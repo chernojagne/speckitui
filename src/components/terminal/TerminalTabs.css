@@ -86,14 +86,17 @@
   display: flex;
   align-items: center;
   padding: 0 0.5rem;
+  position: relative;
 }
 
 .new-terminal-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
+  gap: 0.125rem;
+  min-width: 32px;
   height: 24px;
+  padding: 0 0.25rem;
   font-size: 1.25rem;
   line-height: 1;
   color: var(--color-text-muted, #888);
@@ -111,4 +114,56 @@
 
 .plus-icon {
   font-weight: 300;
+}
+
+.dropdown-arrow {
+  font-size: 0.625rem;
+  margin-left: -0.125rem;
+}
+
+/* Shell dropdown menu */
+.shell-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 160px;
+  margin-top: 4px;
+  padding: 4px 0;
+  background: var(--color-surface, #252526);
+  border: 1px solid var(--color-border, #3c3c3c);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.shell-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--color-text, #d4d4d4);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-align: left;
+}
+
+.shell-menu-item:hover {
+  background: var(--color-surface-hover, #2d2d2d);
+}
+
+.shell-icon {
+  width: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-primary, #0078d4);
+}
+
+.shell-menu-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--color-border, #3c3c3c);
 }

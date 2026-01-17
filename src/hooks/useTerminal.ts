@@ -14,6 +14,8 @@ import {
   resizeTerminal,
 } from '@/services/tauriCommands';
 
+export type ShellType = 'powershell' | 'bash' | 'default';
+
 interface UseTerminalReturn {
   // State
   sessions: TerminalSession[];
@@ -22,7 +24,7 @@ interface UseTerminalReturn {
   isCollapsed: boolean;
   
   // Session Management
-  createSession: (title?: string) => Promise<string | null>;
+  createSession: (shell?: ShellType, label?: string) => Promise<string | null>;
   closeSession: (sessionId: string) => Promise<void>;
   closeAllSessions: () => Promise<void>;
   setActiveSession: (sessionId: string) => void;
@@ -56,17 +58,50 @@ export function useTerminal(): UseTerminalReturn {
     return project?.path || '/';
   }, [project]);
 
+  // Detect if running on Windows
+  const isWindows = navigator.userAgent.includes('Windows') || navigator.platform.startsWith('Win');
+
+  // Get shell executable path
+  const getShellPath = useCallback((shell: ShellType): string | undefined => {
+    switch (shell) {
+      case 'powershell':
+        return 'powershell.exe';
+      case 'bash':
+        // Try Git Bash on Windows, otherwise use bash
+        return isWindows 
+          ? 'C:\\Program Files\\Git\\bin\\bash.exe'
+          : '/bin/bash';
+      case 'default':
+      default:
+        return undefined; // Let backend decide
+    }
+  }, [isWindows]);
+
+  // Get shell display name
+  const getShellLabel = useCallback((shell: ShellType): string => {
+    switch (shell) {
+      case 'powershell':
+        return 'PowerShell';
+      case 'bash':
+        return 'Bash';
+      default:
+        return 'Terminal';
+    }
+  }, []);
+
   // Create a new terminal session
-  const createSession = useCallback(async (label?: string): Promise<string | null> => {
+  const createSession = useCallback(async (shell: ShellType = 'default', label?: string): Promise<string | null> => {
     try {
       const cwd = getCwd();
-      const result = await createTerminal(cwd);
+      const shellPath = getShellPath(shell);
+      const result = await createTerminal(cwd, shellPath);
       
+      const shellLabel = getShellLabel(shell);
       const newSession: TerminalSession = {
         id: result.sessionId,
-        label: label || `Terminal ${sessions.length + 1}`,
+        label: label || `${shellLabel} ${sessions.length + 1}`,
         cwd,
-        shell: 'default',
+        shell: result.shell,
         status: 'running',
         isActive: true,
       };
@@ -77,10 +112,10 @@ export function useTerminal(): UseTerminalReturn {
       
       return result.sessionId;
     } catch (err) {
-      console.error('Failed to create terminal session:', err);
+      console.error('Failed to create terminal session:', err, shell);
       return null;
     }
-  }, [getCwd, sessions.length, addSession, storeSetActiveSession, setCollapsed]);
+  }, [getCwd, getShellPath, getShellLabel, sessions.length, addSession, storeSetActiveSession, setCollapsed]);
 
   // Close a terminal session
   const closeSession = useCallback(async (sessionId: string): Promise<void> => {

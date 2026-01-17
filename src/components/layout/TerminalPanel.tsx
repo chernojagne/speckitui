@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
-import { useTerminal } from '@/hooks/useTerminal';
+import { useTerminal, type ShellType } from '@/hooks/useTerminal';
 import { TerminalInstance } from '@/components/terminal/TerminalInstance';
 import { TerminalTabs } from '@/components/terminal/TerminalTabs';
 import './TerminalPanel.css';
@@ -44,8 +44,8 @@ export function TerminalPanel({ minimized = false }: TerminalPanelProps) {
   }, [panelHeight, setPanelHeight]);
 
   // Handle new terminal creation
-  const handleNewTerminal = useCallback(async () => {
-    await createSession();
+  const handleNewTerminal = useCallback(async (shell: ShellType = 'default') => {
+    await createSession(shell);
   }, [createSession]);
 
   // Handle close terminal
@@ -105,7 +105,7 @@ export function TerminalPanel({ minimized = false }: TerminalPanelProps) {
         {sessions.length === 0 ? (
           <div className="terminal-placeholder">
             <p>Click + to open a new terminal</p>
-            <button className="new-terminal-placeholder-btn" onClick={handleNewTerminal}>
+            <button className="new-terminal-placeholder-btn" onClick={() => handleNewTerminal('default')}>
               + New Terminal
             </button>
           </div>
