@@ -11,7 +11,7 @@ import { openProject } from '@/services/tauriCommands';
 import { useWorkflowStore } from '@/stores/workflowStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Button } from '@/components/ui/button';
-import { FolderOpen, Settings, X } from 'lucide-react';
+import { FolderOpen, Settings, X, AlertTriangle } from 'lucide-react';
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -95,7 +95,7 @@ export function AppShell() {
       {/* Error display */}
       {error && (
         <div className="flex items-center justify-between px-4 py-2 bg-destructive text-destructive-foreground text-sm">
-          <span>⚠️ {error}</span>
+          <span className="flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> {error}</span>
           <Button 
             variant="ghost" 
             size="sm" 

@@ -5,6 +5,7 @@
 
 import { useMemo } from 'react';
 import { PRComment, type PRCommentData } from './PRComment';
+import { MessageSquare, File } from 'lucide-react';
 
 interface PRCommentListProps {
   comments: PRCommentData[];
@@ -42,7 +43,7 @@ export function PRCommentList({
   if (comments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-        <span className="text-3xl mb-2 opacity-60">💬</span>
+        <MessageSquare className="h-8 w-8 mb-2 text-muted-foreground opacity-60" />
         <span className="text-sm text-muted-foreground">{emptyMessage}</span>
       </div>
     );
@@ -54,7 +55,7 @@ export function PRCommentList({
         {Array.from(groupedComments.groups.entries()).map(([filePath, fileComments]) => (
           <div key={filePath} className="border border-border rounded-md overflow-hidden">
             <div className="flex items-center gap-2 px-3 py-2.5 bg-muted border-b border-border">
-              <span className="text-sm">📄</span>
+              <File className="h-4 w-4 text-muted-foreground" />
               <span className="flex-1 font-mono text-[13px] font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
                 {filePath}
               </span>
@@ -75,7 +76,7 @@ export function PRCommentList({
         {groupedComments.noFile.length > 0 && (
           <div className="border border-border rounded-md overflow-hidden">
             <div className="flex items-center gap-2 px-3 py-2.5 bg-muted border-b border-border">
-              <span className="text-sm">💬</span>
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
               <span className="flex-1 font-mono text-[13px] font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
                 General Comments
               </span>

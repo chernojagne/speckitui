@@ -4,6 +4,7 @@ import { listDirectory, readSourceFile } from '@/services/tauriCommands';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
 import { SourceViewer } from '../shared/SourceViewer';
+import { Folder, FolderOpen, File, AlertTriangle } from 'lucide-react';
 import type { FileEntry, SourceFileContent } from '@/types';
 
 interface TreeNodeProps {
@@ -41,9 +42,11 @@ function TreeNode({
         className={`flex items-center gap-1 w-full py-1 px-4 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${isSelected ? 'bg-primary text-white' : ''}`}
         onClick={handleClick}
       >
-        <span className="text-sm">
-          {entry.isDirectory ? (isExpanded ? '📂' : '📁') : '📄'}
-        </span>
+        {entry.isDirectory ? (
+          isExpanded ? <FolderOpen className="h-4 w-4 shrink-0" /> : <Folder className="h-4 w-4 shrink-0" />
+        ) : (
+          <File className="h-4 w-4 shrink-0" />
+        )}
         <span className="overflow-hidden text-ellipsis whitespace-nowrap">{entry.name}</span>
       </button>
       {entry.isDirectory && isExpanded && entry.children && (
@@ -158,7 +161,7 @@ export function ImplementView() {
   if (error) {
     return (
       <EmptyState
-        icon="⚠️"
+        icon={AlertTriangle}
         title="Error Loading Files"
         description={error}
       />
@@ -192,7 +195,7 @@ export function ImplementView() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {!selectedPath ? (
             <EmptyState
-              icon="📄"
+              icon={File}
               title="No File Selected"
               description="Select a file from the tree to view its contents."
             />

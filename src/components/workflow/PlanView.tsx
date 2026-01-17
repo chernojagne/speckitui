@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
 import { ProgressIndicator } from '../shared/ProgressIndicator';
 import { parseChecklistSections, calculateCompletionStats } from '@/services/checklistParser';
+import { AlertTriangle, Map } from 'lucide-react';
 
 export function PlanView() {
   const { activeSpec } = useProjectStore();
@@ -132,7 +133,7 @@ export function PlanView() {
   if (error) {
     return (
       <EmptyState
-        icon="⚠️"
+        icon={AlertTriangle}
         title="Error Loading Plan"
         description={error}
       />
@@ -142,7 +143,7 @@ export function PlanView() {
   if (tabs.length === 0) {
     return (
       <EmptyState
-        icon="🗺️"
+        icon={Map}
         title="No Plan Artifacts"
         description="This spec instance has no plan artifacts yet."
         hint="Run: speckit plan"

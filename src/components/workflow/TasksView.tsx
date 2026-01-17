@@ -4,6 +4,7 @@ import { readArtifact, updateCheckbox } from '@/services/tauriCommands';
 import { MarkdownRenderer } from '../shared/MarkdownRenderer';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
+import { AlertTriangle, CheckSquare } from 'lucide-react';
 
 interface TaskStats {
   total: number;
@@ -92,7 +93,7 @@ export function TasksView() {
   if (error) {
     return (
       <EmptyState
-        icon="⚠️"
+        icon={AlertTriangle}
         title="Error Loading Tasks"
         description={error}
       />
@@ -102,7 +103,7 @@ export function TasksView() {
   if (!content) {
     return (
       <EmptyState
-        icon="✅"
+        icon={CheckSquare}
         title="No Tasks"
         description="This spec instance has no tasks.md yet."
         hint="Run: speckit tasks"

@@ -9,6 +9,7 @@ import { PushView } from '../workflow/PushView';
 import { PRView } from '../workflow/PRView';
 import { BugFixView } from '../workflow/BugFixView';
 import { EmptyState } from '../shared/EmptyState';
+import { FolderOpen, FileText, HelpCircle } from 'lucide-react';
 
 export function DetailPane() {
   const { selectedStep } = useWorkflowStore();
@@ -19,7 +20,7 @@ export function DetailPane() {
     return (
       <div className="flex-1 flex flex-col overflow-hidden bg-background">
         <EmptyState
-          icon="📂"
+          icon={FolderOpen}
           title="No Project Open"
           description="Open a project folder to get started with spec-driven development."
         />
@@ -32,7 +33,7 @@ export function DetailPane() {
     return (
       <div className="flex-1 flex flex-col overflow-hidden bg-background">
         <EmptyState
-          icon="📋"
+          icon={FileText}
           title="No Spec Instances"
           description="This project has no spec instances in the specs/ directory."
           hint="Create a new spec using the spec-kit CLI: speckit specify"
@@ -63,11 +64,12 @@ export function DetailPane() {
       default:
         return (
           <EmptyState
-            icon="❓"
+            icon={HelpCircle}
             title="Unknown Step"
             description={`No view available for step: ${selectedStep}`}
           />
         );
+    }
     }
   };
 

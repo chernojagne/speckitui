@@ -5,6 +5,7 @@
 
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { cn } from '@/lib/utils';
+import { FileText } from 'lucide-react';
 
 export interface Issue {
   id: number;
@@ -52,7 +53,7 @@ export function IssueList({
     return (
       <div className="list-none m-0 p-0 flex flex-col">
         <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-          <span className="text-3xl mb-3 opacity-60">📋</span>
+          <FileText className="h-8 w-8 mb-3 opacity-60" />
           <p className="m-0 text-sm">{emptyMessage}</p>
         </div>
       </div>

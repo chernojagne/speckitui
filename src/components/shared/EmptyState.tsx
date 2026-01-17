@@ -1,5 +1,7 @@
+import type { LucideIcon } from 'lucide-react';
+
 interface EmptyStateProps {
-  icon?: string;
+  icon?: LucideIcon;
   title: string;
   description?: string;
   hint?: string;
@@ -9,10 +11,10 @@ interface EmptyStateProps {
   };
 }
 
-export function EmptyState({ icon, title, description, hint, action }: EmptyStateProps) {
+export function EmptyState({ icon: Icon, title, description, hint, action }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-      {icon && <div className="text-6xl mb-6 opacity-60">{icon}</div>}
+      {Icon && <Icon className="h-16 w-16 mb-6 text-muted-foreground opacity-60" />}
       <h2 className="text-xl font-semibold text-foreground mb-2">{title}</h2>
       {description && <p className="text-sm text-muted-foreground max-w-[400px] leading-relaxed">{description}</p>}
       {hint && <p className="text-sm text-muted-foreground mt-4 font-mono bg-muted px-4 py-2 rounded-md">{hint}</p>}

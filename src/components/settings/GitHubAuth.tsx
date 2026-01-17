@@ -8,6 +8,7 @@ import { useGitHub } from '@/hooks/useGitHub';
 import { checkGitHubAuth } from '@/services/tauriCommands';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { cn } from '@/lib/utils';
+import { CheckCircle, AlertTriangle, X } from 'lucide-react';
 
 interface GitHubAuthProps {
   onComplete?: () => void;
@@ -58,7 +59,7 @@ export function GitHubAuth({ onComplete, compact = false }: GitHubAuthProps) {
     return (
       <div className={cn("flex items-center justify-between gap-4", compact ? "p-4" : "p-6")}>
         <div className="flex items-center gap-3">
-          <span className="text-2xl">✅</span>
+          <CheckCircle className="h-6 w-6 text-success" />
           <div className="flex flex-col gap-0.5">
             <span className="text-[15px] font-medium text-foreground">Connected to GitHub</span>
             <span className="text-[13px] text-muted-foreground">You can access pull requests and issues</span>
@@ -81,13 +82,13 @@ export function GitHubAuth({ onComplete, compact = false }: GitHubAuthProps) {
     <div className={cn(compact ? "p-4" : "p-6")}>
       {displayError && (
         <div className="flex items-center gap-2 px-3.5 py-2.5 mb-4 bg-destructive/10 text-destructive rounded-md text-[13px]">
-          <span>⚠️</span>
+          <AlertTriangle className="h-4 w-4" />
           <span>{displayError}</span>
           <button 
             className="ml-auto p-1 text-sm leading-none bg-transparent border-none cursor-pointer rounded hover:bg-white/20"
             onClick={() => { clearError(); setCheckError(null); }}
           >
-            ✕
+            <X className="h-3 w-3" />
           </button>
         </div>
       )}

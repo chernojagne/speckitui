@@ -5,6 +5,7 @@ import { TabContainer } from '../shared/TabContainer';
 import { MarkdownRenderer } from '../shared/MarkdownRenderer';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
+import { AlertTriangle, FileText } from 'lucide-react';
 
 export function SpecifyView() {
   const { activeSpec } = useProjectStore();
@@ -59,7 +60,7 @@ export function SpecifyView() {
   if (error) {
     return (
       <EmptyState
-        icon="⚠️"
+        icon={AlertTriangle}
         title="Error Loading Spec"
         description={error}
       />
@@ -69,7 +70,7 @@ export function SpecifyView() {
   if (!specContent && Object.keys(checklistContents).length === 0) {
     return (
       <EmptyState
-        icon="📋"
+        icon={FileText}
         title="No Spec Artifacts"
         description="This spec instance has no spec.md or checklists yet."
         hint="Run: speckit specify"

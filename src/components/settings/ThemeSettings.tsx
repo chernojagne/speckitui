@@ -5,18 +5,35 @@
 
 import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/lib/utils';
+import { Sun, Moon, Monitor, Check, type LucideIcon } from 'lucide-react';
 
 type Theme = 'light' | 'dark' | 'system';
 
-const themes: { value: Theme; label: string; icon: string }[] = [
-  { value: 'light', label: 'Light', icon: '☀️' },
-  { value: 'dark', label: 'Dark', icon: '🌙' },
-  { value: 'system', label: 'System', icon: '💻' },
+const themes: { value: Theme; label: string; icon: LucideIcon }[] = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor },
 ];
+
+const fontSizes = [12, 13, 14, 15, 16, 18];
 
 export function ThemeSettings() {
   const theme = useSettingsStore((state) => state.theme);
   const setTheme = useSettingsStore((state) => state.setTheme);
+  
+  // Editor settings
+  const editorFontSize = useSettingsStore((state) => state.editorFontSize);
+  const setEditorFontSize = useSettingsStore((state) => state.setEditorFontSize);
+  const editorLineNumbers = useSettingsStore((state) => state.editorLineNumbers);
+  const setEditorLineNumbers = useSettingsStore((state) => state.setEditorLineNumbers);
+  const editorWordWrap = useSettingsStore((state) => state.editorWordWrap);
+  const setEditorWordWrap = useSettingsStore((state) => state.setEditorWordWrap);
+  
+  // Sidebar settings
+  const sidebarShowIcons = useSettingsStore((state) => state.sidebarShowIcons);
+  const setSidebarShowIcons = useSettingsStore((state) => state.setSidebarShowIcons);
+  const sidebarCompactMode = useSettingsStore((state) => state.sidebarCompactMode);
+  const setSidebarCompactMode = useSettingsStore((state) => state.setSidebarCompactMode);
 
   return (
     <div className="flex flex-col gap-6">
@@ -37,10 +54,10 @@ export function ThemeSettings() {
               onClick={() => setTheme(option.value)}
               aria-pressed={theme === option.value}
             >
-              <span className="text-2xl">{option.icon}</span>
+              <option.icon className="h-6 w-6 text-foreground" />
               <span className="text-[13px] font-medium text-foreground">{option.label}</span>
               {theme === option.value && (
-                <span className="absolute top-2 right-2 text-xs text-primary">✓</span>
+                <Check className="absolute top-2 right-2 h-4 w-4 text-primary" />
               )}
             </button>
           ))}
@@ -59,14 +76,12 @@ export function ThemeSettings() {
           </div>
           <select 
             className="px-3 py-1.5 text-[13px] border border-border rounded bg-card text-foreground cursor-pointer hover:border-border focus:outline-none focus:border-primary"
-            defaultValue="14"
+            value={editorFontSize}
+            onChange={(e) => setEditorFontSize(Number(e.target.value))}
           >
-            <option value="12">12px</option>
-            <option value="13">13px</option>
-            <option value="14">14px</option>
-            <option value="15">15px</option>
-            <option value="16">16px</option>
-            <option value="18">18px</option>
+            {fontSizes.map((size) => (
+              <option key={size} value={size}>{size}px</option>
+            ))}
           </select>
         </div>
 
@@ -80,7 +95,8 @@ export function ThemeSettings() {
           <input 
             type="checkbox" 
             className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
-            defaultChecked
+            checked={editorLineNumbers}
+            onChange={(e) => setEditorLineNumbers(e.target.checked)}
           />
         </div>
 
@@ -94,7 +110,8 @@ export function ThemeSettings() {
           <input 
             type="checkbox" 
             className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
-            defaultChecked={false}
+            checked={editorWordWrap}
+            onChange={(e) => setEditorWordWrap(e.target.checked)}
           />
         </div>
       </div>
@@ -112,7 +129,8 @@ export function ThemeSettings() {
           <input 
             type="checkbox" 
             className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
-            defaultChecked
+            checked={sidebarShowIcons}
+            onChange={(e) => setSidebarShowIcons(e.target.checked)}
           />
         </div>
 
@@ -126,7 +144,8 @@ export function ThemeSettings() {
           <input 
             type="checkbox" 
             className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
-            defaultChecked={false}
+            checked={sidebarCompactMode}
+            onChange={(e) => setSidebarCompactMode(e.target.checked)}
           />
         </div>
       </div>

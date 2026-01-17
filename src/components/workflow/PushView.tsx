@@ -3,6 +3,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { getChangedFiles, getGitStatus } from '@/services/tauriCommands';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
+import { AlertTriangle, Upload, GitBranch } from 'lucide-react';
 import type { ChangedFile, GitStatus } from '@/types';
 
 export function PushView() {
@@ -43,7 +44,7 @@ export function PushView() {
   if (error) {
     return (
       <EmptyState
-        icon="⚠️"
+        icon={AlertTriangle}
         title="Git Error"
         description={error}
         hint="Make sure this is a git repository."
@@ -54,7 +55,7 @@ export function PushView() {
   if (!gitStatus) {
     return (
       <EmptyState
-        icon="📤"
+        icon={Upload}
         title="Not a Git Repository"
         description="This project is not initialized as a git repository."
         hint="Run: git init"
@@ -67,7 +68,7 @@ export function PushView() {
       {/* Git status header */}
       <div className="flex items-center justify-between p-4 bg-card border-b border-border">
         <div className="flex items-center gap-2">
-          <span className="text-base">🌿</span>
+          <GitBranch className="h-4 w-4 text-muted-foreground" />
           <span className="font-mono font-semibold text-foreground">{gitStatus.branch}</span>
           {gitStatus.ahead > 0 && (
             <span className="px-1.5 py-0.5 text-xs font-semibold rounded-sm bg-success text-white" title="Commits ahead of remote">

@@ -9,6 +9,7 @@ import { ConstitutionView } from './ConstitutionView';
 import { ThemeSettings } from './ThemeSettings';
 import { RecentProjects } from './RecentProjects';
 import { cn } from '@/lib/utils';
+import { Settings, Palette, FolderOpen, ScrollText, X } from 'lucide-react';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -61,7 +62,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               )}
               onClick={() => setActiveTab('general')}
             >
-              ⚙️ General
+              <Settings className="h-4 w-4" /> General
             </button>
             <button
               className={cn(
@@ -70,7 +71,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               )}
               onClick={() => setActiveTab('appearance')}
             >
-              🎨 Appearance
+              <Palette className="h-4 w-4" /> Appearance
             </button>
             <button
               className={cn(
@@ -79,7 +80,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               )}
               onClick={() => setActiveTab('projects')}
             >
-              📁 Recent Projects
+              <FolderOpen className="h-4 w-4" /> Recent Projects
             </button>
             <button
               className={cn(
@@ -88,7 +89,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               )}
               onClick={() => setActiveTab('constitution')}
             >
-              📜 Constitution
+              <ScrollText className="h-4 w-4" /> Constitution
             </button>
           </nav>
 

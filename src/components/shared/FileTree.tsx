@@ -5,6 +5,17 @@
 
 import { useState, useCallback, memo } from 'react';
 import type { FileEntry } from '@/types';
+import { 
+  File, 
+  FileText, 
+  FileCode, 
+  FileJson, 
+  Image, 
+  Lock, 
+  Folder, 
+  FolderOpen,
+  ChevronRight
+} from 'lucide-react';
 
 interface FileTreeProps {
   entries: FileEntry[];
@@ -102,7 +113,7 @@ const FileTreeItem = memo(function FileTreeItem({
     }
   };
 
-  const icon = getFileIcon(entry);
+  const IconComponent = getFileIcon(entry, isExpanded);
 
   return (
     <div className="flex flex-col">
@@ -117,11 +128,9 @@ const FileTreeItem = memo(function FileTreeItem({
         aria-selected={isSelected}
       >
         {entry.isDirectory && (
-          <span className={`text-[0.625rem] text-muted-foreground transition-transform duration-150 w-3 shrink-0 ${isExpanded ? 'rotate-90' : ''}`}>
-            ▶
-          </span>
+          <ChevronRight className={`h-3 w-3 text-muted-foreground transition-transform duration-150 shrink-0 ${isExpanded ? 'rotate-90' : ''}`} />
         )}
-        <span className="text-base leading-none shrink-0">{icon}</span>
+        <IconComponent className="h-4 w-4 shrink-0 text-muted-foreground" />
         <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-foreground">{entry.name}</span>
       </div>
       
@@ -144,51 +153,53 @@ const FileTreeItem = memo(function FileTreeItem({
   );
 });
 
-function getFileIcon(entry: FileEntry): string {
+type IconComponent = typeof File;
+
+function getFileIcon(entry: FileEntry, isExpanded?: boolean): IconComponent {
   if (entry.isDirectory) {
-    return '📁';
+    return isExpanded ? FolderOpen : Folder;
   }
 
   const ext = entry.name.split('.').pop()?.toLowerCase() ?? '';
   
-  const iconMap: Record<string, string> = {
+  const iconMap: Record<string, IconComponent> = {
     // Code files
-    ts: '📘',
-    tsx: '📘',
-    js: '📒',
-    jsx: '📒',
-    rs: '🦀',
-    py: '🐍',
-    go: '🔵',
-    java: '☕',
-    rb: '💎',
+    ts: FileCode,
+    tsx: FileCode,
+    js: FileCode,
+    jsx: FileCode,
+    rs: FileCode,
+    py: FileCode,
+    go: FileCode,
+    java: FileCode,
+    rb: FileCode,
     
     // Config files
-    json: '📋',
-    yaml: '📋',
-    yml: '📋',
-    toml: '📋',
-    xml: '📋',
+    json: FileJson,
+    yaml: FileJson,
+    yml: FileJson,
+    toml: FileJson,
+    xml: FileJson,
     
     // Markdown/docs
-    md: '📝',
-    mdx: '📝',
-    txt: '📄',
+    md: FileText,
+    mdx: FileText,
+    txt: FileText,
     
     // Styles
-    css: '🎨',
-    scss: '🎨',
-    less: '🎨',
+    css: FileCode,
+    scss: FileCode,
+    less: FileCode,
     
     // Other
-    html: '🌐',
-    svg: '🖼️',
-    png: '🖼️',
-    jpg: '🖼️',
-    jpeg: '🖼️',
-    gif: '🖼️',
-    lock: '🔒',
+    html: FileCode,
+    svg: Image,
+    png: Image,
+    jpg: Image,
+    jpeg: Image,
+    gif: Image,
+    lock: Lock,
   };
 
-  return iconMap[ext] ?? '📄';
+  return iconMap[ext] ?? File;
 }

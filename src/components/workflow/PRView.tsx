@@ -3,6 +3,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { getPullRequests, getPRComments, checkGitHubAuth } from '@/services/tauriCommands';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
+import { Table, LayoutGrid, Copy, Check, AlertTriangle, Lock, GitPullRequest, MessageSquare, ChevronRight, ChevronDown } from 'lucide-react';
 import type { PRFeedback } from '@/types';
 
 interface PRWithComments extends PRFeedback {
@@ -114,7 +115,7 @@ export function PRView() {
   if (error) {
     return (
       <EmptyState
-        icon="⚠️"
+        icon={AlertTriangle}
         title="GitHub Error"
         description={error}
       />
@@ -124,7 +125,7 @@ export function PRView() {
   if (!isAuthenticated) {
     return (
       <EmptyState
-        icon="🔐"
+        icon={Lock}
         title="GitHub Authentication Required"
         description="Please authenticate with GitHub to view pull requests."
         hint="Run: gh auth login"
@@ -135,7 +136,7 @@ export function PRView() {
   if (pullRequests.length === 0) {
     return (
       <EmptyState
-        icon="🔀"
+        icon={GitPullRequest}
         title="No Pull Requests"
         description="There are no open pull requests for this repository."
       />
@@ -152,16 +153,16 @@ export function PRView() {
         {/* View toggle */}
         <div className="flex gap-1 ml-4">
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all ${viewMode === 'table' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'table' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setViewMode('table')}
           >
-            📋 Table
+            <Table className="h-3 w-3" /> Table
           </button>
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all ${viewMode === 'cards' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'cards' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setViewMode('cards')}
           >
-            🃏 Cards
+            <LayoutGrid className="h-3 w-3" /> Cards
           </button>
         </div>
 
@@ -170,7 +171,7 @@ export function PRView() {
           className="ml-auto py-1 px-3 text-xs border border-border rounded-sm bg-background hover:bg-muted text-foreground transition-all flex items-center gap-1"
           onClick={copyToClipboard}
         >
-          {copied ? '✓ Copied!' : '📋 Copy Summary'}
+          {copied ? <><Check className="h-3 w-3" /> Copied!</> : <><Copy className="h-3 w-3" /> Copy Summary</>}
         </button>
       </div>
 
@@ -211,8 +212,8 @@ export function PRView() {
                           <span className="animate-pulse">Loading...</span>
                         ) : pr.fetchedComments ? (
                           <span className="flex items-center gap-1">
-                            💬 {pr.fetchedComments.length}
-                            <span className="text-xs">{expandedPR === pr.number ? '▼' : '▶'}</span>
+                            <MessageSquare className="h-3.5 w-3.5" /> {pr.fetchedComments.length}
+                            {expandedPR === pr.number ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                           </span>
                         ) : (
                           <span className="text-xs text-muted-foreground">Click to load</span>
@@ -270,8 +271,8 @@ export function PRView() {
                 <div className="flex gap-4 text-sm text-muted-foreground">
                   <span>by {pr.author}</span>
                   {pr.comments && pr.comments.length > 0 && (
-                    <span className="text-muted-foreground">
-                      💬 {pr.comments.length} comments
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <MessageSquare className="h-3.5 w-3.5" /> {pr.comments.length} comments
                     </span>
                   )}
                 </div>

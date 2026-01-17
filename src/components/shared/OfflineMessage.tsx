@@ -3,6 +3,8 @@
  * Displays message when offline or GitHub features are unavailable
  */
 
+import { WifiOff, Lock, Clock, type LucideIcon } from 'lucide-react';
+
 interface OfflineMessageProps {
   type?: 'offline' | 'auth-required' | 'rate-limited';
   title?: string;
@@ -11,21 +13,21 @@ interface OfflineMessageProps {
   onAuth?: () => void;
 }
 
-const DEFAULT_MESSAGES = {
+const DEFAULT_MESSAGES: Record<string, { title: string; message: string; icon: LucideIcon }> = {
   offline: {
     title: 'You are offline',
     message: 'GitHub features require an internet connection. Please check your network and try again.',
-    icon: '📡',
+    icon: WifiOff,
   },
   'auth-required': {
     title: 'GitHub authentication required',
     message: 'Sign in to GitHub to access pull requests, issues, and other repository features.',
-    icon: '🔐',
+    icon: Lock,
   },
   'rate-limited': {
     title: 'Rate limit exceeded',
     message: 'Too many requests to GitHub. Please wait a moment before trying again.',
-    icon: '⏱️',
+    icon: Clock,
   },
 };
 
@@ -43,10 +45,11 @@ export function OfflineMessage({
   onAuth,
 }: OfflineMessageProps) {
   const defaults = DEFAULT_MESSAGES[type];
+  const IconComponent = defaults.icon;
 
   return (
     <div className={`flex flex-col items-center justify-center text-center px-8 py-12 min-h-50 ${typeClasses[type]}`}>
-      <div className="text-5xl mb-4 opacity-80">{defaults.icon}</div>
+      <IconComponent className="h-12 w-12 mb-4 text-muted-foreground opacity-80" />
       <h3 className="text-lg font-semibold text-foreground m-0 mb-2">{title ?? defaults.title}</h3>
       <p className="text-sm text-muted-foreground max-w-75 m-0 mb-6 leading-relaxed">{message ?? defaults.message}</p>
       

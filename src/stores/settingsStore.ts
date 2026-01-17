@@ -2,6 +2,39 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { AppSettings } from '@/types';
 
+// Helper to apply theme to document
+const applyTheme = (theme: 'light' | 'dark' | 'system') => {
+  const root = document.documentElement;
+  
+  if (theme === 'system') {
+    // Check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  } else if (theme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+};
+
+// Listen for system theme changes
+if (typeof window !== 'undefined') {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const currentTheme = useSettingsStore.getState().theme;
+    if (currentTheme === 'system') {
+      if (e.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  });
+}
+
 interface SettingsState extends AppSettings {
   // Actions
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
@@ -9,6 +42,13 @@ interface SettingsState extends AppSettings {
   setTerminalPanelCollapsed: (collapsed: boolean) => void;
   addRecentProject: (path: string) => void;
   setLastProject: (path: string, specId?: string) => void;
+  // Editor settings actions
+  setEditorFontSize: (size: number) => void;
+  setEditorLineNumbers: (show: boolean) => void;
+  setEditorWordWrap: (wrap: boolean) => void;
+  // Sidebar settings actions
+  setSidebarShowIcons: (show: boolean) => void;
+  setSidebarCompactMode: (compact: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -21,9 +61,19 @@ export const useSettingsStore = create<SettingsState>()(
       terminalPanelHeight: 200,
       terminalPanelCollapsed: true,
       theme: 'system',
+      // Editor settings
+      editorFontSize: 14,
+      editorLineNumbers: true,
+      editorWordWrap: false,
+      // Sidebar settings
+      sidebarShowIcons: true,
+      sidebarCompactMode: false,
 
       // Actions
-      setTheme: (theme) => set({ theme }),
+      setTheme: (theme) => {
+        applyTheme(theme);
+        set({ theme });
+      },
 
       setTerminalPanelHeight: (height) =>
         set({ terminalPanelHeight: Math.max(100, Math.min(600, height)) }),
@@ -42,10 +92,25 @@ export const useSettingsStore = create<SettingsState>()(
           lastProjectPath: path,
           lastSpecId: specId,
         }),
+
+      // Editor settings actions
+      setEditorFontSize: (size) => set({ editorFontSize: size }),
+      setEditorLineNumbers: (show) => set({ editorLineNumbers: show }),
+      setEditorWordWrap: (wrap) => set({ editorWordWrap: wrap }),
+      
+      // Sidebar settings actions
+      setSidebarShowIcons: (show) => set({ sidebarShowIcons: show }),
+      setSidebarCompactMode: (compact) => set({ sidebarCompactMode: compact }),
     }),
     {
       name: 'speckitui-settings',
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        // Apply theme when store is rehydrated from localStorage
+        if (state?.theme) {
+          applyTheme(state.theme);
+        }
+      },
     }
   )
 );

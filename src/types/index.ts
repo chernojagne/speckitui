@@ -1,6 +1,8 @@
 // Core TypeScript types for SpeckitUI
 // Based on data-model.md specifications
 
+import type { LucideIcon } from 'lucide-react';
+
 // ============ Project & Spec Types ============
 
 export interface Project {
@@ -126,7 +128,7 @@ export type WorkflowStepId =
 export interface WorkflowStep {
   id: WorkflowStepId;
   label: string;
-  icon: string;
+  icon: LucideIcon;
   artifactPatterns: string[];
   requiresGitHub: boolean;
   hasContent: boolean;
@@ -209,6 +211,13 @@ export interface AppSettings {
   terminalPanelHeight: number;
   terminalPanelCollapsed: boolean;
   theme: 'light' | 'dark' | 'system';
+  // Editor settings
+  editorFontSize: number;
+  editorLineNumbers: boolean;
+  editorWordWrap: boolean;
+  // Sidebar settings
+  sidebarShowIcons: boolean;
+  sidebarCompactMode: boolean;
 }
 
 // ============ Git Types ============

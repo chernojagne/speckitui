@@ -1,4 +1,15 @@
 import type { WorkflowStep, WorkflowStepId } from '@/types';
+import type { LucideIcon } from 'lucide-react';
+import { 
+  FileText, 
+  Map, 
+  CheckSquare, 
+  Code, 
+  FlaskConical, 
+  Upload, 
+  GitPullRequest, 
+  Bug 
+} from 'lucide-react';
 
 /**
  * Workflow step configuration
@@ -8,7 +19,7 @@ export const workflowSteps: WorkflowStep[] = [
   {
     id: 'specify',
     label: 'Specify',
-    icon: '📋',
+    icon: FileText,
     artifactPatterns: ['spec.md', 'checklists/requirements.md'],
     requiresGitHub: false,
     hasContent: false,
@@ -16,7 +27,7 @@ export const workflowSteps: WorkflowStep[] = [
   {
     id: 'plan',
     label: 'Plan',
-    icon: '🗺️',
+    icon: Map,
     artifactPatterns: ['plan.md', 'research.md', 'data-model.md', 'quickstart.md', 'contracts/*'],
     requiresGitHub: false,
     hasContent: false,
@@ -24,7 +35,7 @@ export const workflowSteps: WorkflowStep[] = [
   {
     id: 'tasks',
     label: 'Tasks',
-    icon: '✅',
+    icon: CheckSquare,
     artifactPatterns: ['tasks.md'],
     requiresGitHub: false,
     hasContent: false,
@@ -32,7 +43,7 @@ export const workflowSteps: WorkflowStep[] = [
   {
     id: 'implement',
     label: 'Implement',
-    icon: '💻',
+    icon: Code,
     artifactPatterns: [], // Uses file tree instead of artifacts
     requiresGitHub: false,
     hasContent: false,
@@ -40,7 +51,7 @@ export const workflowSteps: WorkflowStep[] = [
   {
     id: 'test',
     label: 'Test',
-    icon: '🧪',
+    icon: FlaskConical,
     artifactPatterns: ['test-results.md'],
     requiresGitHub: false,
     hasContent: false,
@@ -48,7 +59,7 @@ export const workflowSteps: WorkflowStep[] = [
   {
     id: 'push',
     label: 'Push',
-    icon: '📤',
+    icon: Upload,
     artifactPatterns: [], // Uses git status
     requiresGitHub: false,
     hasContent: false,
@@ -56,7 +67,7 @@ export const workflowSteps: WorkflowStep[] = [
   {
     id: 'pr',
     label: 'PR',
-    icon: '🔀',
+    icon: GitPullRequest,
     artifactPatterns: [], // Uses GitHub API
     requiresGitHub: true,
     hasContent: false,
@@ -64,7 +75,7 @@ export const workflowSteps: WorkflowStep[] = [
   {
     id: 'bugfix',
     label: 'Bug Fix',
-    icon: '🐛',
+    icon: Bug,
     artifactPatterns: [], // Uses GitHub Issues API
     requiresGitHub: true,
     hasContent: false,

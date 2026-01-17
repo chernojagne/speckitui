@@ -4,6 +4,7 @@
  */
 
 import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { AlertTriangle, X } from 'lucide-react';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -56,7 +57,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       return (
         <div className="flex flex-col items-center justify-center px-8 py-12 text-center min-h-[200px]">
-          <div className="text-4xl mb-4">⚠️</div>
+          <AlertTriangle className="h-10 w-10 mb-4 text-destructive" />
           <h3 className="text-lg font-semibold text-foreground m-0 mb-2">Something went wrong</h3>
           <p className="text-sm text-muted-foreground max-w-[400px] m-0 mb-6 leading-relaxed font-mono bg-muted px-4 py-3 rounded-md break-words">
             {this.state.error?.message || 'An unexpected error occurred'}
@@ -97,7 +98,7 @@ export function ErrorDisplay({
   return (
     <div className="bg-destructive/10 border border-destructive/30 rounded-md p-4 my-2">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-base">⚠️</span>
+        <AlertTriangle className="h-4 w-4 text-destructive" />
         <span className="font-semibold text-sm text-destructive flex-1">{title}</span>
         {onDismiss && (
           <button 
@@ -105,7 +106,7 @@ export function ErrorDisplay({
             onClick={onDismiss} 
             aria-label="Dismiss"
           >
-            ×
+            <X className="h-4 w-4" />
           </button>
         )}
       </div>

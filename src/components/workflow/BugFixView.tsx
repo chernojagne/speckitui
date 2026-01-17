@@ -5,6 +5,7 @@ import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
 import { OfflineMessage } from '../shared/OfflineMessage';
 import { useGitHub } from '@/hooks/useGitHub';
+import { Bug, List, Table, LayoutGrid, Copy, Check, MessageSquare, AlertTriangle } from 'lucide-react';
 import type { GitHubIssue } from '@/types';
 
 export function BugFixView() {
@@ -109,7 +110,7 @@ export function BugFixView() {
   if (error) {
     return (
       <EmptyState
-        icon="⚠️"
+        icon={AlertTriangle}
         title="GitHub Error"
         description={error}
       />
@@ -119,7 +120,7 @@ export function BugFixView() {
   if (issues.length === 0) {
     return (
       <EmptyState
-        icon="🐛"
+        icon={Bug}
         title="No Issues"
         description="There are no open issues for this repository."
       />
@@ -135,32 +136,32 @@ export function BugFixView() {
         {/* Filter buttons */}
         <div className="flex gap-1">
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all ${filter === 'bug' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${filter === 'bug' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setFilter('bug')}
           >
-            🐛 Bugs
+            <Bug className="h-3 w-3" /> Bugs
           </button>
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all ${filter === 'all' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${filter === 'all' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setFilter('all')}
           >
-            All
+            <List className="h-3 w-3" /> All
           </button>
         </div>
 
         {/* View toggle */}
         <div className="flex gap-1 ml-2">
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all ${viewMode === 'table' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'table' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setViewMode('table')}
           >
-            📋 Table
+            <Table className="h-3 w-3" /> Table
           </button>
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all ${viewMode === 'cards' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'cards' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setViewMode('cards')}
           >
-            🃏 Cards
+            <LayoutGrid className="h-3 w-3" /> Cards
           </button>
         </div>
 
@@ -171,7 +172,7 @@ export function BugFixView() {
           className="ml-auto py-1 px-3 text-xs border border-border rounded-sm bg-background hover:bg-muted text-foreground transition-all flex items-center gap-1"
           onClick={copyToClipboard}
         >
-          {copied ? '✓ Copied!' : '📋 Copy Summary'}
+          {copied ? <><Check className="h-3 w-3" /> Copied!</> : <><Copy className="h-3 w-3" /> Copy Summary</>}
         </button>
       </div>
 
@@ -187,7 +188,7 @@ export function BugFixView() {
                   <th className="text-left p-2 font-semibold text-muted-foreground">State</th>
                   <th className="text-left p-2 font-semibold text-muted-foreground">Labels</th>
                   <th className="text-left p-2 font-semibold text-muted-foreground">Author</th>
-                  <th className="text-left p-2 font-semibold text-muted-foreground">💬</th>
+                  <th className="text-left p-2 font-semibold text-muted-foreground"><MessageSquare className="h-3.5 w-3.5" /></th>
                   <th className="text-left p-2 font-semibold text-muted-foreground">Created</th>
                 </tr>
               </thead>

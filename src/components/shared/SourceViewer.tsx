@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createHighlighter, type Highlighter, type BundledLanguage, type BundledTheme } from 'shiki';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 interface SourceViewerProps {
   code: string;
@@ -13,6 +14,10 @@ interface SourceViewerProps {
   showLineNumbers?: boolean;
   highlightLines?: number[];
   maxHeight?: string;
+  /** Override font size from settings */
+  fontSize?: number;
+  /** Override word wrap from settings */
+  wordWrap?: boolean;
 }
 
 // Reuse the highlighter from MarkdownRenderer
@@ -86,10 +91,21 @@ export function SourceViewer({
   code,
   language,
   fileName,
-  showLineNumbers = true,
+  showLineNumbers,
   highlightLines = [],
   maxHeight = '600px',
+  fontSize,
+  wordWrap,
 }: SourceViewerProps) {
+  // Get settings from store (props override settings)
+  const settingsLineNumbers = useSettingsStore((state) => state.editorLineNumbers);
+  const settingsFontSize = useSettingsStore((state) => state.editorFontSize);
+  const settingsWordWrap = useSettingsStore((state) => state.editorWordWrap);
+
+  const resolvedShowLineNumbers = showLineNumbers ?? settingsLineNumbers;
+  const resolvedFontSize = fontSize ?? settingsFontSize;
+  const resolvedWordWrap = wordWrap ?? settingsWordWrap;
+
   const [highlighter, setHighlighter] = useState<Highlighter | null>(null);
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
 
@@ -143,12 +159,13 @@ export function SourceViewer({
       )}
       
       <div className="flex overflow-auto">
-        {showLineNumbers && (
+        {resolvedShowLineNumbers && (
           <div className="shrink-0 py-3 bg-muted border-r border-border text-right select-none">
             {lines.map((_, idx) => (
               <div
                 key={idx + 1}
-                className={`px-3 font-mono text-xs leading-relaxed text-muted-foreground min-w-10 ${highlightSet.has(idx + 1) ? 'bg-warning/20 text-warning' : ''}`}
+                className={`px-3 font-mono leading-relaxed text-muted-foreground min-w-10 ${highlightSet.has(idx + 1) ? 'bg-warning/20 text-warning' : ''}`}
+                style={{ fontSize: `${resolvedFontSize}px` }}
               >
                 {idx + 1}
               </div>
@@ -159,11 +176,15 @@ export function SourceViewer({
         <div className="flex-1 overflow-x-auto">
           {highlightedHtml ? (
             <div
-              className="m-0 px-4 py-3 font-mono text-[0.8125rem] leading-relaxed [&_.shiki]:bg-transparent! [&_.shiki]:p-0! [&_.shiki]:m-0! [&_.shiki_code]:bg-transparent!"
+              className={`m-0 px-4 py-3 font-mono leading-relaxed [&_.shiki]:bg-transparent! [&_.shiki]:p-0! [&_.shiki]:m-0! [&_.shiki_code]:bg-transparent! ${resolvedWordWrap ? 'whitespace-pre-wrap wrap-break-word' : ''}`}
+              style={{ fontSize: `${resolvedFontSize}px` }}
               dangerouslySetInnerHTML={{ __html: highlightedHtml }}
             />
           ) : (
-            <pre className="m-0 px-4 py-3 font-mono text-[0.8125rem] leading-relaxed bg-transparent whitespace-pre">
+            <pre 
+              className={`m-0 px-4 py-3 font-mono leading-relaxed bg-transparent ${resolvedWordWrap ? 'whitespace-pre-wrap wrap-break-word' : 'whitespace-pre'}`}
+              style={{ fontSize: `${resolvedFontSize}px` }}
+            >
               <code>
                 {lines.map((line, idx) => (
                   <div
