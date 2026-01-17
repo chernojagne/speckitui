@@ -3,7 +3,10 @@ import { useTerminalStore } from '@/stores/terminalStore';
 import { useTerminal, type ShellType } from '@/hooks/useTerminal';
 import { TerminalInstance } from '@/components/terminal/TerminalInstance';
 import { TerminalTabs } from '@/components/terminal/TerminalTabs';
-import './TerminalPanel.css';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ChevronUp, ChevronDown, Plus, Terminal } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface TerminalPanelProps {
   minimized?: boolean;
@@ -56,12 +59,22 @@ export function TerminalPanel({ minimized = false }: TerminalPanelProps) {
   // Minimized view (just the toggle bar)
   if (minimized || isCollapsed) {
     return (
-      <div className="terminal-toggle-bar">
-        <button className="terminal-toggle-btn" onClick={toggleCollapsed}>
-          <span className="toggle-icon">{isCollapsed ? '▲' : '▼'}</span>
-          <span className="toggle-label">Terminal</span>
-          {sessions.length > 0 && <span className="session-count">{sessions.length}</span>}
-        </button>
+      <div className="flex items-center h-8 px-2 bg-card border-t border-border">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-6 gap-2"
+          onClick={toggleCollapsed}
+        >
+          <ChevronUp className="h-4 w-4" />
+          <Terminal className="h-4 w-4" />
+          <span className="text-sm">Terminal</span>
+          {sessions.length > 0 && (
+            <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+              {sessions.length}
+            </Badge>
+          )}
+        </Button>
       </div>
     );
   }
@@ -70,12 +83,15 @@ export function TerminalPanel({ minimized = false }: TerminalPanelProps) {
   return (
     <div 
       ref={panelRef}
-      className={`terminal-panel ${isResizing ? 'resizing' : ''}`}
+      className={cn(
+        "flex flex-col bg-background border-t border-border",
+        isResizing && "select-none"
+      )}
       style={{ height: panelHeight }}
     >
       {/* Resize handle */}
       <div 
-        className="terminal-resize-handle"
+        className="h-1 cursor-ns-resize bg-border hover:bg-primary/50 transition-colors"
         onMouseDown={handleDragStart}
         role="separator"
         aria-orientation="horizontal"
@@ -83,34 +99,43 @@ export function TerminalPanel({ minimized = false }: TerminalPanelProps) {
       />
 
       {/* Terminal header with tabs */}
-      <div className="terminal-header">
+      <div className="flex items-center justify-between">
         <TerminalTabs 
           onNewTerminal={handleNewTerminal}
           onCloseTerminal={handleCloseTerminal}
         />
-        <div className="terminal-header-actions">
-          <button 
-            className="terminal-toggle-btn" 
+        <div className="px-2">
+          <Button 
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
             onClick={toggleCollapsed} 
             title="Collapse Terminal Panel"
             aria-label="Collapse terminal panel"
           >
-            ▼
-          </button>
+            <ChevronDown className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
       {/* Terminal content */}
-      <div className="terminal-content">
+      <div className="flex-1 overflow-hidden">
         {sessions.length === 0 ? (
-          <div className="terminal-placeholder">
-            <p>Click + to open a new terminal</p>
-            <button className="new-terminal-placeholder-btn" onClick={() => handleNewTerminal('default')}>
-              + New Terminal
-            </button>
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
+            <Terminal className="h-12 w-12" />
+            <p className="text-sm">Click + to open a new terminal</p>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="gap-2"
+              onClick={() => handleNewTerminal('default')}
+            >
+              <Plus className="h-4 w-4" />
+              New Terminal
+            </Button>
           </div>
         ) : (
-          <div className="terminal-instances">
+          <div className="h-full">
             {sessions.map((session) => (
               <TerminalInstance
                 key={session.id}

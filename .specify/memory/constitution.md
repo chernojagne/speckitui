@@ -17,7 +17,10 @@ Tests MUST be written before implementation for all backend commands and core fr
 ### V. Spec-Kit Compatibility
 Respect spec-kit directory structure (`.specify/`, `specs/`). Parse and render markdown artifacts faithfully. Checkbox modifications must be atomic and preserve file formatting.
 
-### VI. Performance Budgets
+### VI. shadcn/ui Component Library
+**All UI components MUST use shadcn/ui components** where a suitable component exists. This includes buttons, inputs, dropdowns, tabs, accordions, cards, tooltips, scroll areas, switches, and dialogs. Only create custom components when shadcn/ui does not provide an equivalent. Custom components should follow shadcn/ui patterns (Radix primitives, Tailwind styling, `cn()` utility).
+
+### VII. Performance Budgets
 - Navigation between steps: <1 second
 - Project open and scan: <3 seconds
 - Terminal spawn: <2 seconds

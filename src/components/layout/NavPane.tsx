@@ -1,8 +1,12 @@
 import { workflowSteps } from '@/config/workflowSteps';
 import { useWorkflowStore } from '@/stores/workflowStore';
 import { useProjectStore } from '@/stores/projectStore';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import type { WorkflowStepId } from '@/types';
-import './NavPane.css';
 
 export function NavPane() {
   const { selectedStep, setSelectedStep, stepContentStatus } = useWorkflowStore();
@@ -13,44 +17,59 @@ export function NavPane() {
   };
 
   return (
-    <nav className="nav-pane">
-      <div className="nav-header">
-        <span className="nav-title">Workflow</span>
+    <nav className="flex flex-col w-[220px] bg-card border-r border-border">
+      <div className="flex items-center h-10 px-4 border-b border-border">
+        <span className="text-sm font-semibold text-foreground">Workflow</span>
       </div>
-      <ul className="nav-steps">
-        {workflowSteps.map((step) => {
-          const isSelected = selectedStep === step.id;
-          const hasContent = stepContentStatus[step.id];
-          const isDisabled = !project || !activeSpec;
+      
+      <ScrollArea className="flex-1">
+        <div className="p-2 space-y-1">
+          {workflowSteps.map((step) => {
+            const isSelected = selectedStep === step.id;
+            const hasContent = stepContentStatus[step.id];
+            const isDisabled = !project || !activeSpec;
 
-          return (
-            <li key={step.id}>
-              <button
-                className={`nav-step ${isSelected ? 'selected' : ''} ${hasContent ? 'has-content' : ''}`}
+            return (
+              <Button
+                key={step.id}
+                variant={isSelected ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start gap-2 h-9",
+                  isSelected && "bg-accent text-accent-foreground",
+                  !isSelected && hasContent && "text-foreground"
+                )}
                 onClick={() => handleStepClick(step.id)}
                 disabled={isDisabled}
                 aria-current={isSelected ? 'page' : undefined}
               >
-                <span className="step-icon">{step.icon}</span>
-                <span className="step-label">{step.label}</span>
-                {hasContent && <span className="content-indicator" title="Has content" />}
-                {step.requiresGitHub && (
-                  <span className="github-indicator" title="Requires GitHub">
-                    
-                  </span>
+                <span className="text-base">{step.icon}</span>
+                <span className="flex-1 text-left text-sm">{step.label}</span>
+                {hasContent && (
+                  <span className="h-2 w-2 rounded-full bg-success" title="Has content" />
                 )}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      {activeSpec && (
-        <div className="nav-footer">
-          <div className="spec-info">
-            <span className="spec-badge">{String(activeSpec.number).padStart(3, '0')}</span>
-            <span className="spec-name">{activeSpec.shortName}</span>
-          </div>
+                {step.requiresGitHub && (
+                  <Badge variant="outline" className="h-4 px-1 text-[10px]">GH</Badge>
+                )}
+              </Button>
+            );
+          })}
         </div>
+      </ScrollArea>
+      
+      {activeSpec && (
+        <>
+          <Separator />
+          <div className="p-3">
+            <div className="flex items-center gap-2">
+              <Badge variant="default" className="font-mono">
+                {String(activeSpec.number).padStart(3, '0')}
+              </Badge>
+              <span className="text-sm text-muted-foreground truncate">
+                {activeSpec.shortName}
+              </span>
+            </div>
+          </div>
+        </>
       )}
     </nav>
   );
