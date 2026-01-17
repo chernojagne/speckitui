@@ -4,10 +4,9 @@ use std::sync::Mutex;
 
 /// GitHub API response types
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct GitHubUser {
     pub login: String,
-    pub avatar_url: String,
+    pub avatar_url: Option<String>,
     pub name: Option<String>,
 }
 
@@ -70,10 +69,76 @@ pub struct GitHubClient {
 
 impl GitHubClient {
     pub fn new() -> Self {
+        // Try to get token from gh CLI on initialization
+        let initial_token = Self::get_gh_cli_token();
+        
         Self {
-            token: Mutex::new(None),
+            token: Mutex::new(initial_token),
             base_url: "https://api.github.com".to_string(),
             client: reqwest::Client::new(),
+        }
+    }
+    
+    /// Attempts to read the GitHub token from the gh CLI
+    fn get_gh_cli_token() -> Option<String> {
+        use std::process::Command;
+        
+        // On Windows, try multiple approaches to find gh
+        #[cfg(windows)]
+        {
+            // Try gh.exe directly first
+            if let Some(token) = Self::try_gh_command("gh.exe") {
+                return Some(token);
+            }
+            // Try through cmd.exe (picks up PATH properly)
+            if let Ok(output) = Command::new("cmd")
+                .args(["/C", "gh", "auth", "token"])
+                .output()
+            {
+                if output.status.success() {
+                    let token = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                    if !token.is_empty() {
+                        log::info!("Successfully loaded GitHub token from gh CLI (via cmd)");
+                        return Some(token);
+                    }
+                }
+            }
+        }
+        
+        // Unix/Mac or fallback
+        Self::try_gh_command("gh")
+    }
+    
+    fn try_gh_command(cmd: &str) -> Option<String> {
+        use std::process::Command;
+        
+        match Command::new(cmd).args(["auth", "token"]).output() {
+            Ok(output) => {
+                if output.status.success() {
+                    let token = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                    if !token.is_empty() {
+                        log::info!("Successfully loaded GitHub token from gh CLI");
+                        return Some(token);
+                    }
+                } else {
+                    let stderr = String::from_utf8_lossy(&output.stderr);
+                    log::warn!("gh auth token failed: {}", stderr);
+                }
+            }
+            Err(e) => {
+                log::warn!("Failed to run gh command '{}': {}", cmd, e);
+            }
+        }
+        None
+    }
+    
+    /// Refreshes the token from gh CLI
+    pub fn refresh_from_cli(&self) -> bool {
+        if let Some(token) = Self::get_gh_cli_token() {
+            self.set_token(token);
+            true
+        } else {
+            false
         }
     }
 

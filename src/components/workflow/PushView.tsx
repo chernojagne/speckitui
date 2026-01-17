@@ -4,8 +4,6 @@ import { getChangedFiles, getGitStatus } from '@/services/tauriCommands';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
 import type { ChangedFile, GitStatus } from '@/types';
-import './WorkflowView.css';
-import './PushView.css';
 
 export function PushView() {
   const { project } = useProjectStore();
@@ -65,49 +63,49 @@ export function PushView() {
   }
 
   return (
-    <div className="workflow-view push-view">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Git status header */}
-      <div className="git-status-header">
-        <div className="branch-info">
-          <span className="branch-icon">🌿</span>
-          <span className="branch-name">{gitStatus.branch}</span>
+      <div className="flex items-center justify-between p-4 bg-card border-b border-border">
+        <div className="flex items-center gap-2">
+          <span className="text-base">🌿</span>
+          <span className="font-mono font-semibold text-foreground">{gitStatus.branch}</span>
           {gitStatus.ahead > 0 && (
-            <span className="commit-badge ahead" title="Commits ahead of remote">
+            <span className="px-1.5 py-0.5 text-xs font-semibold rounded-sm bg-success text-white" title="Commits ahead of remote">
               ↑{gitStatus.ahead}
             </span>
           )}
           {gitStatus.behind > 0 && (
-            <span className="commit-badge behind" title="Commits behind remote">
+            <span className="px-1.5 py-0.5 text-xs font-semibold rounded-sm bg-warning text-white" title="Commits behind remote">
               ↓{gitStatus.behind}
             </span>
           )}
         </div>
-        <div className="git-actions">
-          <button className="git-action-btn" disabled>
+        <div className="flex gap-2">
+          <button className="py-1 px-4 text-sm border border-border rounded-md bg-background text-foreground transition-all hover:bg-muted hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed" disabled>
             Pull
           </button>
-          <button className="git-action-btn primary" disabled>
+          <button className="py-1 px-4 text-sm border border-primary rounded-md bg-primary text-white transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
             Push
           </button>
         </div>
       </div>
 
       {/* Changed files */}
-      <div className="changed-files-section">
-        <h3 className="section-title">
+      <div className="flex-1 overflow-auto p-4">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
           Changed Files
-          <span className="file-count">{changedFiles.length}</span>
+          <span className="px-2 py-0.5 bg-muted rounded-sm text-xs text-muted-foreground">{changedFiles.length}</span>
         </h3>
         {changedFiles.length === 0 ? (
-          <div className="no-changes">
+          <div className="flex items-center justify-center p-8 text-success text-sm">
             <span>✓ Working tree clean</span>
           </div>
         ) : (
-          <ul className="file-list">
+          <ul className="list-none">
             {changedFiles.map((file) => (
-              <li key={file.path} className={`file-item status-${file.status}`}>
-                <span className="file-status">{getStatusLabel(file.status)}</span>
-                <span className="file-path">{file.path}</span>
+              <li key={file.path} className="flex items-center gap-2 py-1 px-2 rounded-sm transition-colors hover:bg-muted">
+                <span className={`w-5 h-5 flex items-center justify-center text-xs font-semibold font-mono rounded-sm text-white ${file.status === 'added' ? 'bg-success' : file.status === 'modified' ? 'bg-warning' : file.status === 'deleted' ? 'bg-destructive' : 'bg-muted-foreground'}`}>{getStatusLabel(file.status)}</span>
+                <span className="font-mono text-sm text-muted-foreground">{file.path}</span>
               </li>
             ))}
           </ul>

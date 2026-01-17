@@ -4,7 +4,7 @@
  */
 
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import './IssueList.css';
+import { cn } from '@/lib/utils';
 
 export interface Issue {
   id: number;
@@ -42,7 +42,7 @@ export function IssueList({
 }: IssueListProps) {
   if (isLoading) {
     return (
-      <div className="issue-list">
+      <div className="list-none m-0 p-0 flex flex-col">
         <LoadingSpinner message="Loading issues..." />
       </div>
     );
@@ -50,38 +50,43 @@ export function IssueList({
 
   if (issues.length === 0) {
     return (
-      <div className="issue-list">
-        <div className="issue-list-empty">
-          <span className="empty-icon">📋</span>
-          <p>{emptyMessage}</p>
+      <div className="list-none m-0 p-0 flex flex-col">
+        <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+          <span className="text-3xl mb-3 opacity-60">📋</span>
+          <p className="m-0 text-sm">{emptyMessage}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <ul className="issue-list">
+    <ul className="list-none m-0 p-0 flex flex-col">
       {issues.map((issue) => (
         <li key={issue.id}>
           <button
-            className={`issue-item ${selectedIssueId === issue.id ? 'selected' : ''}`}
+            className={cn(
+              "flex flex-col gap-1.5 w-full px-4 py-3 bg-transparent border-none border-b border-border text-left cursor-pointer transition-colors hover:bg-accent",
+              selectedIssueId === issue.id && "bg-primary/5 border-l-[3px] border-l-primary"
+            )}
             onClick={() => onSelectIssue(issue)}
           >
-            <div className="issue-header">
-              <span className={`issue-state ${issue.state}`}>
+            <div className="flex items-center gap-2">
+              <span className="text-xs">
                 {issue.state === 'open' ? '🟢' : '🟣'}
               </span>
-              <span className="issue-number">#{issue.number}</span>
+              <span className="text-xs font-medium text-muted-foreground">#{issue.number}</span>
             </div>
             
-            <h4 className="issue-title">{issue.title}</h4>
+            <h4 className="m-0 text-sm font-medium text-foreground leading-snug line-clamp-2">
+              {issue.title}
+            </h4>
             
             {issue.labels.length > 0 && (
-              <div className="issue-labels">
+              <div className="flex flex-wrap gap-1">
                 {issue.labels.slice(0, 3).map((label) => (
                   <span
                     key={label.name}
-                    className="issue-label"
+                    className="px-2 py-0.5 text-[11px] font-medium rounded-full whitespace-nowrap"
                     style={{ 
                       backgroundColor: `#${label.color}`,
                       color: getContrastColor(label.color)
@@ -91,19 +96,21 @@ export function IssueList({
                   </span>
                 ))}
                 {issue.labels.length > 3 && (
-                  <span className="issue-label-more">+{issue.labels.length - 3}</span>
+                  <span className="px-1.5 py-0.5 text-[11px] text-muted-foreground bg-card rounded-full">
+                    +{issue.labels.length - 3}
+                  </span>
                 )}
               </div>
             )}
             
-            <div className="issue-meta">
-              <span className="issue-author">{issue.author.login}</span>
-              <span className="issue-separator">•</span>
-              <span className="issue-date">{formatRelativeTime(issue.createdAt)}</span>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="font-medium">{issue.author.login}</span>
+              <span className="opacity-50">•</span>
+              <span>{formatRelativeTime(issue.createdAt)}</span>
               {issue.commentsCount > 0 && (
                 <>
-                  <span className="issue-separator">•</span>
-                  <span className="issue-comments">💬 {issue.commentsCount}</span>
+                  <span className="opacity-50">•</span>
+                  <span className="flex items-center gap-1">💬 {issue.commentsCount}</span>
                 </>
               )}
             </div>

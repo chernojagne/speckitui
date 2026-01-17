@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createHighlighter, type Highlighter, type BundledLanguage, type BundledTheme } from 'shiki';
-import './SourceViewer.css';
 
 interface SourceViewerProps {
   code: string;
@@ -135,21 +134,21 @@ export function SourceViewer({
   const highlightSet = useMemo(() => new Set(highlightLines), [highlightLines]);
 
   return (
-    <div className="source-viewer" style={{ maxHeight }}>
+    <div className="flex flex-col border border-border rounded-md overflow-hidden bg-card" style={{ maxHeight }}>
       {fileName && (
-        <div className="source-viewer-header">
-          <span className="source-viewer-filename">{fileName}</span>
-          <span className="source-viewer-language">{resolvedLanguage}</span>
+        <div className="flex items-center justify-between px-3 py-2 bg-muted border-b border-border text-[0.8125rem]">
+          <span className="font-mono font-medium text-foreground">{fileName}</span>
+          <span className="text-muted-foreground uppercase text-[0.6875rem] font-semibold">{resolvedLanguage}</span>
         </div>
       )}
       
-      <div className="source-viewer-content">
+      <div className="flex overflow-auto">
         {showLineNumbers && (
-          <div className="line-numbers">
+          <div className="shrink-0 py-3 bg-muted border-r border-border text-right select-none">
             {lines.map((_, idx) => (
               <div
                 key={idx + 1}
-                className={`line-number ${highlightSet.has(idx + 1) ? 'highlighted' : ''}`}
+                className={`px-3 font-mono text-xs leading-relaxed text-muted-foreground min-w-10 ${highlightSet.has(idx + 1) ? 'bg-warning/20 text-warning' : ''}`}
               >
                 {idx + 1}
               </div>
@@ -157,19 +156,19 @@ export function SourceViewer({
           </div>
         )}
         
-        <div className="source-code-container">
+        <div className="flex-1 overflow-x-auto">
           {highlightedHtml ? (
             <div
-              className="source-code highlighted"
+              className="m-0 px-4 py-3 font-mono text-[0.8125rem] leading-relaxed [&_.shiki]:bg-transparent! [&_.shiki]:p-0! [&_.shiki]:m-0! [&_.shiki_code]:bg-transparent!"
               dangerouslySetInnerHTML={{ __html: highlightedHtml }}
             />
           ) : (
-            <pre className="source-code plain">
+            <pre className="m-0 px-4 py-3 font-mono text-[0.8125rem] leading-relaxed bg-transparent whitespace-pre">
               <code>
                 {lines.map((line, idx) => (
                   <div
                     key={idx}
-                    className={`code-line ${highlightSet.has(idx + 1) ? 'highlighted' : ''}`}
+                    className={`min-h-[1.5em] ${highlightSet.has(idx + 1) ? 'bg-warning/15 -mx-4 px-4' : ''}`}
                   >
                     {line || ' '}
                   </div>

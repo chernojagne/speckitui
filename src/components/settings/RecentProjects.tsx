@@ -6,7 +6,7 @@
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { openProject } from '@/services/tauriCommands';
-import './RecentProjects.css';
+import { cn } from '@/lib/utils';
 
 interface RecentProjectsProps {
   onProjectSelect?: () => void;
@@ -44,23 +44,25 @@ export function RecentProjects({ onProjectSelect }: RecentProjectsProps) {
 
   if (recentProjects.length === 0) {
     return (
-      <div className="recent-projects">
-        <div className="recent-projects-empty">
-          <span className="empty-icon">📁</span>
-          <p>No recent projects</p>
-          <p className="hint">Projects you open will appear here for quick access.</p>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <span className="text-4xl mb-4 opacity-70">📁</span>
+          <p className="my-1 text-foreground">No recent projects</p>
+          <p className="mt-2 text-[13px] text-muted-foreground max-w-[280px]">
+            Projects you open will appear here for quick access.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="recent-projects">
-      <div className="recent-projects-header">
-        <span className="recent-count">{recentProjects.length} recent projects</span>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between pb-3 border-b border-border">
+        <span className="text-[13px] text-muted-foreground">{recentProjects.length} recent projects</span>
       </div>
 
-      <ul className="recent-projects-list">
+      <ul className="list-none m-0 p-0 flex flex-col gap-1">
         {recentProjects.map((projectPath: string) => {
           const isCurrent = currentProject?.path === projectPath;
           const projectName = getProjectName(projectPath);
@@ -68,20 +70,29 @@ export function RecentProjects({ onProjectSelect }: RecentProjectsProps) {
           return (
             <li 
               key={projectPath}
-              className={`recent-project-item ${isCurrent ? 'current' : ''}`}
+              className={cn(
+                "flex items-center gap-2 rounded-md transition-colors",
+                isCurrent ? "bg-primary/10" : "hover:bg-accent"
+              )}
             >
               <button
-                className="project-btn"
+                className="flex-1 flex items-center gap-3 p-3 bg-transparent border-none cursor-pointer text-left disabled:cursor-default"
                 onClick={() => handleOpenProject(projectPath)}
                 disabled={isCurrent}
               >
-                <span className="project-icon">📁</span>
-                <div className="project-info">
-                  <span className="project-name">{projectName}</span>
-                  <span className="project-path">{formatPath(projectPath)}</span>
+                <span className="text-xl opacity-80">📁</span>
+                <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                  <span className="text-sm font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis">
+                    {projectName}
+                  </span>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">
+                    {formatPath(projectPath)}
+                  </span>
                 </div>
                 {isCurrent && (
-                  <span className="current-badge">Current</span>
+                  <span className="px-2 py-0.5 text-[11px] font-medium text-primary bg-primary/10 rounded-full uppercase">
+                    Current
+                  </span>
                 )}
               </button>
             </li>

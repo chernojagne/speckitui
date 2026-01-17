@@ -5,8 +5,6 @@ import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
 import { SourceViewer } from '../shared/SourceViewer';
 import type { FileEntry, SourceFileContent } from '@/types';
-import './WorkflowView.css';
-import './ImplementView.css';
 
 interface TreeNodeProps {
   entry: FileEntry;
@@ -38,18 +36,18 @@ function TreeNode({
   };
 
   return (
-    <li className="tree-node">
+    <li className="list-none">
       <button
-        className={`tree-item ${isSelected ? 'selected' : ''}`}
+        className={`flex items-center gap-1 w-full py-1 px-4 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${isSelected ? 'bg-primary text-white' : ''}`}
         onClick={handleClick}
       >
-        <span className="tree-icon">
+        <span className="text-sm">
           {entry.isDirectory ? (isExpanded ? '📂' : '📁') : '📄'}
         </span>
-        <span className="tree-name">{entry.name}</span>
+        <span className="overflow-hidden text-ellipsis whitespace-nowrap">{entry.name}</span>
       </button>
       {entry.isDirectory && isExpanded && entry.children && (
-        <ul className="tree-children">
+        <ul className="list-none pl-4">
           {entry.children.map((child) => (
             <TreeNode
               key={child.name}
@@ -168,14 +166,14 @@ export function ImplementView() {
   }
 
   return (
-    <div className="workflow-view implement-view">
-      <div className="implement-layout">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex h-full overflow-hidden">
         {/* File tree */}
-        <div className="file-tree-pane">
-          <div className="file-tree-header">
+        <div className="w-70 flex flex-col bg-card border-r border-border shrink-0 overflow-hidden">
+          <div className="py-2 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground border-b border-border">
             <span>Files</span>
           </div>
-          <ul className="file-tree">
+          <ul className="flex-1 overflow-auto py-1 list-none">
             {rootEntries.map((entry) => (
               <TreeNode
                 key={entry.name}
@@ -191,7 +189,7 @@ export function ImplementView() {
         </div>
 
         {/* File content */}
-        <div className="file-content-pane">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {!selectedPath ? (
             <EmptyState
               icon="📄"
@@ -201,7 +199,7 @@ export function ImplementView() {
           ) : !fileContent ? (
             <LoadingSpinner message="Loading file..." />
           ) : (
-            <div className="file-viewer">
+            <div className="flex flex-col h-full overflow-hidden">
               <SourceViewer
                 code={fileContent.content}
                 language={fileContent.language}

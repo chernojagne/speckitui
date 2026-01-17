@@ -8,7 +8,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { ConstitutionView } from './ConstitutionView';
 import { ThemeSettings } from './ThemeSettings';
 import { RecentProjects } from './RecentProjects';
-import './SettingsPanel.css';
+import { cn } from '@/lib/utils';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -31,44 +31,68 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   };
 
   return (
-    <div className="settings-panel-backdrop" onClick={handleBackdropClick}>
-      <div className="settings-panel" role="dialog" aria-modal="true" aria-label="Settings">
-        <div className="settings-panel-header">
-          <h2 className="settings-title">Settings</h2>
-          <button className="settings-close" onClick={onClose} aria-label="Close settings">
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] animate-in fade-in duration-150"
+      onClick={handleBackdropClick}
+    >
+      <div 
+        className="w-[90%] max-w-[700px] max-h-[80vh] bg-background rounded-lg shadow-xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-200"
+        role="dialog" 
+        aria-modal="true" 
+        aria-label="Settings"
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h2 className="text-lg font-semibold m-0 text-foreground">Settings</h2>
+          <button 
+            className="w-8 h-8 flex items-center justify-center bg-transparent border-none text-2xl text-muted-foreground cursor-pointer rounded-sm transition-all hover:bg-muted hover:text-foreground"
+            onClick={onClose} 
+            aria-label="Close settings"
+          >
             ×
           </button>
         </div>
 
-        <div className="settings-panel-content">
-          <nav className="settings-nav">
+        <div className="flex flex-1 overflow-hidden">
+          <nav className="flex flex-col w-[180px] p-2 border-r border-border bg-card">
             <button
-              className={`settings-nav-item ${activeTab === 'general' ? 'active' : ''}`}
+              className={cn(
+                "flex items-center gap-2 py-2.5 px-3 bg-transparent border-none text-left text-sm text-foreground cursor-pointer rounded-md transition-colors hover:bg-muted",
+                activeTab === 'general' && "bg-primary/15 text-primary font-medium"
+              )}
               onClick={() => setActiveTab('general')}
             >
               ⚙️ General
             </button>
             <button
-              className={`settings-nav-item ${activeTab === 'appearance' ? 'active' : ''}`}
+              className={cn(
+                "flex items-center gap-2 py-2.5 px-3 bg-transparent border-none text-left text-sm text-foreground cursor-pointer rounded-md transition-colors hover:bg-muted",
+                activeTab === 'appearance' && "bg-primary/15 text-primary font-medium"
+              )}
               onClick={() => setActiveTab('appearance')}
             >
               🎨 Appearance
             </button>
             <button
-              className={`settings-nav-item ${activeTab === 'projects' ? 'active' : ''}`}
+              className={cn(
+                "flex items-center gap-2 py-2.5 px-3 bg-transparent border-none text-left text-sm text-foreground cursor-pointer rounded-md transition-colors hover:bg-muted",
+                activeTab === 'projects' && "bg-primary/15 text-primary font-medium"
+              )}
               onClick={() => setActiveTab('projects')}
             >
               📁 Recent Projects
             </button>
             <button
-              className={`settings-nav-item ${activeTab === 'constitution' ? 'active' : ''}`}
+              className={cn(
+                "flex items-center gap-2 py-2.5 px-3 bg-transparent border-none text-left text-sm text-foreground cursor-pointer rounded-md transition-colors hover:bg-muted",
+                activeTab === 'constitution' && "bg-primary/15 text-primary font-medium"
+              )}
               onClick={() => setActiveTab('constitution')}
             >
               📜 Constitution
             </button>
           </nav>
 
-          <div className="settings-content">
+          <div className="flex-1 p-5 overflow-y-auto">
             {activeTab === 'general' && <GeneralSettings />}
             {activeTab === 'appearance' && <ThemeSettings />}
             {activeTab === 'projects' && <RecentProjects />}
@@ -85,11 +109,11 @@ function GeneralSettings() {
     useSettingsStore();
 
   return (
-    <div className="settings-section">
-      <h3 className="settings-section-title">Terminal</h3>
+    <div className="max-w-[400px]">
+      <h3 className="text-[15px] font-semibold m-0 mb-4 text-foreground">Terminal</h3>
 
-      <div className="settings-row">
-        <label className="settings-label" htmlFor="terminal-collapsed">
+      <div className="flex items-center justify-between py-3 border-b border-border">
+        <label className="text-sm text-foreground" htmlFor="terminal-collapsed">
           Terminal Panel Collapsed by Default
         </label>
         <input
@@ -97,12 +121,12 @@ function GeneralSettings() {
           id="terminal-collapsed"
           checked={terminalPanelCollapsed}
           onChange={(e) => setTerminalPanelCollapsed(e.target.checked)}
-          className="settings-checkbox"
+          className="w-[18px] h-[18px] accent-primary cursor-pointer"
         />
       </div>
 
-      <div className="settings-row">
-        <label className="settings-label" htmlFor="terminal-height">
+      <div className="flex items-center justify-between py-3 border-b border-border">
+        <label className="text-sm text-foreground" htmlFor="terminal-height">
           Terminal Panel Height (px)
         </label>
         <input
@@ -112,15 +136,15 @@ function GeneralSettings() {
           onChange={(e) => setTerminalPanelHeight(parseInt(e.target.value, 10))}
           min={100}
           max={600}
-          className="settings-input"
+          className="w-20 px-2 py-1.5 border border-border rounded-sm text-sm bg-background text-foreground focus:outline-none focus:border-primary"
         />
       </div>
 
-      <h3 className="settings-section-title">About</h3>
-      <div className="settings-info">
-        <p><strong>SpeckitUI</strong></p>
-        <p>A visual interface for spec-kit driven development</p>
-        <p className="version">Version 0.1.0</p>
+      <h3 className="text-[15px] font-semibold mt-8 mb-4 text-foreground">About</h3>
+      <div className="text-sm text-foreground leading-relaxed">
+        <p className="my-1"><strong>SpeckitUI</strong></p>
+        <p className="my-1">A visual interface for spec-kit driven development</p>
+        <p className="mt-3 text-[13px] text-muted-foreground">Version 0.1.0</p>
       </div>
     </div>
   );

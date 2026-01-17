@@ -162,12 +162,14 @@ export interface PRFeedback {
   number: number;
   title: string;
   state: 'open' | 'closed' | 'merged';
-  status: 'open' | 'draft' | 'merged' | 'closed';
+  status?: 'open' | 'draft' | 'merged' | 'closed';
   url: string;
   author: string;
-  comments: PRComment[];
-  statusChecks: StatusCheck[];
-  reviewState: 'approved' | 'changes_requested' | 'pending' | 'none';
+  branch?: string;
+  createdAt?: string;
+  comments?: PRComment[];
+  statusChecks?: StatusCheck[];
+  reviewState?: 'approved' | 'changes_requested' | 'pending' | 'none';
 }
 
 export interface PRComment {

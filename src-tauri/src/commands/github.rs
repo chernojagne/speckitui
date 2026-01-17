@@ -49,7 +49,6 @@ pub struct GitHubIssue {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct DeviceCodeResponse {
     pub device_code: String,
     pub user_code: String,
@@ -60,6 +59,56 @@ pub struct DeviceCodeResponse {
 
 /// Managed state for GitHub client
 pub struct GitHubState(pub Arc<GitHubClient>);
+
+/// Extracts owner and repo from a git remote URL or project path
+fn extract_owner_repo(project_path: &str) -> Result<(String, String), String> {
+    use std::process::Command;
+    
+    log::info!("Extracting owner/repo from project path: {}", project_path);
+    
+    // Try to get the git remote URL
+    let output = Command::new("git")
+        .args(["-C", project_path, "remote", "get-url", "origin"])
+        .output()
+        .map_err(|e| format!("Failed to run git: {}", e))?;
+    
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        log::error!("Git command failed: {}", stderr);
+        return Err(format!("No git remote 'origin' found: {}", stderr));
+    }
+    
+    let remote_url = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    log::info!("Got remote URL: {}", remote_url);
+    parse_github_url(&remote_url)
+}
+
+/// Parses a GitHub URL to extract owner and repo
+fn parse_github_url(url: &str) -> Result<(String, String), String> {
+    // Handle SSH format: git@github.com:owner/repo.git
+    if url.starts_with("git@github.com:") {
+        let path = url.trim_start_matches("git@github.com:");
+        let path = path.trim_end_matches(".git");
+        let parts: Vec<&str> = path.split('/').collect();
+        if parts.len() >= 2 {
+            return Ok((parts[0].to_string(), parts[1].to_string()));
+        }
+    }
+    
+    // Handle HTTPS format: https://github.com/owner/repo.git
+    if url.contains("github.com") {
+        let path = url
+            .trim_start_matches("https://github.com/")
+            .trim_start_matches("http://github.com/")
+            .trim_end_matches(".git");
+        let parts: Vec<&str> = path.split('/').collect();
+        if parts.len() >= 2 {
+            return Ok((parts[0].to_string(), parts[1].to_string()));
+        }
+    }
+    
+    Err(format!("Could not parse GitHub URL: {}", url))
+}
 
 /// Sets the GitHub token
 #[tauri::command]
@@ -81,6 +130,11 @@ pub async fn clear_github_token(state: State<'_, GitHubState>) -> Result<(), Str
 /// Checks GitHub authentication status
 #[tauri::command]
 pub async fn check_github_auth(state: State<'_, GitHubState>) -> Result<GitHubAuth, String> {
+    // If not authenticated, try to refresh from gh CLI
+    if !state.0.is_authenticated() {
+        state.0.refresh_from_cli();
+    }
+    
     if !state.0.is_authenticated() {
         return Ok(GitHubAuth {
             is_authenticated: false,
@@ -93,7 +147,7 @@ pub async fn check_github_auth(state: State<'_, GitHubState>) -> Result<GitHubAu
         Ok(user) => Ok(GitHubAuth {
             is_authenticated: true,
             login: Some(user.login),
-            avatar_url: Some(user.avatar_url),
+            avatar_url: user.avatar_url,
         }),
         Err(e) => {
             log::warn!("GitHub auth check failed: {}", e);
@@ -191,7 +245,7 @@ pub async fn github_oauth_complete(
             Ok(user) => Ok(GitHubAuth {
                 is_authenticated: true,
                 login: Some(user.login),
-                avatar_url: Some(user.avatar_url),
+                avatar_url: user.avatar_url,
             }),
             Err(e) => Err(format!("Failed to get user info: {}", e)),
         }
@@ -204,10 +258,11 @@ pub async fn github_oauth_complete(
 #[tauri::command]
 pub async fn get_pull_requests(
     state: State<'_, GitHubState>,
-    owner: String,
-    repo: String,
+    #[allow(non_snake_case)]
+    projectPath: String,
     branch: Option<String>,
 ) -> Result<Vec<PullRequest>, String> {
+    let (owner, repo) = extract_owner_repo(&projectPath)?;
     log::info!("Fetching PRs for {}/{}", owner, repo);
     
     let prs = state.0.get_pull_requests(&owner, &repo, Some("open")).await?;
@@ -239,13 +294,15 @@ pub async fn get_pull_requests(
 #[tauri::command]
 pub async fn get_pr_comments(
     state: State<'_, GitHubState>,
-    owner: String,
-    repo: String,
-    pr_number: u32,
+    #[allow(non_snake_case)]
+    projectPath: String,
+    #[allow(non_snake_case)]
+    prNumber: u32,
 ) -> Result<Vec<PRComment>, String> {
-    log::info!("Fetching PR comments for {}/{} #{}", owner, repo, pr_number);
+    let (owner, repo) = extract_owner_repo(&projectPath)?;
+    log::info!("Fetching PR comments for {}/{} #{}", owner, repo, prNumber);
     
-    let comments = state.0.get_pr_comments(&owner, &repo, pr_number).await?;
+    let comments = state.0.get_pr_comments(&owner, &repo, prNumber).await?;
     
     Ok(comments
         .into_iter()
@@ -264,17 +321,19 @@ pub async fn get_pr_comments(
 #[tauri::command]
 pub async fn get_issues(
     state: State<'_, GitHubState>,
-    owner: String,
-    repo: String,
-    issue_state: Option<String>,
+    #[allow(non_snake_case)]
+    projectPath: String,
+    #[allow(non_snake_case)]
+    issueState: Option<String>,
     labels: Option<Vec<String>>,
 ) -> Result<Vec<GitHubIssue>, String> {
+    let (owner, repo) = extract_owner_repo(&projectPath)?;
     log::info!("Fetching issues for {}/{}", owner, repo);
     
     let issues = state.0.get_issues(
         &owner,
         &repo,
-        issue_state.as_deref(),
+        issueState.as_deref(),
         labels.as_deref(),
     ).await?;
     
@@ -298,13 +357,15 @@ pub async fn get_issues(
 #[tauri::command]
 pub async fn get_issue_detail(
     state: State<'_, GitHubState>,
-    owner: String,
-    repo: String,
-    issue_number: u32,
+    #[allow(non_snake_case)]
+    projectPath: String,
+    #[allow(non_snake_case)]
+    issueNumber: u32,
 ) -> Result<GitHubIssue, String> {
-    log::info!("Fetching issue {}/{} #{}", owner, repo, issue_number);
+    let (owner, repo) = extract_owner_repo(&projectPath)?;
+    log::info!("Fetching issue {}/{} #{}", owner, repo, issueNumber);
     
-    let issue = state.0.get_issue(&owner, &repo, issue_number).await?;
+    let issue = state.0.get_issue(&owner, &repo, issueNumber).await?;
     
     Ok(GitHubIssue {
         number: issue.number,

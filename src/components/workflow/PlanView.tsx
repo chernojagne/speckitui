@@ -7,7 +7,6 @@ import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
 import { ProgressIndicator } from '../shared/ProgressIndicator';
 import { parseChecklistSections, calculateCompletionStats } from '@/services/checklistParser';
-import './WorkflowView.css';
 
 export function PlanView() {
   const { activeSpec } = useProjectStore();
@@ -92,7 +91,7 @@ export function PlanView() {
           id: file,
           label: file,
           content: (
-            <div className="artifact-content">
+            <div className="p-6">
               <MarkdownRenderer
                 content={artifacts[file]}
                 filePath={`${activeSpec?.path}/${file}`}
@@ -113,7 +112,7 @@ export function PlanView() {
           id: file,
           label: shortName,
           content: (
-            <div className="artifact-content">
+            <div className="p-6">
               <MarkdownRenderer
                 content={artifacts[file]}
                 filePath={`${activeSpec?.path}/${file}`}
@@ -152,10 +151,10 @@ export function PlanView() {
   }
 
   return (
-    <div className="workflow-view plan-view">
+    <div className="flex flex-col h-full overflow-hidden">
       {planStats && planStats.total > 0 && (
-        <div className="plan-progress-header">
-          <span className="progress-label">Phase -1 Gates</span>
+        <div className="flex items-center gap-4 px-6 py-3 border-b border-border bg-card">
+          <span className="text-sm font-medium text-muted-foreground">Phase -1 Gates</span>
           <ProgressIndicator
             completed={planStats.completed}
             total={planStats.total}

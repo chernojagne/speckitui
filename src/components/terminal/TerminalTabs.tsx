@@ -48,7 +48,7 @@ export function TerminalTabs({
           <button
             key={session.id}
             className={cn(
-              "flex items-center gap-1.5 h-8 px-3 text-sm border-r border-border transition-colors",
+              "group flex items-center gap-1.5 h-8 px-3 text-sm border-r border-border transition-colors",
               "hover:bg-accent/50",
               session.id === activeSessionId 
                 ? "bg-background text-foreground border-b-2 border-b-primary" 

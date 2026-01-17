@@ -3,8 +3,6 @@
  * Individual PR review comment with author, body, and file context
  */
 
-import './PRComment.css';
-
 export interface PRCommentData {
   id: number;
   author: string;
@@ -27,46 +25,48 @@ export function PRComment({ comment, showFileContext = true }: PRCommentProps) {
   const formattedDate = formatRelativeTime(comment.createdAt);
 
   return (
-    <div className="pr-comment">
-      <div className="pr-comment-header">
-        <div className="pr-comment-author">
+    <div className="p-4 bg-card border border-border rounded-md [&+&]:mt-3">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
           {comment.authorAvatarUrl ? (
             <img
               src={comment.authorAvatarUrl}
               alt={comment.author}
-              className="pr-comment-avatar"
+              className="w-7 h-7 rounded-full object-cover"
             />
           ) : (
-            <div className="pr-comment-avatar-placeholder">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center bg-primary text-white text-xs font-semibold">
               {comment.author.charAt(0).toUpperCase()}
             </div>
           )}
-          <span className="pr-comment-author-name">{comment.author}</span>
+          <span className="font-semibold text-sm text-foreground">{comment.author}</span>
         </div>
-        <span className="pr-comment-date">{formattedDate}</span>
+        <span className="text-xs text-muted-foreground">{formattedDate}</span>
       </div>
 
       {showFileContext && comment.path && (
-        <div className="pr-comment-file-context">
-          <span className="pr-comment-file-path">{comment.path}</span>
+        <div className="flex items-center gap-2 mb-2 px-2 py-1.5 bg-muted rounded-sm font-mono text-xs">
+          <span className="font-medium text-foreground">{comment.path}</span>
           {comment.line && (
-            <span className="pr-comment-line">Line {comment.line}</span>
+            <span className="text-muted-foreground before:content-['•'] before:mr-2">Line {comment.line}</span>
           )}
         </div>
       )}
 
       {comment.diffHunk && (
-        <pre className="pr-comment-diff-hunk">
-          <code>{comment.diffHunk}</code>
+        <pre className="my-2 p-2 bg-muted rounded-sm overflow-x-auto text-xs">
+          <code className="text-muted-foreground whitespace-pre">{comment.diffHunk}</code>
         </pre>
       )}
 
-      <div className="pr-comment-body">
+      <div className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
         {comment.body}
       </div>
 
       {comment.state === 'PENDING' && (
-        <span className="pr-comment-pending-badge">Pending</span>
+        <span className="inline-block mt-2 px-2 py-0.5 text-[11px] font-semibold uppercase bg-warning/20 text-warning rounded-full">
+          Pending
+        </span>
       )}
     </div>
   );

@@ -125,7 +125,7 @@ export async function closeTerminal(sessionId: string): Promise<void> {
 // ============ GitHub Commands ============
 
 export interface GitHubAuthStatus {
-  authenticated: boolean;
+  isAuthenticated: boolean;
   login?: string;
   avatarUrl?: string;
 }

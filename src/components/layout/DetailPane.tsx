@@ -9,7 +9,6 @@ import { PushView } from '../workflow/PushView';
 import { PRView } from '../workflow/PRView';
 import { BugFixView } from '../workflow/BugFixView';
 import { EmptyState } from '../shared/EmptyState';
-import './DetailPane.css';
 
 export function DetailPane() {
   const { selectedStep } = useWorkflowStore();
@@ -18,7 +17,7 @@ export function DetailPane() {
   // No project loaded
   if (!project) {
     return (
-      <div className="detail-pane">
+      <div className="flex-1 flex flex-col overflow-hidden bg-background">
         <EmptyState
           icon="📂"
           title="No Project Open"
@@ -31,7 +30,7 @@ export function DetailPane() {
   // No spec instances found
   if (!activeSpec) {
     return (
-      <div className="detail-pane">
+      <div className="flex-1 flex flex-col overflow-hidden bg-background">
         <EmptyState
           icon="📋"
           title="No Spec Instances"
@@ -72,5 +71,5 @@ export function DetailPane() {
     }
   };
 
-  return <div className="detail-pane">{renderView()}</div>;
+  return <div className="flex-1 flex flex-col overflow-hidden bg-background">{renderView()}</div>;
 }

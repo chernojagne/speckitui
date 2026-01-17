@@ -43,7 +43,6 @@
   align-items: center;
   gap: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
-  background-color: var(--color-primary);
   color: white;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
@@ -56,7 +55,8 @@
 
 .project-name {
   font-weight: 500;
-  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  color: var(--color-text);
 }
 
 .settings-btn {

@@ -5,7 +5,6 @@
 
 import { useMemo } from 'react';
 import { PRComment, type PRCommentData } from './PRComment';
-import './PRCommentList.css';
 
 interface PRCommentListProps {
   comments: PRCommentData[];
@@ -42,41 +41,53 @@ export function PRCommentList({
 
   if (comments.length === 0) {
     return (
-      <div className="pr-comment-list-empty">
-        <span className="empty-icon">💬</span>
-        <span className="empty-message">{emptyMessage}</span>
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <span className="text-3xl mb-2 opacity-60">💬</span>
+        <span className="text-sm text-muted-foreground">{emptyMessage}</span>
       </div>
     );
   }
 
   if (groupedComments) {
     return (
-      <div className="pr-comment-list grouped">
+      <div className="flex flex-col gap-4">
         {Array.from(groupedComments.groups.entries()).map(([filePath, fileComments]) => (
-          <div key={filePath} className="pr-comment-group">
-            <div className="pr-comment-group-header">
-              <span className="file-icon">📄</span>
-              <span className="file-path">{filePath}</span>
-              <span className="comment-count">{fileComments.length}</span>
+          <div key={filePath} className="border border-border rounded-md overflow-hidden">
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-muted border-b border-border">
+              <span className="text-sm">📄</span>
+              <span className="flex-1 font-mono text-[13px] font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
+                {filePath}
+              </span>
+              <span className="text-xs font-semibold px-1.5 py-0.5 bg-card rounded-full text-muted-foreground">
+                {fileComments.length}
+              </span>
             </div>
-            <div className="pr-comment-group-body">
+            <div className="p-3">
               {fileComments.map((comment) => (
-                <PRComment key={comment.id} comment={comment} showFileContext={false} />
+                <div key={comment.id} className="border-none bg-transparent p-3 rounded-sm hover:bg-muted">
+                  <PRComment comment={comment} showFileContext={false} />
+                </div>
               ))}
             </div>
           </div>
         ))}
         
         {groupedComments.noFile.length > 0 && (
-          <div className="pr-comment-group">
-            <div className="pr-comment-group-header">
-              <span className="file-icon">💬</span>
-              <span className="file-path">General Comments</span>
-              <span className="comment-count">{groupedComments.noFile.length}</span>
+          <div className="border border-border rounded-md overflow-hidden">
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-muted border-b border-border">
+              <span className="text-sm">💬</span>
+              <span className="flex-1 font-mono text-[13px] font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
+                General Comments
+              </span>
+              <span className="text-xs font-semibold px-1.5 py-0.5 bg-card rounded-full text-muted-foreground">
+                {groupedComments.noFile.length}
+              </span>
             </div>
-            <div className="pr-comment-group-body">
+            <div className="p-3">
               {groupedComments.noFile.map((comment) => (
-                <PRComment key={comment.id} comment={comment} showFileContext={false} />
+                <div key={comment.id} className="border-none bg-transparent p-3 rounded-sm hover:bg-muted">
+                  <PRComment comment={comment} showFileContext={false} />
+                </div>
               ))}
             </div>
           </div>
@@ -86,7 +97,7 @@ export function PRCommentList({
   }
 
   return (
-    <div className="pr-comment-list">
+    <div className="flex flex-col">
       {comments.map((comment) => (
         <PRComment key={comment.id} comment={comment} />
       ))}

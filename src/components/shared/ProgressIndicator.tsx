@@ -3,8 +3,6 @@
  * Shows completion status (X/Y complete, percentage)
  */
 
-import './ProgressIndicator.css';
-
 interface ProgressIndicatorProps {
   completed: number;
   total: number;
@@ -13,6 +11,27 @@ interface ProgressIndicatorProps {
   size?: 'sm' | 'md' | 'lg';
   label?: string;
 }
+
+const sizeClasses = {
+  sm: {
+    container: 'gap-2',
+    bar: 'h-1',
+    counts: 'text-xs',
+    percentage: 'text-xs',
+  },
+  md: {
+    container: 'gap-3',
+    bar: 'h-1.5',
+    counts: 'text-[0.8125rem]',
+    percentage: 'text-sm',
+  },
+  lg: {
+    container: 'gap-4',
+    bar: 'h-2',
+    counts: 'text-sm',
+    percentage: 'text-base',
+  },
+};
 
 export function ProgressIndicator({
   completed,
@@ -24,26 +43,27 @@ export function ProgressIndicator({
 }: ProgressIndicatorProps) {
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   const isComplete = completed === total && total > 0;
+  const classes = sizeClasses[size];
 
   return (
-    <div className={`progress-indicator progress-indicator--${size}`}>
-      {label && <span className="progress-label">{label}</span>}
+    <div className={`flex items-center ${classes.container}`}>
+      {label && <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">{label}</span>}
       
-      <div className="progress-bar-container">
+      <div className={`flex-1 min-w-[60px] bg-muted rounded-sm overflow-hidden ${classes.bar}`}>
         <div
-          className={`progress-bar-fill ${isComplete ? 'complete' : ''}`}
+          className={`h-full rounded-sm transition-[width] duration-300 ${isComplete ? 'bg-success' : 'bg-primary'}`}
           style={{ width: `${percentage}%` }}
         />
       </div>
 
-      <div className="progress-stats">
+      <div className="flex items-center gap-2 whitespace-nowrap">
         {showCounts && (
-          <span className="progress-counts">
+          <span className={`font-mono text-muted-foreground ${classes.counts}`}>
             {completed}/{total}
           </span>
         )}
         {showPercentage && (
-          <span className={`progress-percentage ${isComplete ? 'complete' : ''}`}>
+          <span className={`font-semibold ${classes.percentage} ${isComplete ? 'text-success' : 'text-foreground'}`}>
             {percentage}%
           </span>
         )}
@@ -66,7 +86,7 @@ export function ProgressBadge({
   const isComplete = percentage === 100;
 
   return (
-    <span className={`progress-badge ${isComplete ? 'complete' : ''}`}>
+    <span className={`inline-flex items-center justify-center font-mono text-xs font-medium px-2 py-0.5 rounded-full ${isComplete ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'}`}>
       {completed}/{total}
     </span>
   );

@@ -3,8 +3,6 @@
  * Animated placeholder for loading states
  */
 
-import './LoadingSkeleton.css';
-
 interface SkeletonProps {
   width?: string | number;
   height?: string | number;
@@ -12,6 +10,18 @@ interface SkeletonProps {
   variant?: 'text' | 'rect' | 'circle';
   animation?: 'pulse' | 'wave' | 'none';
 }
+
+const variantClasses = {
+  text: 'h-[1em] my-1',
+  rect: 'w-full',
+  circle: 'rounded-full',
+};
+
+const animationClasses = {
+  pulse: 'animate-pulse',
+  wave: 'relative overflow-hidden',
+  none: '',
+};
 
 export function Skeleton({
   width,
@@ -27,7 +37,7 @@ export function Skeleton({
 
   return (
     <div
-      className={`skeleton skeleton--${variant} skeleton--${animation} ${className}`}
+      className={`bg-muted rounded-sm ${variantClasses[variant]} ${animationClasses[animation]} ${className}`}
       style={style}
     />
   );
@@ -39,7 +49,7 @@ export function Skeleton({
 
 export function SkeletonText({ lines = 3 }: { lines?: number }) {
   return (
-    <div className="skeleton-text">
+    <div className="flex flex-col gap-2">
       {Array.from({ length: lines }).map((_, idx) => (
         <Skeleton
           key={idx}
@@ -53,9 +63,9 @@ export function SkeletonText({ lines = 3 }: { lines?: number }) {
 
 export function SkeletonCard() {
   return (
-    <div className="skeleton-card">
+    <div className="border border-border rounded-md overflow-hidden">
       <Skeleton variant="rect" height={120} />
-      <div className="skeleton-card-content">
+      <div className="p-4 flex flex-col gap-2">
         <Skeleton variant="text" width="80%" />
         <Skeleton variant="text" width="60%" />
       </div>
@@ -65,9 +75,9 @@ export function SkeletonCard() {
 
 export function SkeletonListItem() {
   return (
-    <div className="skeleton-list-item">
+    <div className="flex items-center gap-3 py-3">
       <Skeleton variant="circle" width={40} height={40} />
-      <div className="skeleton-list-item-content">
+      <div className="flex-1 flex flex-col gap-1">
         <Skeleton variant="text" width="60%" />
         <Skeleton variant="text" width="40%" height={12} />
       </div>
@@ -77,7 +87,7 @@ export function SkeletonListItem() {
 
 export function SkeletonList({ count = 5 }: { count?: number }) {
   return (
-    <div className="skeleton-list">
+    <div className="flex flex-col">
       {Array.from({ length: count }).map((_, idx) => (
         <SkeletonListItem key={idx} />
       ))}
@@ -87,7 +97,7 @@ export function SkeletonList({ count = 5 }: { count?: number }) {
 
 export function SkeletonMarkdown() {
   return (
-    <div className="skeleton-markdown">
+    <div className="p-4">
       <Skeleton variant="text" width="40%" height={28} />
       <div style={{ height: '1rem' }} />
       <SkeletonText lines={4} />
@@ -105,9 +115,9 @@ export function SkeletonMarkdown() {
 
 export function SkeletonNavPane() {
   return (
-    <div className="skeleton-nav-pane">
+    <div className="flex flex-col gap-2 p-4">
       {Array.from({ length: 8 }).map((_, idx) => (
-        <div key={idx} className="skeleton-nav-item">
+        <div key={idx} className="flex items-center gap-3 p-2">
           <Skeleton variant="circle" width={24} height={24} />
           <Skeleton variant="text" width="70%" />
         </div>

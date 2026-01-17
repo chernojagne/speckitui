@@ -22,6 +22,10 @@ interface TerminalInstanceProps {
 // Backend emits just the data string as payload
 type TerminalOutputPayload = string;
 
+// Global map to track terminal instances by sessionId
+// This prevents duplicate terminals in React StrictMode
+const terminalInstances = new Map<string, { terminal: Terminal; fitAddon: FitAddon }>();
+
 export function TerminalInstance({
   sessionId,
   isActive,
@@ -32,10 +36,40 @@ export function TerminalInstance({
   const containerRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
+  const mountedRef = useRef(false);
+  
+  // Store callbacks in refs to avoid re-initializing terminal when they change
+  const onReadyRef = useRef(onReady);
+  const onDataRef = useRef(onData);
+  const onErrorRef = useRef(onError);
+  
+  // Keep refs up to date
+  useEffect(() => {
+    onReadyRef.current = onReady;
+    onDataRef.current = onData;
+    onErrorRef.current = onError;
+  }, [onReady, onData, onError]);
 
-  // Initialize terminal
+  // Initialize terminal - only depends on sessionId
   useEffect(() => {
     if (!containerRef.current) return;
+    
+    // Check if terminal already exists for this session (React StrictMode protection)
+    const existing = terminalInstances.get(sessionId);
+    if (existing) {
+      // Reattach existing terminal to this container
+      terminalRef.current = existing.terminal;
+      fitAddonRef.current = existing.fitAddon;
+      
+      // Re-open in the new container if needed
+      if (!containerRef.current.querySelector('.xterm')) {
+        existing.terminal.open(containerRef.current);
+        existing.fitAddon.fit();
+      }
+      
+      mountedRef.current = true;
+      return;
+    }
 
     // Create terminal with theme matching app
     const terminal = new Terminal({
@@ -75,32 +109,48 @@ export function TerminalInstance({
 
     terminalRef.current = terminal;
     fitAddonRef.current = fitAddon;
+    
+    // Store in global map
+    terminalInstances.set(sessionId, { terminal, fitAddon });
 
-    // Handle user input
+    // Handle user input - use ref for callback
     terminal.onData((data) => {
       writeTerminal(sessionId, data).catch((err) => {
         console.error('Failed to write to terminal:', err);
-        onError?.(err.message || 'Failed to write to terminal');
+        onErrorRef.current?.(err.message || 'Failed to write to terminal');
       });
-      onData?.(data);
+      onDataRef.current?.(data);
     });
 
-    onReady?.();
+    mountedRef.current = true;
+    onReadyRef.current?.();
 
+    // Cleanup only removes from map when component is truly unmounting
+    // We use a timeout to distinguish StrictMode remount from real unmount
     return () => {
-      terminal.dispose();
-      terminalRef.current = null;
-      fitAddonRef.current = null;
+      mountedRef.current = false;
+      
+      // Delay cleanup to allow StrictMode remount to claim the terminal
+      setTimeout(() => {
+        if (!mountedRef.current) {
+          // Component didn't remount - truly unmounting
+          terminalInstances.delete(sessionId);
+          terminal.dispose();
+          terminalRef.current = null;
+          fitAddonRef.current = null;
+        }
+      }, 100);
     };
-  }, [sessionId, onReady, onData, onError]);
+  }, [sessionId]);
 
   // Listen for terminal output from Tauri
   useEffect(() => {
     let unlisten: UnlistenFn | null = null;
+    let cancelled = false;
 
     const setupListener = async () => {
       try {
-        unlisten = await listen<TerminalOutputPayload>(
+        const unlistenFn = await listen<TerminalOutputPayload>(
           `terminal-output-${sessionId}`,
           (event) => {
             if (terminalRef.current && event.payload) {
@@ -108,6 +158,13 @@ export function TerminalInstance({
             }
           }
         );
+        
+        // If cancelled during async setup, immediately unlisten
+        if (cancelled) {
+          unlistenFn();
+        } else {
+          unlisten = unlistenFn;
+        }
       } catch (err) {
         console.error('Failed to setup terminal output listener:', err);
       }
@@ -116,6 +173,7 @@ export function TerminalInstance({
     setupListener();
 
     return () => {
+      cancelled = true;
       unlisten?.();
     };
   }, [sessionId]);

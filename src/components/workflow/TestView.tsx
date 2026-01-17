@@ -1,9 +1,8 @@
 import { EmptyState } from '../shared/EmptyState';
-import './WorkflowView.css';
 
 export function TestView() {
   return (
-    <div className="workflow-view test-view">
+    <div className="flex flex-col h-full overflow-hidden">
       <EmptyState
         icon="🧪"
         title="Test Step"

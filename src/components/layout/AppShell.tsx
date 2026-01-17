@@ -10,7 +10,8 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { openProject } from '@/services/tauriCommands';
 import { useWorkflowStore } from '@/stores/workflowStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import './AppShell.css';
+import { Button } from '@/components/ui/button';
+import { FolderOpen, Settings, X } from 'lucide-react';
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -53,27 +54,38 @@ export function AppShell() {
   };
 
   return (
-    <div className="app-shell">
+    <div className="flex flex-col h-screen overflow-hidden">
       {/* Header */}
-      <header className="app-header">
-        <div className="header-left">
-          <button className="open-project-btn" onClick={handleOpenProject} disabled={isLoading}>
-            {isLoading ? 'Opening...' : '📂 Open Project'}
-          </button>
-          {project && <span className="project-name">{project.name}</span>}
+      <header className="flex items-center justify-between h-12 px-4 bg-card border-b border-border shrink-0">
+        <div className="flex items-center gap-4 flex-1">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="gap-1.5"
+            onClick={handleOpenProject} 
+            disabled={isLoading}
+          >
+            <FolderOpen className="h-4 w-4" />
+          </Button>
+          {project && (
+            <span className="font-medium uppercase text-foreground text-sm">
+              {project.name}
+            </span>
+          )}
         </div>
-        <div className="header-center">
+        <div className="flex items-center">
           {project && project.specInstances.length > 0 && <SpecSelector />}
         </div>
-        <div className="header-right">
-          <button 
-            className="settings-btn" 
+        <div className="flex items-center gap-4 flex-1 justify-end">
+          <Button 
+            variant="ghost"
+            size="sm"
             title="Settings"
             onClick={() => setIsSettingsOpen(true)}
             aria-label="Open settings"
           >
-            ⚙️
-          </button>
+            <Settings className="h-4 w-4" />
+          </Button>
         </div>
       </header>
 
@@ -82,16 +94,23 @@ export function AppShell() {
 
       {/* Error display */}
       {error && (
-        <div className="error-banner">
+        <div className="flex items-center justify-between px-4 py-2 bg-destructive text-destructive-foreground text-sm">
           <span>⚠️ {error}</span>
-          <button onClick={() => setError(null)}>✕</button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-6 w-6 p-0 hover:bg-destructive/80"
+            onClick={() => setError(null)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       )}
 
       {/* Main content area */}
-      <div className="app-content">
+      <div className="flex flex-1 overflow-hidden">
         <NavPane />
-        <main className="main-area">
+        <main className="flex flex-col flex-1 overflow-hidden">
           <DetailPane />
         </main>
       </div>

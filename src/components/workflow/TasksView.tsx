@@ -4,8 +4,6 @@ import { readArtifact, updateCheckbox } from '@/services/tauriCommands';
 import { MarkdownRenderer } from '../shared/MarkdownRenderer';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
-import './WorkflowView.css';
-import './TasksView.css';
 
 interface TaskStats {
   total: number;
@@ -113,28 +111,28 @@ export function TasksView() {
   }
 
   return (
-    <div className="workflow-view tasks-view">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Progress bar */}
-      <div className="tasks-header">
-        <div className="tasks-stats">
-          <span className="stat-item">
-            <strong>{stats.completed}</strong> / {stats.total} completed
+      <div className="flex items-center gap-4 p-4 bg-card border-b border-border flex-shrink-0">
+        <div className="flex gap-4 text-sm text-muted-foreground">
+          <span>
+            <strong className="text-foreground">{stats.completed}</strong> / {stats.total} completed
           </span>
-          <span className="stat-item stat-pending">
+          <span className="text-warning">
             {stats.pending} pending
           </span>
         </div>
-        <div className="progress-bar">
+        <div className="flex-1 h-2 bg-muted rounded-lg overflow-hidden">
           <div
-            className="progress-fill"
+            className="h-full bg-success transition-[width]"
             style={{ width: `${stats.percentComplete}%` }}
           />
         </div>
-        <span className="progress-percent">{stats.percentComplete}%</span>
+        <span className="text-sm font-semibold text-success min-w-[40px] text-right">{stats.percentComplete}%</span>
       </div>
 
       {/* Task content */}
-      <div className="artifact-content">
+      <div className="flex-1 overflow-auto p-6">
         <MarkdownRenderer
           content={content}
           filePath={filePath ?? undefined}

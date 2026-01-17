@@ -4,7 +4,6 @@
  */
 
 import { Component, type ReactNode, type ErrorInfo } from 'react';
-import './ErrorBoundary.css';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -56,13 +55,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       return (
-        <div className="error-boundary">
-          <div className="error-icon">⚠️</div>
-          <h3 className="error-title">Something went wrong</h3>
-          <p className="error-message">
+        <div className="flex flex-col items-center justify-center px-8 py-12 text-center min-h-[200px]">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h3 className="text-lg font-semibold text-foreground m-0 mb-2">Something went wrong</h3>
+          <p className="text-sm text-muted-foreground max-w-[400px] m-0 mb-6 leading-relaxed font-mono bg-muted px-4 py-3 rounded-md break-words">
             {this.state.error?.message || 'An unexpected error occurred'}
           </p>
-          <button className="error-retry-button" onClick={this.handleRetry}>
+          <button 
+            className="px-5 py-2 text-sm font-medium rounded-md border-none bg-primary text-primary-foreground cursor-pointer hover:bg-primary/90 transition-colors"
+            onClick={this.handleRetry}
+          >
             Try again
           </button>
         </div>
@@ -93,19 +95,26 @@ export function ErrorDisplay({
   const errorMessage = typeof error === 'string' ? error : error.message;
 
   return (
-    <div className="error-display">
-      <div className="error-display-header">
-        <span className="error-display-icon">⚠️</span>
-        <span className="error-display-title">{title}</span>
+    <div className="bg-destructive/10 border border-destructive/30 rounded-md p-4 my-2">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-base">⚠️</span>
+        <span className="font-semibold text-sm text-destructive flex-1">{title}</span>
         {onDismiss && (
-          <button className="error-dismiss" onClick={onDismiss} aria-label="Dismiss">
+          <button 
+            className="bg-transparent border-none text-xl leading-none text-muted-foreground cursor-pointer p-0 w-6 h-6 flex items-center justify-center rounded-sm hover:bg-muted hover:text-foreground"
+            onClick={onDismiss} 
+            aria-label="Dismiss"
+          >
             ×
           </button>
         )}
       </div>
-      <p className="error-display-message">{errorMessage}</p>
+      <p className="text-[0.8125rem] text-foreground m-0 leading-relaxed">{errorMessage}</p>
       {onRetry && (
-        <button className="error-retry-button" onClick={onRetry}>
+        <button 
+          className="mt-3 px-4 py-1.5 text-[0.8125rem] font-medium rounded-md border-none bg-primary text-primary-foreground cursor-pointer hover:bg-primary/90 transition-colors"
+          onClick={onRetry}
+        >
           Retry
         </button>
       )}

@@ -5,7 +5,6 @@
 
 import { useState, useCallback, memo } from 'react';
 import type { FileEntry } from '@/types';
-import './FileTree.css';
 
 interface FileTreeProps {
   entries: FileEntry[];
@@ -44,7 +43,7 @@ export function FileTree({
   }, [onToggleExpand]);
 
   return (
-    <div className="file-tree">
+    <div className="text-sm select-none">
       {entries.map((entry) => (
         <FileTreeItem
           key={entry.path}
@@ -106,9 +105,9 @@ const FileTreeItem = memo(function FileTreeItem({
   const icon = getFileIcon(entry);
 
   return (
-    <div className="file-tree-item-wrapper">
+    <div className="flex flex-col">
       <div
-        className={`file-tree-item ${isSelected ? 'selected' : ''} ${entry.isDirectory ? 'directory' : 'file'}`}
+        className={`flex items-center gap-1.5 py-1.5 px-2 cursor-pointer rounded-sm transition-colors hover:bg-muted focus:outline-none focus:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-[-2px] ${isSelected ? 'bg-primary/15 hover:bg-primary/20' : ''} ${entry.isDirectory ? 'font-medium' : ''}`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -118,16 +117,16 @@ const FileTreeItem = memo(function FileTreeItem({
         aria-selected={isSelected}
       >
         {entry.isDirectory && (
-          <span className={`tree-chevron ${isExpanded ? 'expanded' : ''}`}>
+          <span className={`text-[0.625rem] text-muted-foreground transition-transform duration-150 w-3 shrink-0 ${isExpanded ? 'rotate-90' : ''}`}>
             ▶
           </span>
         )}
-        <span className="tree-icon">{icon}</span>
-        <span className="tree-name">{entry.name}</span>
+        <span className="text-base leading-none shrink-0">{icon}</span>
+        <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-foreground">{entry.name}</span>
       </div>
       
       {entry.isDirectory && isExpanded && hasChildren && (
-        <div className="file-tree-children" role="group">
+        <div className="flex flex-col relative before:content-[''] before:absolute before:left-5 before:top-0 before:bottom-2 before:w-px before:bg-border before:opacity-50" role="group">
           {entry.children!.map((child) => (
             <FileTreeItem
               key={child.path}

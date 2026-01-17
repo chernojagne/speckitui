@@ -5,7 +5,6 @@ import { TabContainer } from '../shared/TabContainer';
 import { MarkdownRenderer } from '../shared/MarkdownRenderer';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { EmptyState } from '../shared/EmptyState';
-import './WorkflowView.css';
 
 export function SpecifyView() {
   const { activeSpec } = useProjectStore();
@@ -86,7 +85,7 @@ export function SpecifyView() {
       id: 'spec',
       label: 'spec.md',
       content: (
-        <div className="artifact-content">
+        <div className="p-6">
           <MarkdownRenderer
             content={specContent}
             filePath={`${activeSpec?.path}/spec.md`}
@@ -102,7 +101,7 @@ export function SpecifyView() {
       id: `checklist-${filename}`,
       label: filename,
       content: (
-        <div className="artifact-content">
+        <div className="p-6">
           <MarkdownRenderer
             content={content}
             filePath={`${activeSpec?.path}/checklists/${filename}`}
@@ -116,7 +115,7 @@ export function SpecifyView() {
   });
 
   return (
-    <div className="workflow-view specify-view">
+    <div className="flex flex-col h-full overflow-hidden">
       <TabContainer tabs={tabs} />
     </div>
   );

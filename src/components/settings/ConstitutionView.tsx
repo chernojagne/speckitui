@@ -8,7 +8,6 @@ import { MarkdownRenderer } from '@/components/shared/MarkdownRenderer';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useProjectStore } from '@/stores/projectStore';
 import { readArtifact } from '@/services/tauriCommands';
-import './ConstitutionView.css';
 
 export function ConstitutionView() {
   const [content, setContent] = useState<string | null>(null);
@@ -52,10 +51,10 @@ export function ConstitutionView() {
 
   if (!project) {
     return (
-      <div className="constitution-view">
-        <div className="constitution-empty">
-          <span className="empty-icon">📜</span>
-          <p>Open a project to view its constitution</p>
+      <div className="h-full flex flex-col">
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <span className="text-4xl mb-4 opacity-70">📜</span>
+          <p className="my-1 text-foreground">Open a project to view its constitution</p>
         </div>
       </div>
     );
@@ -63,7 +62,7 @@ export function ConstitutionView() {
 
   if (isLoading) {
     return (
-      <div className="constitution-view">
+      <div className="h-full flex flex-col">
         <LoadingSpinner message="Loading constitution..." />
       </div>
     );
@@ -71,11 +70,11 @@ export function ConstitutionView() {
 
   if (error) {
     return (
-      <div className="constitution-view">
-        <div className="constitution-empty">
-          <span className="empty-icon">📜</span>
-          <p>{error}</p>
-          <p className="hint">
+      <div className="h-full flex flex-col">
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <span className="text-4xl mb-4 opacity-70">📜</span>
+          <p className="my-1 text-foreground">{error}</p>
+          <p className="mt-4 text-[13px] text-muted-foreground max-w-[300px]">
             Create a constitution.md file in your .specify/ directory to define project guidelines.
           </p>
         </div>
@@ -84,8 +83,8 @@ export function ConstitutionView() {
   }
 
   return (
-    <div className="constitution-view">
-      <div className="constitution-content">
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto p-6">
         {content && <MarkdownRenderer content={content} />}
       </div>
     </div>
