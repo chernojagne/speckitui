@@ -1,0 +1,102 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+  padding: 0 var(--spacing-md);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.header-left,
+.header-center,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.header-left {
+  flex: 1;
+}
+
+.header-center {
+  flex: 0 0 auto;
+}
+
+.header-right {
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.open-project-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.open-project-btn:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.project-name {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.settings-btn {
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.settings-btn:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+/* Error banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-error);
+  color: white;
+  font-size: var(--font-size-sm);
+}
+
+.error-banner button {
+  padding: var(--spacing-xs);
+  color: white;
+  font-size: var(--font-size-md);
+}
+
+/* Main content */
+.app-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}

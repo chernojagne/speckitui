@@ -1,0 +1,114 @@
+.terminal-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  background: var(--color-surface, #252526);
+  border-bottom: 1px solid var(--color-border, #3c3c3c);
+}
+
+.tabs-container {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  overflow-x: auto;
+  flex: 1;
+  scrollbar-width: none;
+}
+
+.tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
+.terminal-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 32px;
+  padding: 0 0.5rem 0 0.75rem;
+  background: var(--color-bg, #1e1e1e);
+  border: none;
+  border-right: 1px solid var(--color-border, #3c3c3c);
+  color: var(--color-text-muted, #888);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.terminal-tab:hover {
+  color: var(--color-text, #ccc);
+  background: var(--color-surface-hover, #2d2d2d);
+}
+
+.terminal-tab.active {
+  background: var(--color-surface, #252526);
+  color: var(--color-text, #d4d4d4);
+  border-bottom: 2px solid var(--color-primary, #0078d4);
+}
+
+.tab-icon {
+  font-size: 0.625rem;
+  color: var(--color-success, #0dbc79);
+}
+
+.tab-title {
+  font-size: 0.75rem;
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-close {
+  padding: 0.125rem 0.25rem;
+  font-size: 1rem;
+  line-height: 1;
+  color: inherit;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.terminal-tab:hover .tab-close {
+  opacity: 1;
+}
+
+.tab-close:hover {
+  background: var(--color-surface-active, #4a4a4a);
+  color: var(--color-text, #fff);
+}
+
+/* Actions */
+.tabs-actions {
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+}
+
+.new-terminal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--color-text-muted, #888);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.new-terminal-btn:hover {
+  color: var(--color-text, #d4d4d4);
+  background: var(--color-surface-hover, #2d2d2d);
+}
+
+.plus-icon {
+  font-weight: 300;
+}

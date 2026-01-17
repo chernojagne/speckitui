@@ -21,13 +21,13 @@
 
 **Purpose**: Initialize Tauri + React project structure
 
-- [ ] T001 Initialize Tauri 2.x project with `npm create tauri-app@latest` in repository root
-- [ ] T002 Configure Cargo.toml with dependencies: portable-pty, tokio, serde, serde_json in src-tauri/Cargo.toml
-- [ ] T003 [P] Configure package.json with React 18, TypeScript, Vite dependencies in package.json
-- [ ] T004 [P] Configure tauri.conf.json with app name, window settings, and permissions in src-tauri/tauri.conf.json
-- [ ] T005 [P] Setup TypeScript configuration in tsconfig.json
-- [ ] T006 [P] Configure Vite build settings in vite.config.ts
-- [ ] T007 [P] Setup ESLint and Prettier configuration in .eslintrc.js and .prettierrc
+- [X] T001 Initialize Tauri 2.x project with `npm create tauri-app@latest` in repository root
+- [X] T002 Configure Cargo.toml with dependencies: portable-pty, tokio, serde, serde_json in src-tauri/Cargo.toml
+- [X] T003 [P] Configure package.json with React 18, TypeScript, Vite dependencies in package.json
+- [X] T004 [P] Configure tauri.conf.json with app name, window settings, and permissions in src-tauri/tauri.conf.json
+- [X] T005 [P] Setup TypeScript configuration in tsconfig.json
+- [X] T006 [P] Configure Vite build settings in vite.config.ts
+- [X] T007 [P] Setup ESLint and Prettier configuration in .eslintrc.js and .prettierrc
 
 **Checkpoint**: Tauri app skeleton runs with `npm run tauri dev`
 
@@ -41,27 +41,27 @@
 
 ### TypeScript Types & Interfaces
 
-- [ ] T008 Create core TypeScript types in src/types/index.ts (Project, SpecInstance, Artifact, WorkflowStep, etc.)
-- [ ] T009 [P] Create Tauri command response types in src/types/commands.ts
+- [X] T008 Create core TypeScript types in src/types/index.ts (Project, SpecInstance, Artifact, WorkflowStep, etc.)
+- [X] T009 [P] Create Tauri command response types in src/types/commands.ts
 
 ### Rust Backend Foundation
 
-- [ ] T010 Create Rust models module structure in src-tauri/src/models/mod.rs
-- [ ] T011 [P] Create Project model in src-tauri/src/models/project.rs
-- [ ] T012 [P] Create SpecInstance model in src-tauri/src/models/spec_instance.rs
-- [ ] T013 [P] Create Artifact model in src-tauri/src/models/artifact.rs
-- [ ] T014 Create commands module structure in src-tauri/src/commands/mod.rs
-- [ ] T015 [P] Create services module structure in src-tauri/src/services/mod.rs
-- [ ] T016 Register all command modules in src-tauri/src/main.rs
+- [X] T010 Create Rust models module structure in src-tauri/src/models/mod.rs
+- [X] T011 [P] Create Project model in src-tauri/src/models/project.rs
+- [X] T012 [P] Create SpecInstance model in src-tauri/src/models/spec_instance.rs
+- [X] T013 [P] Create Artifact model in src-tauri/src/models/artifact.rs
+- [X] T014 Create commands module structure in src-tauri/src/commands/mod.rs
+- [X] T015 [P] Create services module structure in src-tauri/src/services/mod.rs
+- [X] T016 Register all command modules in src-tauri/src/main.rs
 
 ### Frontend Foundation
 
-- [ ] T017 Create Zustand project store skeleton in src/stores/projectStore.ts
-- [ ] T018 [P] Create Zustand workflow store skeleton in src/stores/workflowStore.ts
-- [ ] T019 [P] Create Zustand settings store skeleton in src/stores/settingsStore.ts
-- [ ] T020 Create Tauri IPC wrapper service in src/services/tauriCommands.ts
-- [ ] T021 Create main App.tsx with router/layout structure in src/App.tsx
-- [ ] T022 Create application entry point in src/main.tsx
+- [X] T017 Create Zustand project store skeleton in src/stores/projectStore.ts
+- [X] T018 [P] Create Zustand workflow store skeleton in src/stores/workflowStore.ts
+- [X] T019 [P] Create Zustand settings store skeleton in src/stores/settingsStore.ts
+- [X] T020 Create Tauri IPC wrapper service in src/services/tauriCommands.ts
+- [X] T021 Create main App.tsx with router/layout structure in src/App.tsx
+- [X] T022 Create application entry point in src/main.tsx
 
 **Checkpoint**: Foundation ready - `npm run tauri dev` shows blank app shell, stores initialized
 
@@ -75,20 +75,20 @@
 
 ### Layout Components
 
-- [ ] T023 [US1] Create AppShell layout component in src/components/layout/AppShell.tsx
-- [ ] T024 [US1] Create NavPane component with 8 workflow steps in src/components/layout/NavPane.tsx
-- [ ] T025 [US1] Create DetailPane container component in src/components/layout/DetailPane.tsx
-- [ ] T026 [US1] Define WorkflowStep configuration (id, label, icon, artifactPatterns) in src/config/workflowSteps.ts
+- [X] T023 [US1] Create AppShell layout component in src/components/layout/AppShell.tsx
+- [X] T024 [US1] Create NavPane component with 8 workflow steps in src/components/layout/NavPane.tsx
+- [X] T025 [US1] Create DetailPane container component in src/components/layout/DetailPane.tsx
+- [X] T026 [US1] Define WorkflowStep configuration (id, label, icon, artifactPatterns) in src/config/workflowSteps.ts
 
 ### State Management
 
-- [ ] T027 [US1] Implement selectedStep state in workflowStore in src/stores/workflowStore.ts
-- [ ] T028 [US1] Implement step selection action and hasContent indicators in src/stores/workflowStore.ts
+- [X] T027 [US1] Implement selectedStep state in workflowStore in src/stores/workflowStore.ts
+- [X] T028 [US1] Implement step selection action and hasContent indicators in src/stores/workflowStore.ts
 
 ### Styling
 
-- [ ] T029 [US1] Add navigation pane styles (selected state, hover, icons) in src/components/layout/NavPane.css
-- [ ] T030 [US1] Add app shell layout styles (sidebar + main area) in src/components/layout/AppShell.css
+- [X] T029 [US1] Add navigation pane styles (selected state, hover, icons) in src/components/layout/NavPane.css
+- [X] T030 [US1] Add app shell layout styles (sidebar + main area) in src/components/layout/AppShell.css
 
 **Checkpoint**: App shows sidebar with 8 steps; clicking step highlights it; detail pane shows placeholder for selected step
 
@@ -102,28 +102,28 @@
 
 ### Rust Backend - File Reading
 
-- [ ] T031 [US2] Implement read_artifact command in src-tauri/src/commands/artifacts.rs
-- [ ] T032 [US2] Implement write_artifact command in src-tauri/src/commands/artifacts.rs
-- [ ] T033 [US2] Implement list_directory command in src-tauri/src/commands/artifacts.rs
-- [ ] T034 [US2] Implement read_source_file command in src-tauri/src/commands/artifacts.rs
-- [ ] T035 [US2] Register artifact commands in src-tauri/src/main.rs
+- [X] T031 [US2] Implement read_artifact command in src-tauri/src/commands/artifacts.rs
+- [X] T032 [US2] Implement write_artifact command in src-tauri/src/commands/artifacts.rs
+- [X] T033 [US2] Implement list_directory command in src-tauri/src/commands/artifacts.rs
+- [X] T034 [US2] Implement read_source_file command in src-tauri/src/commands/artifacts.rs
+- [X] T035 [US2] Register artifact commands in src-tauri/src/main.rs
 
 ### Frontend - Markdown Rendering
 
-- [ ] T036 [US2] Create MarkdownRenderer component with react-markdown + remark-gfm in src/components/shared/MarkdownRenderer.tsx
-- [ ] T037 [US2] Create TabContainer component for multi-artifact display in src/components/shared/TabContainer.tsx
-- [ ] T038 [US2] Add syntax highlighting support with Shiki in src/components/shared/MarkdownRenderer.tsx
+- [X] T036 [US2] Create MarkdownRenderer component with react-markdown + remark-gfm in src/components/shared/MarkdownRenderer.tsx
+- [X] T037 [US2] Create TabContainer component for multi-artifact display in src/components/shared/TabContainer.tsx
+- [X] T038 [US2] Add syntax highlighting support with Shiki in src/components/shared/MarkdownRenderer.tsx
 
 ### Workflow Step Views
 
-- [ ] T039 [US2] Create SpecifyView component (displays spec.md) in src/components/workflow/SpecifyView.tsx
-- [ ] T040 [P] [US2] Create PlanView component (tabbed: plan.md, research.md, data-model.md, contracts) in src/components/workflow/PlanView.tsx
-- [ ] T041 [P] [US2] Create TasksView component (displays tasks.md) in src/components/workflow/TasksView.tsx
+- [X] T039 [US2] Create SpecifyView component (displays spec.md) in src/components/workflow/SpecifyView.tsx
+- [X] T040 [P] [US2] Create PlanView component (tabbed: plan.md, research.md, data-model.md, contracts) in src/components/workflow/PlanView.tsx
+- [X] T041 [P] [US2] Create TasksView component (displays tasks.md) in src/components/workflow/TasksView.tsx
 
 ### Hooks
 
-- [ ] T042 [US2] Create useArtifacts hook for loading artifact content in src/hooks/useArtifacts.ts
-- [ ] T043 [US2] Integrate workflow views into DetailPane based on selected step in src/components/layout/DetailPane.tsx
+- [X] T042 [US2] Create useArtifacts hook for loading artifact content in src/hooks/useArtifacts.ts
+- [X] T043 [US2] Integrate workflow views into DetailPane based on selected step in src/components/layout/DetailPane.tsx
 
 **Checkpoint**: Selecting Specify/Plan/Tasks step shows corresponding markdown rendered with tabs for multi-artifact steps
 
@@ -137,21 +137,21 @@
 
 ### Rust Backend - Project Commands
 
-- [ ] T044 [US3] Implement open_project command (scan .specify/, specs/) in src-tauri/src/commands/project.rs
-- [ ] T045 [US3] Implement get_spec_instances command in src-tauri/src/commands/project.rs
-- [ ] T046 [US3] Implement get_recent_projects command in src-tauri/src/commands/project.rs
-- [ ] T047 [US3] Implement settings persistence (save/load) in src-tauri/src/commands/settings.rs
-- [ ] T048 [US3] Register project and settings commands in src-tauri/src/main.rs
+- [X] T044 [US3] Implement open_project command (scan .specify/, specs/) in src-tauri/src/commands/project.rs
+- [X] T045 [US3] Implement get_spec_instances command in src-tauri/src/commands/project.rs
+- [X] T046 [US3] Implement get_recent_projects command in src-tauri/src/commands/project.rs
+- [X] T047 [US3] Implement settings persistence (save/load) in src-tauri/src/commands/settings.rs
+- [X] T048 [US3] Register project and settings commands in src-tauri/src/main.rs
 
 ### Frontend - Project Management
 
-- [ ] T049 [US3] Create project open dialog trigger in AppShell header in src/components/layout/AppShell.tsx
-- [ ] T050 [US3] Create SpecSelector dropdown component in src/components/layout/SpecSelector.tsx
-- [ ] T051 [US3] Implement project and spec instance state in projectStore in src/stores/projectStore.ts
-- [ ] T052 [US3] Create useProject hook for project operations in src/hooks/useProject.ts
-- [ ] T053 [US3] Create useSpecInstance hook for spec switching in src/hooks/useSpecInstance.ts
-- [ ] T054 [US3] Implement session restore (last project/spec on startup) in src/App.tsx
-- [ ] T055 [US3] Create empty state component for no specs in src/components/shared/EmptyState.tsx
+- [X] T049 [US3] Create project open dialog trigger in AppShell header in src/components/layout/AppShell.tsx
+- [X] T050 [US3] Create SpecSelector dropdown component in src/components/layout/SpecSelector.tsx
+- [X] T051 [US3] Implement project and spec instance state in projectStore in src/stores/projectStore.ts
+- [X] T052 [US3] Create useProject hook for project operations in src/hooks/useProject.ts
+- [X] T053 [US3] Create useSpecInstance hook for spec switching in src/hooks/useSpecInstance.ts
+- [X] T054 [US3] Implement session restore (last project/spec on startup) in src/App.tsx
+- [X] T055 [US3] Create empty state component for no specs in src/components/shared/EmptyState.tsx
 
 **Checkpoint**: Can open project folder, see spec dropdown, switch specs, changes persist on restart
 
@@ -165,18 +165,18 @@
 
 ### Rust Backend - Checkbox Update
 
-- [ ] T056 [US4] Implement update_checkbox command (atomic line update) in src-tauri/src/commands/artifacts.rs
-- [ ] T057 [US4] Add file change detection for concurrent edit warning in src-tauri/src/services/file_watcher.rs
+- [X] T056 [US4] Implement update_checkbox command (atomic line update) in src-tauri/src/commands/artifacts.rs
+- [X] T057 [US4] Add file change detection for concurrent edit warning in src-tauri/src/services/file_watcher.rs
 
 ### Frontend - Checklist Interaction
 
-- [ ] T058 [US4] Create checklistParser service to extract checkboxes from markdown in src/services/checklistParser.ts
-- [ ] T059 [US4] Create ChecklistItem component (interactive checkbox) in src/components/shared/ChecklistItem.tsx
-- [ ] T060 [US4] Create ProgressIndicator component (X/Y complete, percentage) in src/components/shared/ProgressIndicator.tsx
-- [ ] T061 [US4] Integrate ChecklistItem into MarkdownRenderer (custom checkbox rendering) in src/components/shared/MarkdownRenderer.tsx
-- [ ] T062 [US4] Implement checkbox toggle with optimistic update and file sync in src/hooks/useArtifacts.ts
-- [ ] T063 [US4] Add progress indicator to TasksView header in src/components/workflow/TasksView.tsx
-- [ ] T064 [US4] Add progress indicator to PlanView for Phase -1 Gates in src/components/workflow/PlanView.tsx
+- [X] T058 [US4] Create checklistParser service to extract checkboxes from markdown in src/services/checklistParser.ts
+- [X] T059 [US4] Create ChecklistItem component (interactive checkbox) in src/components/shared/ChecklistItem.tsx
+- [X] T060 [US4] Create ProgressIndicator component (X/Y complete, percentage) in src/components/shared/ProgressIndicator.tsx
+- [X] T061 [US4] Integrate ChecklistItem into MarkdownRenderer (custom checkbox rendering) in src/components/shared/MarkdownRenderer.tsx
+- [X] T062 [US4] Implement checkbox toggle with optimistic update and file sync in src/hooks/useArtifacts.ts
+- [X] T063 [US4] Add progress indicator to TasksView header in src/components/workflow/TasksView.tsx
+- [X] T064 [US4] Add progress indicator to PlanView for Phase -1 Gates in src/components/workflow/PlanView.tsx
 
 **Checkpoint**: Checkboxes are clickable, toggle state persists to file, progress percentage displays correctly
 
@@ -190,25 +190,25 @@
 
 ### Rust Backend - Terminal/PTY
 
-- [ ] T065 [US5] Implement create_terminal command using portable-pty in src-tauri/src/commands/terminal.rs
-- [ ] T066 [US5] Implement write_terminal command (send input to PTY) in src-tauri/src/commands/terminal.rs
-- [ ] T067 [US5] Implement resize_terminal command in src-tauri/src/commands/terminal.rs
-- [ ] T068 [US5] Implement close_terminal command in src-tauri/src/commands/terminal.rs
-- [ ] T069 [US5] Implement terminal output event emission to frontend in src-tauri/src/commands/terminal.rs
-- [ ] T070 [US5] Create terminal session manager service in src-tauri/src/services/terminal_manager.rs
-- [ ] T071 [US5] Register terminal commands in src-tauri/src/main.rs
+- [X] T065 [US5] Implement create_terminal command using portable-pty in src-tauri/src/commands/terminal.rs
+- [X] T066 [US5] Implement write_terminal command (send input to PTY) in src-tauri/src/commands/terminal.rs
+- [X] T067 [US5] Implement resize_terminal command in src-tauri/src/commands/terminal.rs
+- [X] T068 [US5] Implement close_terminal command in src-tauri/src/commands/terminal.rs
+- [X] T069 [US5] Implement terminal output event emission to frontend in src-tauri/src/commands/terminal.rs
+- [X] T070 [US5] Create terminal session manager service in src-tauri/src/services/terminal_manager.rs
+- [X] T071 [US5] Register terminal commands in src-tauri/src/main.rs
 
 ### Frontend - Terminal UI
 
-- [ ] T072 [US5] Create TerminalPanel component (bottom panel container) in src/components/layout/TerminalPanel.tsx
-- [ ] T073 [US5] Create TerminalInstance component using xterm.js in src/components/terminal/TerminalInstance.tsx
-- [ ] T074 [US5] Create TerminalTabs component for session switching in src/components/terminal/TerminalTabs.tsx
-- [ ] T075 [US5] Implement resizable panel with drag handle in src/components/layout/TerminalPanel.tsx
-- [ ] T076 [US5] Implement collapse/expand toggle for terminal panel in src/components/layout/TerminalPanel.tsx
-- [ ] T077 [US5] Create Zustand terminal store for session state in src/stores/terminalStore.ts
-- [ ] T078 [US5] Create useTerminal hook for terminal operations in src/hooks/useTerminal.ts
-- [ ] T079 [US5] Integrate TerminalPanel into AppShell layout in src/components/layout/AppShell.tsx
-- [ ] T080 [US5] Persist terminal panel height and collapsed state in settings in src/stores/settingsStore.ts
+- [X] T072 [US5] Create TerminalPanel component (bottom panel container) in src/components/layout/TerminalPanel.tsx
+- [X] T073 [US5] Create TerminalInstance component using xterm.js in src/components/terminal/TerminalInstance.tsx
+- [X] T074 [US5] Create TerminalTabs component for session switching in src/components/terminal/TerminalTabs.tsx
+- [X] T075 [US5] Implement resizable panel with drag handle in src/components/layout/TerminalPanel.tsx
+- [X] T076 [US5] Implement collapse/expand toggle for terminal panel in src/components/layout/TerminalPanel.tsx
+- [X] T077 [US5] Create Zustand terminal store for session state in src/stores/terminalStore.ts
+- [X] T078 [US5] Create useTerminal hook for terminal operations in src/hooks/useTerminal.ts
+- [X] T079 [US5] Integrate TerminalPanel into AppShell layout in src/components/layout/AppShell.tsx
+- [X] T080 [US5] Persist terminal panel height and collapsed state in settings in src/stores/settingsStore.ts
 
 **Checkpoint**: Terminal panel at bottom, can open/close terminals, run commands, switch tabs, resize panel
 
@@ -222,24 +222,24 @@
 
 ### Rust Backend - GitHub API
 
-- [ ] T081 [US6] Create GitHub client service with Octokit-like functionality in src-tauri/src/services/github_client.rs
-- [ ] T082 [US6] Implement check_github_auth command in src-tauri/src/commands/github.rs
-- [ ] T083 [US6] Implement github_oauth_start command in src-tauri/src/commands/github.rs
-- [ ] T084 [US6] Implement github_oauth_complete command in src-tauri/src/commands/github.rs
-- [ ] T085 [US6] Implement get_pull_requests command in src-tauri/src/commands/github.rs
-- [ ] T086 [US6] Implement get_pr_comments command in src-tauri/src/commands/github.rs
-- [ ] T087 [US6] Implement network status detection with event emission in src-tauri/src/services/network_monitor.rs
-- [ ] T088 [US6] Register GitHub commands in src-tauri/src/main.rs
+- [X] T081 [US6] Create GitHub client service with Octokit-like functionality in src-tauri/src/services/github_client.rs
+- [X] T082 [US6] Implement check_github_auth command in src-tauri/src/commands/github.rs
+- [X] T083 [US6] Implement github_oauth_start command in src-tauri/src/commands/github.rs
+- [X] T084 [US6] Implement github_oauth_complete command in src-tauri/src/commands/github.rs
+- [X] T085 [US6] Implement get_pull_requests command in src-tauri/src/commands/github.rs
+- [X] T086 [US6] Implement get_pr_comments command in src-tauri/src/commands/github.rs
+- [X] T087 [US6] Implement network status detection with event emission in src-tauri/src/services/network_monitor.rs
+- [X] T088 [US6] Register GitHub commands in src-tauri/src/main.rs
 
 ### Frontend - PR View
 
-- [ ] T089 [US6] Create PRView component in src/components/workflow/PRView.tsx
-- [ ] T090 [US6] Create PRCommentList component in src/components/pr/PRCommentList.tsx
-- [ ] T091 [US6] Create PRComment component (author, body, file context) in src/components/pr/PRComment.tsx
-- [ ] T092 [US6] Create StatusCheckList component in src/components/pr/StatusCheckList.tsx
-- [ ] T093 [US6] Create useGitHub hook for GitHub operations in src/hooks/useGitHub.ts
-- [ ] T094 [US6] Create OfflineMessage component for disabled GitHub steps in src/components/shared/OfflineMessage.tsx
-- [ ] T095 [US6] Add GitHub auth flow UI (settings or first-use dialog) in src/components/settings/GitHubAuth.tsx
+- [X] T089 [US6] Create PRView component in src/components/workflow/PRView.tsx
+- [X] T090 [US6] Create PRCommentList component in src/components/pr/PRCommentList.tsx
+- [X] T091 [US6] Create PRComment component (author, body, file context) in src/components/pr/PRComment.tsx
+- [X] T092 [US6] Create StatusCheckList component in src/components/pr/StatusCheckList.tsx
+- [X] T093 [US6] Create useGitHub hook for GitHub operations in src/hooks/useGitHub.ts
+- [X] T094 [US6] Create OfflineMessage component for disabled GitHub steps in src/components/shared/OfflineMessage.tsx
+- [X] T095 [US6] Add GitHub auth flow UI (settings or first-use dialog) in src/components/settings/GitHubAuth.tsx
 
 **Checkpoint**: PR step shows PR info when online with valid auth; shows offline message when disconnected
 
@@ -253,16 +253,16 @@
 
 ### Rust Backend - Issues
 
-- [ ] T096 [US7] Implement get_issues command in src-tauri/src/commands/github.rs
-- [ ] T097 [US7] Implement get_issue_detail command in src-tauri/src/commands/github.rs
+- [X] T096 [US7] Implement get_issues command in src-tauri/src/commands/github.rs
+- [X] T097 [US7] Implement get_issue_detail command in src-tauri/src/commands/github.rs
 
 ### Frontend - Bug Fix View
 
-- [ ] T098 [US7] Create BugFixView component in src/components/workflow/BugFixView.tsx
-- [ ] T099 [US7] Create IssueList component in src/components/issues/IssueList.tsx
-- [ ] T100 [US7] Create IssueDetail component in src/components/issues/IssueDetail.tsx
-- [ ] T101 [US7] Create IssueFilters component (state, labels) in src/components/issues/IssueFilters.tsx
-- [ ] T102 [US7] Integrate offline detection in BugFixView in src/components/workflow/BugFixView.tsx
+- [X] T098 [US7] Create BugFixView component in src/components/workflow/BugFixView.tsx
+- [X] T099 [US7] Create IssueList component in src/components/issues/IssueList.tsx
+- [X] T100 [US7] Create IssueDetail component in src/components/issues/IssueDetail.tsx
+- [X] T101 [US7] Create IssueFilters component (state, labels) in src/components/issues/IssueFilters.tsx
+- [X] T102 [US7] Integrate offline detection in BugFixView in src/components/workflow/BugFixView.tsx
 
 **Checkpoint**: Bug Fix step shows issues list, can filter and select to view details
 
@@ -276,11 +276,11 @@
 
 ### Frontend - Settings
 
-- [ ] T103 [US8] Create SettingsPanel component (modal or slide-out) in src/components/settings/SettingsPanel.tsx
-- [ ] T104 [US8] Create ConstitutionView component in src/components/settings/ConstitutionView.tsx
-- [ ] T105 [US8] Add settings trigger button to AppShell header in src/components/layout/AppShell.tsx
-- [ ] T106 [US8] Add theme preference (light/dark/system) to settings in src/components/settings/ThemeSettings.tsx
-- [ ] T107 [US8] Add recent projects list to settings in src/components/settings/RecentProjects.tsx
+- [X] T103 [US8] Create SettingsPanel component (modal or slide-out) in src/components/settings/SettingsPanel.tsx
+- [X] T104 [US8] Create ConstitutionView component in src/components/settings/ConstitutionView.tsx
+- [X] T105 [US8] Add settings trigger button to AppShell header in src/components/layout/AppShell.tsx
+- [X] T106 [US8] Add theme preference (light/dark/system) to settings in src/components/settings/ThemeSettings.tsx
+- [X] T107 [US8] Add recent projects list to settings in src/components/settings/RecentProjects.tsx
 
 **Checkpoint**: Settings accessible via icon, constitution displays, preferences persist
 
@@ -292,16 +292,16 @@
 
 ### Implement Step (File Tree + Source Viewer)
 
-- [ ] T108 [P] Create ImplementView component in src/components/workflow/ImplementView.tsx
-- [ ] T109 [P] Create FileTree component in src/components/shared/FileTree.tsx
-- [ ] T110 [P] Create SourceViewer component (read-only, syntax highlighting) in src/components/shared/SourceViewer.tsx
-- [ ] T111 Implement get_changed_files command in src-tauri/src/commands/project.rs
+- [X] T108 [P] Create ImplementView component in src/components/workflow/ImplementView.tsx
+- [X] T109 [P] Create FileTree component in src/components/shared/FileTree.tsx
+- [X] T110 [P] Create SourceViewer component (read-only, syntax highlighting) in src/components/shared/SourceViewer.tsx
+- [X] T111 Implement get_changed_files command in src-tauri/src/commands/project.rs
 
 ### Test & Push Steps (Placeholder/Git Status)
 
-- [ ] T112 [P] Create TestView component (placeholder or test results display) in src/components/workflow/TestView.tsx
-- [ ] T113 [P] Create PushView component in src/components/workflow/PushView.tsx
-- [ ] T114 Implement get_git_status command in src-tauri/src/commands/project.rs
+- [X] T112 [P] Create TestView component (placeholder or test results display) in src/components/workflow/TestView.tsx
+- [X] T113 [P] Create PushView component in src/components/workflow/PushView.tsx
+- [X] T114 Implement get_git_status command in src-tauri/src/commands/project.rs
 
 **Checkpoint**: All 8 workflow steps have functional views
 
@@ -311,13 +311,13 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T115 [P] Add loading states and skeletons to all views in src/components/shared/LoadingSkeleton.tsx
-- [ ] T116 [P] Add error boundaries and error display components in src/components/shared/ErrorBoundary.tsx
-- [ ] T117 [P] Implement file watcher for external changes in src-tauri/src/services/file_watcher.rs
-- [ ] T118 [P] Add file change event listener in frontend in src/hooks/useFileWatcher.ts
-- [ ] T119 Code cleanup and consistent styling across all components
-- [ ] T120 Performance optimization (React.memo, virtualization for large lists)
-- [ ] T121 Run quickstart.md validation scenarios
+- [X] T115 [P] Add loading states and skeletons to all views in src/components/shared/LoadingSkeleton.tsx
+- [X] T116 [P] Add error boundaries and error display components in src/components/shared/ErrorBoundary.tsx
+- [X] T117 [P] Implement file watcher for external changes in src-tauri/src/services/file_watcher.rs
+- [X] T118 [P] Add file change event listener in frontend in src/hooks/useFileWatcher.ts
+- [X] T119 Code cleanup and consistent styling across all components
+- [X] T120 Performance optimization (React.memo, virtualization for large lists)
+- [X] T121 Run quickstart.md validation scenarios
 
 ---
 

@@ -1,0 +1,54 @@
+.constitution-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.constitution-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.constitution-empty .empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.constitution-empty p {
+  margin: 0.25rem 0;
+  color: var(--color-text);
+}
+
+.constitution-empty .hint {
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  max-width: 300px;
+}
+
+.constitution-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.constitution-content .markdown-renderer {
+  font-size: 0.875rem;
+}
+
+.constitution-content .markdown-renderer h1 {
+  font-size: 1.5rem;
+  margin-top: 0;
+}
+
+.constitution-content .markdown-renderer h2 {
+  font-size: 1.25rem;
+}
+
+.constitution-content .markdown-renderer h3 {
+  font-size: 1rem;
+}

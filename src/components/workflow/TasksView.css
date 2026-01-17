@@ -1,0 +1,46 @@
+.tasks-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.tasks-stats {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.stat-item strong {
+  color: var(--color-text);
+}
+
+.stat-pending {
+  color: var(--color-warning);
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--color-success);
+  transition: width var(--transition-normal);
+}
+
+.progress-percent {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-success);
+  min-width: 40px;
+  text-align: right;
+}

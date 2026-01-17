@@ -1,0 +1,167 @@
+.git-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.branch-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.branch-icon {
+  font-size: var(--font-size-lg);
+}
+
+.branch-name {
+  font-family: var(--font-family-mono);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.commit-badge {
+  padding: 2px 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+
+.commit-badge.ahead {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.commit-badge.behind {
+  background-color: var(--color-warning);
+  color: white;
+}
+
+.git-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.git-action-btn {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+}
+
+.git-action-btn:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-primary);
+}
+
+.git-action-btn.primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.git-action-btn.primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.git-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Changed files section */
+.changed-files-section {
+  flex: 1;
+  overflow: auto;
+  padding: var(--spacing-md);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-md);
+}
+
+.file-count {
+  padding: 2px 8px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.no-changes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  color: var(--color-success);
+  font-size: var(--font-size-md);
+}
+
+.file-list {
+  list-style: none;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.file-item:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+.file-status {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  font-family: var(--font-family-mono);
+  border-radius: var(--radius-sm);
+}
+
+.status-added .file-status {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.status-modified .file-status {
+  background-color: var(--color-warning);
+  color: white;
+}
+
+.status-deleted .file-status {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.status-untracked .file-status {
+  background-color: var(--color-text-muted);
+  color: white;
+}
+
+.file-item .file-path {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}

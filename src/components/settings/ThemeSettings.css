@@ -1,0 +1,162 @@
+.theme-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-section {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-section-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--color-text);
+}
+
+.settings-section-description {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin: 0 0 1rem 0;
+}
+
+/* Theme options */
+.theme-options {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.theme-option:hover {
+  border-color: var(--color-border-hover);
+  background: var(--color-surface-hover);
+}
+
+.theme-option.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-surface);
+}
+
+.theme-icon {
+  font-size: 1.5rem;
+}
+
+.theme-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.theme-check {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-primary);
+}
+
+/* Setting items */
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+
+.setting-item:first-of-type {
+  padding-top: 0;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.setting-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.setting-description {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.setting-select {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.setting-select:hover {
+  border-color: var(--color-border-hover);
+}
+
+.setting-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.setting-toggle {
+  width: 40px;
+  height: 22px;
+  appearance: none;
+  background: var(--color-surface-active);
+  border-radius: 11px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.setting-toggle::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.setting-toggle:checked {
+  background: var(--color-primary);
+}
+
+.setting-toggle:checked::before {
+  transform: translateX(18px);
+}
+
+.setting-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary-surface);
+}

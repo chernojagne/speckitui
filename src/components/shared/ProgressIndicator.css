@@ -1,0 +1,106 @@
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.progress-indicator--sm {
+  gap: 0.5rem;
+}
+
+.progress-indicator--lg {
+  gap: 1rem;
+}
+
+.progress-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.progress-bar-container {
+  flex: 1;
+  height: 6px;
+  min-width: 60px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-indicator--sm .progress-bar-container {
+  height: 4px;
+}
+
+.progress-indicator--lg .progress-bar-container {
+  height: 8px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-bar-fill.complete {
+  background-color: var(--color-success);
+}
+
+.progress-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.progress-counts {
+  font-family: var(--font-family-mono);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.progress-indicator--sm .progress-counts {
+  font-size: 0.75rem;
+}
+
+.progress-indicator--lg .progress-counts {
+  font-size: 0.875rem;
+}
+
+.progress-percentage {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.progress-percentage.complete {
+  color: var(--color-success);
+}
+
+.progress-indicator--sm .progress-percentage {
+  font-size: 0.75rem;
+}
+
+.progress-indicator--lg .progress-percentage {
+  font-size: 1rem;
+}
+
+/* Progress Badge - compact inline version */
+.progress-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+}
+
+.progress-badge.complete {
+  background-color: color-mix(in srgb, var(--color-success) 15%, transparent);
+  color: var(--color-success);
+}
