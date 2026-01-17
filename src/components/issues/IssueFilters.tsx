@@ -130,7 +130,7 @@ export function IssueFilters({
           >
             🏷️ Labels
             {filters.labels.length > 0 && (
-              <span className="px-1.5 py-0.5 text-[11px] font-medium text-white bg-primary rounded-full">
+              <span className="px-1.5 py-0.5 text-[11px] font-medium text-primary-foreground bg-primary rounded-full">
                 {filters.labels.length}
               </span>
             )}

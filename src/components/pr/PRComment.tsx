@@ -35,7 +35,7 @@ export function PRComment({ comment, showFileContext = true }: PRCommentProps) {
               className="w-7 h-7 rounded-full object-cover"
             />
           ) : (
-            <div className="w-7 h-7 rounded-full flex items-center justify-center bg-primary text-white text-xs font-semibold">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center bg-primary text-primary-foreground text-xs font-semibold">
               {comment.author.charAt(0).toUpperCase()}
             </div>
           )}

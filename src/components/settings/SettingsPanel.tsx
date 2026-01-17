@@ -9,7 +9,7 @@ import { ConstitutionView } from './ConstitutionView';
 import { ThemeSettings } from './ThemeSettings';
 import { RecentProjects } from './RecentProjects';
 import { cn } from '@/lib/utils';
-import { Settings, Palette, FolderOpen, ScrollText, X } from 'lucide-react';
+import { Settings, Palette, FolderOpen, ScrollText } from 'lucide-react';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -37,7 +37,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       onClick={handleBackdropClick}
     >
       <div 
-        className="w-[90%] max-w-[700px] max-h-[80vh] bg-background rounded-lg shadow-xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-200"
+        className="w-[90%] max-w-[700px] h-[80vh] bg-background rounded-lg shadow-xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-200"
         role="dialog" 
         aria-modal="true" 
         aria-label="Settings"

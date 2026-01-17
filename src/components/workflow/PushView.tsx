@@ -71,12 +71,12 @@ export function PushView() {
           <GitBranch className="h-4 w-4 text-muted-foreground" />
           <span className="font-mono font-semibold text-foreground">{gitStatus.branch}</span>
           {gitStatus.ahead > 0 && (
-            <span className="px-1.5 py-0.5 text-xs font-semibold rounded-sm bg-success text-white" title="Commits ahead of remote">
+            <span className="px-1.5 py-0.5 text-xs font-semibold rounded-sm bg-success text-success-foreground" title="Commits ahead of remote">
               ↑{gitStatus.ahead}
             </span>
           )}
           {gitStatus.behind > 0 && (
-            <span className="px-1.5 py-0.5 text-xs font-semibold rounded-sm bg-warning text-white" title="Commits behind remote">
+            <span className="px-1.5 py-0.5 text-xs font-semibold rounded-sm bg-warning text-warning-foreground" title="Commits behind remote">
               ↓{gitStatus.behind}
             </span>
           )}
@@ -85,7 +85,7 @@ export function PushView() {
           <button className="py-1 px-4 text-sm border border-border rounded-md bg-background text-foreground transition-all hover:bg-muted hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed" disabled>
             Pull
           </button>
-          <button className="py-1 px-4 text-sm border border-primary rounded-md bg-primary text-white transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          <button className="py-1 px-4 text-sm border border-primary rounded-md bg-primary text-primary-foreground transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
             Push
           </button>
         </div>
@@ -105,7 +105,7 @@ export function PushView() {
           <ul className="list-none">
             {changedFiles.map((file) => (
               <li key={file.path} className="flex items-center gap-2 py-1 px-2 rounded-sm transition-colors hover:bg-muted">
-                <span className={`w-5 h-5 flex items-center justify-center text-xs font-semibold font-mono rounded-sm text-white ${file.status === 'added' ? 'bg-success' : file.status === 'modified' ? 'bg-warning' : file.status === 'deleted' ? 'bg-destructive' : 'bg-muted-foreground'}`}>{getStatusLabel(file.status)}</span>
+                <span className={`w-5 h-5 flex items-center justify-center text-xs font-semibold font-mono rounded-sm ${file.status === 'added' ? 'bg-success text-success-foreground' : file.status === 'modified' ? 'bg-warning text-warning-foreground' : file.status === 'deleted' ? 'bg-destructive text-destructive-foreground' : 'bg-muted text-muted-foreground'}`}>{getStatusLabel(file.status)}</span>
                 <span className="font-mono text-sm text-muted-foreground">{file.path}</span>
               </li>
             ))}

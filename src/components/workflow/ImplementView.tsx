@@ -39,7 +39,7 @@ function TreeNode({
   return (
     <li className="list-none">
       <button
-        className={`flex items-center gap-1 w-full py-1 px-4 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${isSelected ? 'bg-primary text-white' : ''}`}
+        className={`flex items-center gap-1 w-full py-1 px-4 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${isSelected ? 'bg-primary text-primary-foreground' : ''}`}
         onClick={handleClick}
       >
         {entry.isDirectory ? (

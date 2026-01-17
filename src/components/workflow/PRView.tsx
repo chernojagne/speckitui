@@ -148,18 +148,18 @@ export function PRView() {
       {/* Header */}
       <div className="flex items-center gap-4 p-4 bg-card border-b border-border">
         <h3 className="text-sm font-semibold m-0">Pull Requests</h3>
-        <span className="px-2 py-0.5 bg-primary text-white text-xs font-semibold rounded-sm">{pullRequests.length}</span>
+        <span className="px-2 py-0.5 bg-primary text-primary-foreground text-xs font-semibold rounded-sm">{pullRequests.length}</span>
         
         {/* View toggle */}
         <div className="flex gap-1 ml-4">
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'table' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'table' ? 'bg-primary border-primary text-primary-foreground' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setViewMode('table')}
           >
             <Table className="h-3 w-3" /> Table
           </button>
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'cards' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'cards' ? 'bg-primary border-primary text-primary-foreground' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setViewMode('cards')}
           >
             <LayoutGrid className="h-3 w-3" /> Cards
@@ -201,7 +201,7 @@ export function PRView() {
                       <td className="p-2 font-mono text-muted-foreground">#{pr.number}</td>
                       <td className="p-2 font-medium text-foreground max-w-md truncate">{pr.title}</td>
                       <td className="p-2">
-                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-sm capitalize ${pr.state === 'open' ? 'bg-success text-white' : pr.state === 'merged' ? 'bg-[#6f42c1] text-white' : 'bg-destructive text-white'}`}>
+                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-sm capitalize ${pr.state === 'open' ? 'bg-success text-success-foreground' : pr.state === 'merged' ? 'bg-[#6f42c1] text-primary-foreground' : 'bg-destructive text-destructive-foreground'}`}>
                           {pr.state}
                         </span>
                       </td>
@@ -266,7 +266,7 @@ export function PRView() {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-mono text-sm text-muted-foreground">#{pr.number}</span>
                   <span className="flex-1 font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">{pr.title}</span>
-                  <span className={`px-2 py-0.5 text-xs font-semibold rounded-sm capitalize ${pr.state === 'open' ? 'bg-success text-white' : pr.state === 'merged' ? 'bg-[#6f42c1] text-white' : pr.state === 'closed' ? 'bg-destructive text-white' : 'bg-muted-foreground text-white'}`}>{pr.state}</span>
+                  <span className={`px-2 py-0.5 text-xs font-semibold rounded-sm capitalize ${pr.state === 'open' ? 'bg-success text-success-foreground' : pr.state === 'merged' ? 'bg-[#6f42c1] text-primary-foreground' : pr.state === 'closed' ? 'bg-destructive text-destructive-foreground' : 'bg-muted text-muted-foreground'}`}>{pr.state}</span>
                 </div>
                 <div className="flex gap-4 text-sm text-muted-foreground">
                   <span>by {pr.author}</span>

@@ -136,13 +136,13 @@ export function BugFixView() {
         {/* Filter buttons */}
         <div className="flex gap-1">
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${filter === 'bug' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${filter === 'bug' ? 'bg-primary border-primary text-primary-foreground' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setFilter('bug')}
           >
             <Bug className="h-3 w-3" /> Bugs
           </button>
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${filter === 'all' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${filter === 'all' ? 'bg-primary border-primary text-primary-foreground' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setFilter('all')}
           >
             <List className="h-3 w-3" /> All
@@ -152,13 +152,13 @@ export function BugFixView() {
         {/* View toggle */}
         <div className="flex gap-1 ml-2">
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'table' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'table' ? 'bg-primary border-primary text-primary-foreground' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setViewMode('table')}
           >
             <Table className="h-3 w-3" /> Table
           </button>
           <button
-            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'cards' ? 'bg-primary border-primary text-white' : 'text-muted-foreground bg-background hover:bg-muted'}`}
+            className={`py-1 px-2 text-xs border border-border rounded-sm transition-all flex items-center gap-1 ${viewMode === 'cards' ? 'bg-primary border-primary text-primary-foreground' : 'text-muted-foreground bg-background hover:bg-muted'}`}
             onClick={() => setViewMode('cards')}
           >
             <LayoutGrid className="h-3 w-3" /> Cards
@@ -209,7 +209,7 @@ export function BugFixView() {
                       )}
                     </td>
                     <td className="p-2">
-                      <span className={`px-2 py-0.5 text-xs font-semibold rounded-sm capitalize ${issue.state === 'open' ? 'bg-success text-white' : 'bg-destructive text-white'}`}>
+                      <span className={`px-2 py-0.5 text-xs font-semibold rounded-sm capitalize ${issue.state === 'open' ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'}`}>
                         {issue.state}
                       </span>
                     </td>

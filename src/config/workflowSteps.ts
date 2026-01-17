@@ -1,5 +1,4 @@
 import type { WorkflowStep, WorkflowStepId } from '@/types';
-import type { LucideIcon } from 'lucide-react';
 import { 
   FileText, 
   Map, 
