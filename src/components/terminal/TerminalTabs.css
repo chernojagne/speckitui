@@ -43,7 +43,6 @@
 .terminal-tab.active {
   background: var(--color-surface, #252526);
   color: var(--color-text, #d4d4d4);
-  border-bottom: 2px solid var(--color-primary, #0078d4);
 }
 
 .tab-icon {

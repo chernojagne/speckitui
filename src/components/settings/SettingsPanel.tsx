@@ -4,7 +4,6 @@
  */
 
 import { useState } from 'react';
-import { useSettingsStore } from '@/stores/settingsStore';
 import { ConstitutionView } from './ConstitutionView';
 import { ThemeSettings } from './ThemeSettings';
 import { RecentProjects } from './RecentProjects';
@@ -106,42 +105,9 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 }
 
 function GeneralSettings() {
-  const { terminalPanelHeight, terminalPanelCollapsed, setTerminalPanelHeight, setTerminalPanelCollapsed } =
-    useSettingsStore();
-
   return (
     <div className="max-w-[400px]">
-      <h3 className="text-[15px] font-semibold m-0 mb-4 text-foreground">Terminal</h3>
-
-      <div className="flex items-center justify-between py-3 border-b border-border">
-        <label className="text-sm text-foreground" htmlFor="terminal-collapsed">
-          Terminal Panel Collapsed by Default
-        </label>
-        <input
-          type="checkbox"
-          id="terminal-collapsed"
-          checked={terminalPanelCollapsed}
-          onChange={(e) => setTerminalPanelCollapsed(e.target.checked)}
-          className="w-[18px] h-[18px] accent-primary cursor-pointer"
-        />
-      </div>
-
-      <div className="flex items-center justify-between py-3 border-b border-border">
-        <label className="text-sm text-foreground" htmlFor="terminal-height">
-          Terminal Panel Height (px)
-        </label>
-        <input
-          type="number"
-          id="terminal-height"
-          value={terminalPanelHeight}
-          onChange={(e) => setTerminalPanelHeight(parseInt(e.target.value, 10))}
-          min={100}
-          max={600}
-          className="w-20 px-2 py-1.5 border border-border rounded-sm text-sm bg-background text-foreground focus:outline-none focus:border-primary"
-        />
-      </div>
-
-      <h3 className="text-[15px] font-semibold mt-8 mb-4 text-foreground">About</h3>
+      <h3 className="text-[15px] font-semibold m-0 mb-4 text-foreground">About</h3>
       <div className="text-sm text-foreground leading-relaxed">
         <p className="my-1"><strong>SpeckitUI</strong></p>
         <p className="my-1">A visual interface for spec-kit driven development</p>

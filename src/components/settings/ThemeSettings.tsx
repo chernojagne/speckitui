@@ -58,6 +58,10 @@ export function ThemeSettings() {
   const setTerminalTheme = useSettingsStore((state) => state.setTerminalTheme);
   const terminalCursorBlink = useSettingsStore((state) => state.terminalCursorBlink);
   const setTerminalCursorBlink = useSettingsStore((state) => state.setTerminalCursorBlink);
+  const terminalPanelHeight = useSettingsStore((state) => state.terminalPanelHeight);
+  const setTerminalPanelHeight = useSettingsStore((state) => state.setTerminalPanelHeight);
+  const terminalPanelCollapsed = useSettingsStore((state) => state.terminalPanelCollapsed);
+  const setTerminalPanelCollapsed = useSettingsStore((state) => state.setTerminalPanelCollapsed);
 
   return (
     <div className="flex flex-col gap-6">
@@ -246,6 +250,38 @@ export function ThemeSettings() {
             className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
             checked={terminalCursorBlink}
             onChange={(e) => setTerminalCursorBlink(e.target.checked)}
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-4 py-3">
+          <div className="flex flex-col gap-0.5">
+            <label className="text-sm font-medium text-foreground">Panel Height</label>
+            <span className="text-xs text-muted-foreground">
+              Default height of the terminal panel (100-600px)
+            </span>
+          </div>
+          <input
+            type="number"
+            value={terminalPanelHeight}
+            onChange={(e) => setTerminalPanelHeight(parseInt(e.target.value, 10))}
+            min={100}
+            max={600}
+            className="w-20 px-2 py-1.5 text-[13px] border border-border rounded bg-card text-foreground focus:outline-none focus:border-primary"
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-4 py-3">
+          <div className="flex flex-col gap-0.5">
+            <label className="text-sm font-medium text-foreground">Collapsed by Default</label>
+            <span className="text-xs text-muted-foreground">
+              Start with terminal panel hidden
+            </span>
+          </div>
+          <input 
+            type="checkbox" 
+            className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
+            checked={terminalPanelCollapsed}
+            onChange={(e) => setTerminalPanelCollapsed(e.target.checked)}
           />
         </div>
       </div>
