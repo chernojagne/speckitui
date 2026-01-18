@@ -1,0 +1,13 @@
+.detail-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--color-bg);
+}
+
+/* Ensure child views fill the pane */
+.detail-pane > * {
+  flex: 1;
+  overflow: auto;
+}
