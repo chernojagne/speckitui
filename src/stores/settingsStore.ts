@@ -56,6 +56,10 @@ interface SettingsState extends AppSettings {
   setTerminalFontFamily: (family: string) => void;
   setTerminalTheme: (theme: TerminalThemeSetting) => void;
   setTerminalCursorBlink: (blink: boolean) => void;
+  // Navigation pane settings actions
+  setNavPaneWidth: (width: number) => void;
+  setNavPaneCollapsed: (collapsed: boolean) => void;
+  toggleNavPaneCollapsed: () => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -80,6 +84,9 @@ export const useSettingsStore = create<SettingsState>()(
       terminalFontFamily: 'Consolas, "Courier New", monospace',
       terminalTheme: 'auto',
       terminalCursorBlink: true,
+      // Navigation pane settings
+      navPaneWidth: 220,
+      navPaneCollapsed: false,
 
       // Actions
       setTheme: (theme) => {
@@ -119,10 +126,28 @@ export const useSettingsStore = create<SettingsState>()(
       setTerminalFontFamily: (family) => set({ terminalFontFamily: family }),
       setTerminalTheme: (theme) => set({ terminalTheme: theme }),
       setTerminalCursorBlink: (blink) => set({ terminalCursorBlink: blink }),
+
+      // Navigation pane settings actions
+      setNavPaneWidth: (width) =>
+        set({ navPaneWidth: Math.max(180, Math.min(400, width)) }),
+      setNavPaneCollapsed: (collapsed) => set({ navPaneCollapsed: collapsed }),
+      toggleNavPaneCollapsed: () =>
+        set((state) => ({ navPaneCollapsed: !state.navPaneCollapsed })),
     }),
     {
       name: 'speckitui-settings',
+      version: 1, // Increment to force migration and reset navPaneCollapsed
       storage: createJSONStorage(() => localStorage),
+      // Exclude navPaneCollapsed from persistence - always start expanded
+      partialize: (state) => {
+        const { navPaneCollapsed, ...rest } = state;
+        return rest;
+      },
+      migrate: (persistedState: unknown) => {
+        // Migration: ensure navPaneCollapsed is always false on version upgrade
+        const state = persistedState as Record<string, unknown>;
+        return { ...state, navPaneCollapsed: false };
+      },
       onRehydrateStorage: () => (state) => {
         // Apply theme when store is rehydrated from localStorage
         if (state?.theme) {

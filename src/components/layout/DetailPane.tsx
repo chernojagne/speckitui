@@ -1,5 +1,6 @@
 import { useWorkflowStore } from '@/stores/workflowStore';
 import { useProjectStore } from '@/stores/projectStore';
+import { DescribeStep } from '../workflow/DescribeStep';
 import { SpecifyView } from '../workflow/SpecifyView';
 import { PlanView } from '../workflow/PlanView';
 import { TasksView } from '../workflow/TasksView';
@@ -45,6 +46,8 @@ export function DetailPane() {
   // Render the appropriate view based on selected step
   const renderView = () => {
     switch (selectedStep) {
+      case 'describe':
+        return <DescribeStep />;
       case 'specify':
         return <SpecifyView />;
       case 'plan':

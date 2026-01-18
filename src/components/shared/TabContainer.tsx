@@ -30,17 +30,17 @@ export function TabContainer({ tabs, defaultTab, onTabChange }: TabContainerProp
             key={tab.id}
             role="tab"
             aria-selected={activeTab === tab.id}
-            className={`px-4 py-2 text-sm border-b-2 transition-all whitespace-nowrap
+            className={`px-4 py-2 text-sm transition-all whitespace-nowrap
               ${activeTab === tab.id 
-                ? 'text-primary border-primary bg-transparent' 
-                : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-muted'}`}
+                ? 'text-foreground bg-background' 
+                : 'text-muted-foreground bg-card hover:text-foreground hover:bg-muted'}`}
             onClick={() => handleTabClick(tab.id)}
           >
             {tab.label}
           </button>
         ))}
       </div>
-      <div className="flex-1 overflow-auto" role="tabpanel">
+      <div className="flex-1 overflow-auto bg-background" role="tabpanel">
         {activeContent}
       </div>
     </div>

@@ -1,3 +1,5 @@
+export { DescribeEditor } from './DescribeEditor';
+export { DescribeStep } from './DescribeStep';
 export { SpecifyView } from './SpecifyView';
 export { PlanView } from './PlanView';
 export { TasksView } from './TasksView';

@@ -45,6 +45,10 @@ export async function getGitStatus(projectPath: string): Promise<GitStatus> {
   return invoke('get_git_status', { projectPath });
 }
 
+export async function createSpec(projectPath: string, specName: string): Promise<SpecInstance> {
+  return invoke('create_spec', { projectPath, specName });
+}
+
 // ============ Artifact Commands ============
 
 export async function readArtifact(filePath: string): Promise<ArtifactContent> {
@@ -93,6 +97,26 @@ export async function listDirectory(path: string): Promise<DirectoryListingRespo
 
 export async function readSourceFile(path: string): Promise<SourceFileContent> {
   return invoke('read_source_file', { path });
+}
+
+// ============ Description Commands ============
+
+/**
+ * Save feature description text to a spec's description.md file.
+ * @param specPath - Absolute path to spec directory
+ * @param content - Description text to save
+ */
+export async function saveDescription(specPath: string, content: string): Promise<void> {
+  return invoke('save_description', { specPath, content });
+}
+
+/**
+ * Load feature description text from a spec's description.md file.
+ * @param specPath - Absolute path to spec directory
+ * @returns Description text (empty string if file doesn't exist)
+ */
+export async function loadDescription(specPath: string): Promise<string> {
+  return invoke('load_description', { specPath });
 }
 
 // ============ Terminal Commands ============

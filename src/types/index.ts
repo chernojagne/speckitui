@@ -40,6 +40,7 @@ export interface SpecInstance {
 }
 
 export interface ArtifactManifest {
+  hasDescription: boolean;
   hasSpec: boolean;
   hasPlan: boolean;
   hasResearch: boolean;
@@ -116,6 +117,7 @@ export interface TaskMetadata {
 // ============ Workflow Types ============
 
 export type WorkflowStepId =
+  | 'describe'
   | 'specify'
   | 'plan'
   | 'tasks'
@@ -218,6 +220,9 @@ export interface AppSettings {
   // Sidebar settings
   sidebarShowIcons: boolean;
   sidebarCompactMode: boolean;
+  // Navigation pane settings
+  navPaneWidth: number;
+  navPaneCollapsed: boolean;
   // Terminal settings
   terminalFontSize: number;
   terminalFontFamily: string;

@@ -13,6 +13,7 @@ interface WorkflowState {
 }
 
 const getInitialContentStatus = (): Record<WorkflowStepId, boolean> => ({
+  describe: false,
   specify: false,
   plan: false,
   tasks: false,
@@ -25,7 +26,7 @@ const getInitialContentStatus = (): Record<WorkflowStepId, boolean> => ({
 
 export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   // Initial state
-  selectedStep: 'specify',
+  selectedStep: 'describe',
   stepContentStatus: getInitialContentStatus(),
 
   // Actions
@@ -42,6 +43,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
     set({
       stepContentStatus: {
+        describe: manifest.hasDescription,
         specify: manifest.hasSpec,
         plan: manifest.hasPlan || manifest.hasResearch || manifest.hasDataModel,
         tasks: manifest.hasTasks,

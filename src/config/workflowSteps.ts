@@ -1,5 +1,6 @@
 import type { WorkflowStep, WorkflowStepId } from '@/types';
 import { 
+  PenLine,
   FileText, 
   Map, 
   CheckSquare, 
@@ -12,9 +13,17 @@ import {
 
 /**
  * Workflow step configuration
- * Defines the 8 workflow steps with their properties
+ * Defines the 9 workflow steps with their properties
  */
 export const workflowSteps: WorkflowStep[] = [
+  {
+    id: 'describe',
+    label: 'Describe',
+    icon: PenLine,
+    artifactPatterns: ['description.md'],
+    requiresGitHub: false,
+    hasContent: false,
+  },
   {
     id: 'specify',
     label: 'Specify',

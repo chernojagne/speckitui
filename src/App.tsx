@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { AppShell } from './components/layout/AppShell';
+import { TooltipProvider } from './components/ui/tooltip';
 import { useProjectStore } from './stores/projectStore';
 import { useSettingsStore } from './stores/settingsStore';
 import { useWorkflowStore } from './stores/workflowStore';
@@ -40,7 +41,11 @@ function App() {
     restoreSession();
   }, []);
 
-  return <AppShell />;
+  return (
+    <TooltipProvider>
+      <AppShell />
+    </TooltipProvider>
+  );
 }
 
 export default App;

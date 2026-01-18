@@ -1,5 +1,6 @@
 // Command modules
 pub mod artifacts;
+pub mod description;
 pub mod file_watcher;
 pub mod github;
 pub mod network;

@@ -53,12 +53,16 @@ pub fn run() {
             project::get_recent_projects,
             project::get_changed_files,
             project::get_git_status,
+            project::create_spec,
             // Artifact commands
             artifacts::read_artifact,
             artifacts::write_artifact,
             artifacts::update_checkbox,
             artifacts::list_directory,
             artifacts::read_source_file,
+            // Description commands
+            description::save_description,
+            description::load_description,
             // Terminal commands
             terminal::create_terminal,
             terminal::write_terminal,

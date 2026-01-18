@@ -4,6 +4,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArtifactManifest {
+    /// description.md exists
+    pub has_description: bool,
+    
     /// spec.md exists
     pub has_spec: bool,
     

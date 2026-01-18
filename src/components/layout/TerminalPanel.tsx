@@ -59,21 +59,24 @@ export function TerminalPanel({ minimized = false }: TerminalPanelProps) {
   // Minimized view (just the toggle bar)
   if (minimized || isCollapsed) {
     return (
-      <div className="flex items-center h-8 px-2 bg-card border-t border-border">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="h-6 gap-2"
-          onClick={toggleCollapsed}
-        >
-          <ChevronUp className="h-4 w-4" />
-          <Terminal className="h-4 w-4" />
-          <span className="text-sm">Terminal</span>
+      <div className="flex items-center justify-between h-8 px-2 bg-card border-t border-border">
+        <div className="flex items-center gap-2">
+          <Terminal className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Terminal</span>
           {sessions.length > 0 && (
             <Badge variant="secondary" className="h-5 px-1.5 text-xs">
               {sessions.length}
             </Badge>
           )}
+        </div>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-6 w-6 p-0"
+          onClick={toggleCollapsed}
+          title="Expand Terminal Panel"
+        >
+          <ChevronUp className="h-4 w-4" />
         </Button>
       </div>
     );
@@ -84,20 +87,10 @@ export function TerminalPanel({ minimized = false }: TerminalPanelProps) {
     <div 
       ref={panelRef}
       className={cn(
-        "flex flex-col bg-background border-t border-border",
+        "flex flex-col h-full bg-background border-t border-border",
         isResizing && "select-none"
       )}
-      style={{ height: panelHeight }}
     >
-      {/* Resize handle */}
-      <div 
-        className="h-1 cursor-ns-resize bg-border hover:bg-primary/50 transition-colors"
-        onMouseDown={handleDragStart}
-        role="separator"
-        aria-orientation="horizontal"
-        aria-label="Resize terminal panel"
-      />
-
       {/* Terminal header with tabs */}
       <div className="flex items-center justify-between">
         <TerminalTabs 

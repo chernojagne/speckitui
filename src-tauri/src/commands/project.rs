@@ -113,6 +113,7 @@ fn scan_artifacts(spec_path: &str) -> ArtifactManifest {
     }
 
     ArtifactManifest {
+        has_description: path.join("description.md").exists(),
         has_spec: path.join("spec.md").exists(),
         has_plan: path.join("plan.md").exists(),
         has_research: path.join("research.md").exists(),
@@ -180,6 +181,80 @@ pub async fn get_changed_files(project_path: String) -> Result<Vec<ChangedFile>,
     }
 
     Ok(files)
+}
+
+/// Creates a new spec directory with initial spec.md file
+#[tauri::command]
+pub async fn create_spec(project_path: String, spec_name: String) -> Result<SpecInstance, String> {
+    let specs_path = Path::new(&project_path).join("specs");
+    
+    if !specs_path.exists() {
+        return Err("No specs directory found in this project".to_string());
+    }
+
+    // Find the next available spec number
+    let mut max_number = 0u32;
+    if let Ok(entries) = fs::read_dir(&specs_path) {
+        for entry in entries.flatten() {
+            if entry.path().is_dir() {
+                if let Some(dir_name) = entry.file_name().to_str() {
+                    // Parse number from directory name like "001-some-spec"
+                    if let Some(num_str) = dir_name.split('-').next() {
+                        if let Ok(num) = num_str.parse::<u32>() {
+                            max_number = max_number.max(num);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    let next_number = max_number + 1;
+    
+    // Sanitize spec name: lowercase, replace spaces with hyphens
+    let sanitized_name = spec_name
+        .trim()
+        .to_lowercase()
+        .replace(' ', "-")
+        .chars()
+        .filter(|c| c.is_alphanumeric() || *c == '-')
+        .collect::<String>();
+    
+    if sanitized_name.is_empty() {
+        return Err("Invalid spec name".to_string());
+    }
+    
+    // Create directory name like "003-feature-name"
+    let dir_name = format!("{:03}-{}", next_number, sanitized_name);
+    let spec_dir = specs_path.join(&dir_name);
+    
+    // Create the spec directory
+    fs::create_dir(&spec_dir)
+        .map_err(|e| format!("Failed to create spec directory: {}", e))?;
+    
+    // Create initial spec.md file
+    let spec_file = spec_dir.join("spec.md");
+    let initial_content = format!(
+        "# {}\n\n## Overview\n\nDescribe your feature here.\n\n## Requirements\n\n- [ ] Requirement 1\n- [ ] Requirement 2\n",
+        spec_name.trim()
+    );
+    
+    fs::write(&spec_file, &initial_content)
+        .map_err(|e| format!("Failed to create spec.md: {}", e))?;
+    
+    // Return the new spec instance
+    let spec_path = spec_dir.to_string_lossy().to_string();
+    let artifacts = scan_artifacts(&spec_path);
+    
+    Ok(SpecInstance {
+        id: format!("spec-{:03}-{}", next_number, sanitized_name),
+        number: next_number,
+        short_name: sanitized_name.clone(),
+        display_name: spec_name.trim().to_string(),
+        path: spec_path,
+        artifacts,
+        branch: Some(dir_name.clone()),
+    })
 }
 
 /// Returns current git status for the project
