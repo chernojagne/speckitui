@@ -3,11 +3,13 @@
  * Renders a single terminal instance using xterm.js
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { writeTerminal, resizeTerminal } from '@/services/tauriCommands';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { getTerminalTheme, getAutoTerminalTheme, type TerminalThemeId } from '@/config/terminalThemes';
 import '@xterm/xterm/css/xterm.css';
 import './TerminalInstance.css';
 
@@ -37,6 +39,23 @@ export function TerminalInstance({
   const terminalRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
   const mountedRef = useRef(false);
+  
+  // Get terminal settings from store
+  const terminalFontSize = useSettingsStore((s) => s.terminalFontSize);
+  const terminalFontFamily = useSettingsStore((s) => s.terminalFontFamily);
+  const terminalThemeSetting = useSettingsStore((s) => s.terminalTheme);
+  const terminalCursorBlink = useSettingsStore((s) => s.terminalCursorBlink);
+  const appTheme = useSettingsStore((s) => s.theme);
+  
+  // Compute the actual theme based on settings
+  const resolvedThemeId = useMemo((): TerminalThemeId => {
+    if (terminalThemeSetting === 'auto') {
+      return getAutoTerminalTheme(appTheme);
+    }
+    return terminalThemeSetting as TerminalThemeId;
+  }, [terminalThemeSetting, appTheme]);
+  
+  const terminalTheme = useMemo(() => getTerminalTheme(resolvedThemeId), [resolvedThemeId]);
   
   // Store callbacks in refs to avoid re-initializing terminal when they change
   const onReadyRef = useRef(onReady);
@@ -71,33 +90,12 @@ export function TerminalInstance({
       return;
     }
 
-    // Create terminal with theme matching app
+    // Create terminal with theme from settings
     const terminal = new Terminal({
-      cursorBlink: true,
-      fontSize: 14,
-      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-      theme: {
-        background: '#1e1e1e',
-        foreground: '#d4d4d4',
-        cursor: '#d4d4d4',
-        cursorAccent: '#1e1e1e',
-        black: '#000000',
-        red: '#cd3131',
-        green: '#0dbc79',
-        yellow: '#e5e510',
-        blue: '#2472c8',
-        magenta: '#bc3fbc',
-        cyan: '#11a8cd',
-        white: '#e5e5e5',
-        brightBlack: '#666666',
-        brightRed: '#f14c4c',
-        brightGreen: '#23d18b',
-        brightYellow: '#f5f543',
-        brightBlue: '#3b8eea',
-        brightMagenta: '#d670d6',
-        brightCyan: '#29b8db',
-        brightWhite: '#ffffff',
-      },
+      cursorBlink: terminalCursorBlink,
+      fontSize: terminalFontSize,
+      fontFamily: terminalFontFamily,
+      theme: terminalTheme,
       allowProposedApi: true,
     });
 
@@ -141,7 +139,26 @@ export function TerminalInstance({
         }
       }, 100);
     };
-  }, [sessionId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]); // Only recreate terminal when sessionId changes - settings updates handled separately
+
+  // Update terminal theme when settings change
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.options.theme = terminalTheme;
+    }
+  }, [terminalTheme]);
+
+  // Update terminal font settings when they change
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.options.fontSize = terminalFontSize;
+      terminalRef.current.options.fontFamily = terminalFontFamily;
+      terminalRef.current.options.cursorBlink = terminalCursorBlink;
+      // Refit after font changes
+      fitAddonRef.current?.fit();
+    }
+  }, [terminalFontSize, terminalFontFamily, terminalCursorBlink]);
 
   // Listen for terminal output from Tauri
   useEffect(() => {

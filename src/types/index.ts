@@ -218,6 +218,11 @@ export interface AppSettings {
   // Sidebar settings
   sidebarShowIcons: boolean;
   sidebarCompactMode: boolean;
+  // Terminal settings
+  terminalFontSize: number;
+  terminalFontFamily: string;
+  terminalTheme: 'auto' | 'dark' | 'light' | 'caffeine-dark' | 'caffeine-light' | 'monokai' | 'dracula';
+  terminalCursorBlink: boolean;
 }
 
 // ============ Git Types ============

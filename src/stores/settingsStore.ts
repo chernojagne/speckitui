@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { AppSettings } from '@/types';
 
+export type TerminalThemeSetting = 'auto' | 'dark' | 'light' | 'caffeine-dark' | 'caffeine-light' | 'monokai' | 'dracula';
+
 // Helper to apply theme to document
 const applyTheme = (theme: 'light' | 'dark' | 'system') => {
   const root = document.documentElement;
@@ -49,6 +51,11 @@ interface SettingsState extends AppSettings {
   // Sidebar settings actions
   setSidebarShowIcons: (show: boolean) => void;
   setSidebarCompactMode: (compact: boolean) => void;
+  // Terminal settings actions
+  setTerminalFontSize: (size: number) => void;
+  setTerminalFontFamily: (family: string) => void;
+  setTerminalTheme: (theme: TerminalThemeSetting) => void;
+  setTerminalCursorBlink: (blink: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -68,6 +75,11 @@ export const useSettingsStore = create<SettingsState>()(
       // Sidebar settings
       sidebarShowIcons: true,
       sidebarCompactMode: false,
+      // Terminal settings
+      terminalFontSize: 14,
+      terminalFontFamily: 'Consolas, "Courier New", monospace',
+      terminalTheme: 'auto',
+      terminalCursorBlink: true,
 
       // Actions
       setTheme: (theme) => {
@@ -101,6 +113,12 @@ export const useSettingsStore = create<SettingsState>()(
       // Sidebar settings actions
       setSidebarShowIcons: (show) => set({ sidebarShowIcons: show }),
       setSidebarCompactMode: (compact) => set({ sidebarCompactMode: compact }),
+
+      // Terminal settings actions
+      setTerminalFontSize: (size) => set({ terminalFontSize: size }),
+      setTerminalFontFamily: (family) => set({ terminalFontFamily: family }),
+      setTerminalTheme: (theme) => set({ terminalTheme: theme }),
+      setTerminalCursorBlink: (blink) => set({ terminalCursorBlink: blink }),
     }),
     {
       name: 'speckitui-settings',
