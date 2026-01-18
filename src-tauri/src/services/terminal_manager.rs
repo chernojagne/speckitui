@@ -1,0 +1,190 @@
+use portable_pty::{native_pty_system, CommandBuilder, MasterPty, PtySize, Child};
+use std::collections::HashMap;
+use std::io::{Read, Write};
+use std::sync::{Arc, Mutex};
+use std::thread;
+use tauri::{AppHandle, Emitter};
+
+/// Terminal session with PTY handles
+pub struct TerminalSession {
+    pub id: String,
+    pub cwd: String,
+    pub shell: String,
+    pub master: Arc<Mutex<Box<dyn MasterPty + Send>>>,
+    pub child: Arc<Mutex<Box<dyn Child + Send + Sync>>>,
+    pub writer: Arc<Mutex<Box<dyn Write + Send>>>,
+}
+
+// Make TerminalSession Send + Sync safe
+unsafe impl Send for TerminalSession {}
+unsafe impl Sync for TerminalSession {}
+
+/// Terminal session manager
+/// Manages PTY sessions for the integrated terminal
+pub struct TerminalManager {
+    sessions: Mutex<HashMap<String, Arc<TerminalSession>>>,
+}
+
+impl TerminalManager {
+    pub fn new() -> Self {
+        Self {
+            sessions: Mutex::new(HashMap::new()),
+        }
+    }
+
+    /// Creates a new PTY session
+    pub fn create_session(
+        &self,
+        app_handle: AppHandle,
+        cwd: String,
+        shell: String,
+    ) -> Result<String, String> {
+        let id = uuid::Uuid::new_v4().to_string();
+        
+        // Get the PTY system
+        let pty_system = native_pty_system();
+        
+        // Configure PTY size
+        let pair = pty_system
+            .openpty(PtySize {
+                rows: 24,
+                cols: 80,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
+            .map_err(|e| format!("Failed to open PTY: {}", e))?;
+
+        // Build the shell command
+        let mut cmd = CommandBuilder::new(&shell);
+        cmd.cwd(&cwd);
+        
+        // Set environment variables
+        #[cfg(windows)]
+        {
+            cmd.env("TERM", "xterm-256color");
+        }
+        #[cfg(not(windows))]
+        {
+            cmd.env("TERM", "xterm-256color");
+            cmd.env("COLORTERM", "truecolor");
+        }
+
+        // Spawn the child process
+        let child = pair
+            .slave
+            .spawn_command(cmd)
+            .map_err(|e| format!("Failed to spawn shell: {}", e))?;
+
+        // Get the writer for sending input
+        let writer = pair.master.take_writer()
+            .map_err(|e| format!("Failed to get PTY writer: {}", e))?;
+
+        // Get reader for output
+        let mut reader = pair.master.try_clone_reader()
+            .map_err(|e| format!("Failed to clone PTY reader: {}", e))?;
+
+        let session = Arc::new(TerminalSession {
+            id: id.clone(),
+            cwd,
+            shell,
+            master: Arc::new(Mutex::new(pair.master)),
+            child: Arc::new(Mutex::new(child)),
+            writer: Arc::new(Mutex::new(writer)),
+        });
+
+        // Store the session
+        self.sessions.lock().unwrap().insert(id.clone(), session);
+
+        // Spawn a thread to read output and emit events
+        let session_id = id.clone();
+        thread::spawn(move || {
+            let mut buf = [0u8; 4096];
+            loop {
+                match reader.read(&mut buf) {
+                    Ok(0) => {
+                        // EOF - terminal closed
+                        let _ = app_handle.emit(&format!("terminal-exit-{}", session_id), ());
+                        break;
+                    }
+                    Ok(n) => {
+                        let data = String::from_utf8_lossy(&buf[..n]).to_string();
+                        let _ = app_handle.emit(&format!("terminal-output-{}", session_id), data);
+                    }
+                    Err(e) => {
+                        log::error!("Error reading from PTY: {}", e);
+                        break;
+                    }
+                }
+            }
+        });
+
+        Ok(id)
+    }
+
+    /// Writes data to a terminal session
+    pub fn write_to_session(&self, id: &str, data: &str) -> Result<(), String> {
+        let sessions = self.sessions.lock().unwrap();
+        let session = sessions
+            .get(id)
+            .ok_or_else(|| format!("Terminal session not found: {}", id))?;
+
+        let mut writer = session.writer.lock().unwrap();
+        writer
+            .write_all(data.as_bytes())
+            .map_err(|e| format!("Failed to write to terminal: {}", e))?;
+        writer.flush().map_err(|e| format!("Failed to flush: {}", e))?;
+        
+        Ok(())
+    }
+
+    /// Resizes a terminal session
+    pub fn resize_session(&self, id: &str, cols: u16, rows: u16) -> Result<(), String> {
+        let sessions = self.sessions.lock().unwrap();
+        let session = sessions
+            .get(id)
+            .ok_or_else(|| format!("Terminal session not found: {}", id))?;
+
+        let master = session.master.lock().unwrap();
+        master
+            .resize(PtySize {
+                rows,
+                cols,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
+            .map_err(|e| format!("Failed to resize terminal: {}", e))?;
+
+        Ok(())
+    }
+
+    /// Closes a terminal session
+    pub fn close_session(&self, id: &str) -> Result<(), String> {
+        let mut sessions = self.sessions.lock().unwrap();
+        
+        if let Some(session) = sessions.remove(id) {
+            // Kill the child process
+            let mut child = session.child.lock().unwrap();
+            let _ = child.kill();
+            Ok(())
+        } else {
+            Err(format!("Terminal session not found: {}", id))
+        }
+    }
+
+    /// Lists all active session IDs
+    pub fn list_sessions(&self) -> Vec<String> {
+        self.sessions.lock().unwrap().keys().cloned().collect()
+    }
+
+    /// Gets session info
+    pub fn get_session_info(&self, id: &str) -> Option<(String, String)> {
+        let sessions = self.sessions.lock().unwrap();
+        sessions.get(id).map(|s| (s.cwd.clone(), s.shell.clone()))
+    }
+}
+
+impl Default for TerminalManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
