@@ -75,7 +75,7 @@ export function useTerminal(): UseTerminalReturn {
   const getShellLabel = useCallback((shell: ShellType): string => {
     switch (shell) {
       case 'cmd':
-        return 'Command Prompt';
+        return 'cmd';
       case 'powershell':
         return 'PowerShell';
       case 'bash':
@@ -98,6 +98,7 @@ export function useTerminal(): UseTerminalReturn {
         label: label || `${shellLabel} ${sessions.length + 1}`,
         cwd,
         shell: result.shell,
+        shellType: shell,
         status: 'running',
         isActive: true,
       };

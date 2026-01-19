@@ -14,6 +14,7 @@ interface TerminalState {
   updateSession: (sessionId: string, updates: Partial<TerminalSession>) => void;
   setPanelHeight: (height: number) => void;
   renameSession: (sessionId: string, label: string) => void;
+  reorderSessions: (fromIndex: number, toIndex: number) => void;
 }
 
 export const useTerminalStore = create<TerminalState>((set) => ({
@@ -59,5 +60,15 @@ export const useTerminalStore = create<TerminalState>((set) => ({
           s.id === sessionId ? { ...s, label: newLabel } : s
         ),
       };
+    }),
+
+  // Reorder sessions by moving a tab from one index to another
+  reorderSessions: (fromIndex, toIndex) =>
+    set((state) => {
+      if (fromIndex === toIndex) return state;
+      const sessions = [...state.sessions];
+      const [removed] = sessions.splice(fromIndex, 1);
+      sessions.splice(toIndex, 0, removed);
+      return { sessions };
     }),
 }));

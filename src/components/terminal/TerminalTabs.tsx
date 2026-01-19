@@ -1,9 +1,9 @@
 /**
  * TerminalTabs Component
- * Tab bar for managing multiple terminal sessions
+ * Tab bar for managing multiple terminal sessions with drag-to-reorder
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { getTerminalTheme, getAutoTerminalTheme, type TerminalThemeId } from '@/config/terminalThemes';
@@ -14,12 +14,44 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, X, Zap, Terminal, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
+
+// Terminal shell configuration with icons and labels
+const SHELL_CONFIG = {
+  cmd: {
+    icon: '>_',
+    label: 'cmd',
+    fullName: 'Command Prompt',
+  },
+  powershell: {
+    icon: 'PS',
+    label: 'powershell',
+    fullName: 'PowerShell',
+  },
+  bash: {
+    icon: '$_',
+    label: 'bash',
+    fullName: 'Bash',
+  },
+  default: {
+    icon: '>_',
+    label: 'terminal',
+    fullName: 'Terminal',
+  },
+} as const;
+
+// Get shell icon component
+function ShellIcon({ shell, className }: { shell: ShellType; className?: string }) {
+  const config = SHELL_CONFIG[shell] || SHELL_CONFIG.default;
+  return (
+    <span className={cn("font-mono text-[10px] font-bold", className)}>
+      {config.icon}
+    </span>
+  );
+}
 
 interface TerminalTabsProps {
   onNewTerminal?: (shell: ShellType) => void;
@@ -30,9 +62,13 @@ export function TerminalTabs({
   onNewTerminal,
   onCloseTerminal,
 }: TerminalTabsProps) {
-  const { sessions, activeSessionId, setActiveSession, removeSession, renameSession } = useTerminalStore();
+  const { sessions, activeSessionId, setActiveSession, removeSession, renameSession, reorderSessions } = useTerminalStore();
+  const defaultTerminal = useSettingsStore((s) => s.defaultTerminal);
+  const setDefaultTerminal = useSettingsStore((s) => s.setDefaultTerminal);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
   // Get terminal theme to match selected tab background with terminal
@@ -96,12 +132,53 @@ export function TerminalTabs({
     onNewTerminal?.(shell);
   };
 
+  // Drag and drop handlers for tab reordering
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+    // Add a slight delay to allow the drag image to be created
+    requestAnimationFrame(() => {
+      (e.target as HTMLElement).style.opacity = '0.5';
+    });
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    (e.target as HTMLElement).style.opacity = '1';
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedIndex !== null && index !== draggedIndex) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, toIndex: number) => {
+    e.preventDefault();
+    const fromIndex = draggedIndex;
+    if (fromIndex !== null && fromIndex !== toIndex) {
+      reorderSessions(fromIndex, toIndex);
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   return (
     <div className="flex items-center justify-between h-8 bg-card border-b border-border">
       <div className="flex items-center gap-px overflow-x-auto flex-1 scrollbar-none">
         {sessions.map((session, index) => {
           const displayLabel = session.label || `Terminal ${index + 1}`;
           const isEditing = editingTabId === session.id;
+          const isDragging = draggedIndex === index;
+          const isDragOver = dragOverIndex === index;
 
           return (
             <div
@@ -110,12 +187,29 @@ export function TerminalTabs({
                 "group flex items-center gap-1.5 h-8 px-3 text-xs border-r border-border transition-colors cursor-pointer",
                 session.id === activeSessionId 
                   ? "text-foreground" 
-                  : "text-muted-foreground hover:bg-accent/50"
+                  : "text-muted-foreground hover:bg-accent/50",
+                isDragging && "opacity-50",
+                isDragOver && "border-l-2 border-l-primary"
               )}
               style={{ backgroundColor: session.id === activeSessionId ? terminalBackground : undefined }}
               onClick={() => handleTabClick(session.id)}
               onDoubleClick={() => handleTabDoubleClick(session.id, displayLabel)}
-              title={isEditing ? undefined : `${displayLabel} (double-click to rename)`}
+              onMouseDown={(e) => {
+                // Middle-click to close tab
+                if (e.button === 1) {
+                  e.preventDefault();
+                  removeSession(session.id);
+                  onCloseTerminal?.(session.id);
+                }
+              }}
+              // Drag and drop for reordering
+              draggable={!isEditing}
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+              title={isEditing ? undefined : `${displayLabel} (drag to reorder, double-click to rename, middle-click to close)`}
               role="tab"
               aria-selected={session.id === activeSessionId}
               tabIndex={0}
@@ -126,7 +220,7 @@ export function TerminalTabs({
                 }
               }}
             >
-              <span className="text-[10px] text-success">●</span>
+              <ShellIcon shell={session.shellType || 'default'} className="text-primary" />
               {isEditing ? (
                 <Input
                   ref={inputRef}
@@ -157,32 +251,48 @@ export function TerminalTabs({
         })}
       </div>
 
-      <div className="px-2">
+      {/* Split button: Icon creates default terminal, Chevron opens menu */}
+      <div className="flex items-center px-1">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-6 w-6 p-0"
+          onClick={() => handleNewTerminal(defaultTerminal)}
+          title={`New ${SHELL_CONFIG[defaultTerminal].fullName} (default)`}
+        >
+          <ShellIcon shell={defaultTerminal} className="text-muted-foreground" />
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 px-2 gap-1">
-              <Plus className="h-4 w-4" />
+            <Button variant="ghost" size="sm" className="h-6 w-4 p-0">
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem onClick={() => handleNewTerminal('cmd')}>
-              <Terminal className="h-4 w-4 mr-2 text-primary" />
-              Command Prompt
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNewTerminal('powershell')}>
-              <Zap className="h-4 w-4 mr-2 text-primary" />
-              PowerShell
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNewTerminal('bash')}>
-              <Terminal className="h-4 w-4 mr-2 text-primary" />
-              Bash
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleNewTerminal('default')}>
-              <Terminal className="h-4 w-4 mr-2 text-muted-foreground" />
-              Default Terminal
-            </DropdownMenuItem>
+          <DropdownMenuContent align="end" className="w-52">
+            {(['cmd', 'powershell', 'bash'] as const).map((shell) => {
+              const config = SHELL_CONFIG[shell];
+              const isDefault = defaultTerminal === shell;
+              return (
+                <DropdownMenuItem 
+                  key={shell}
+                  onClick={() => handleNewTerminal(shell)}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    setDefaultTerminal(shell);
+                  }}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <ShellIcon shell={shell} className="text-primary" />
+                    <span>{config.fullName}</span>
+                  </div>
+                  {isDefault && <Check className="h-4 w-4 text-primary" />}
+                </DropdownMenuItem>
+              );
+            })}
+            <div className="text-[10px] text-muted-foreground px-2 py-1 border-t mt-1">
+              Right-click to set default
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

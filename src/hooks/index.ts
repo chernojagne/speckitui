@@ -10,3 +10,4 @@ export { useGitHub } from './useGitHub';
 export { useProject } from './useProject';
 export { useSpecInstance } from './useSpecInstance';
 export { useTerminal } from './useTerminal';
+export { useTerminalHotkeys } from './useTerminalHotkeys';

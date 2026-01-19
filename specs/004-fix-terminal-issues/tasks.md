@@ -19,8 +19,8 @@
 
 **Purpose**: No new setup required - using existing project structure
 
-- [ ] T001 Verify feature branch 004-fix-terminal-issues is checked out
-- [ ] T002 [P] Run `npm install` and `cargo build` to ensure dependencies are current
+- [x] T001 Verify feature branch 004-fix-terminal-issues is checked out
+- [x] T002 [P] Run `npm install` and `cargo build` to ensure dependencies are current
 
 ---
 

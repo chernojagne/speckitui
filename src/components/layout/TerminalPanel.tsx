@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useTerminal, type ShellType } from '@/hooks/useTerminal';
+import { useTerminalHotkeys } from '@/hooks/useTerminalHotkeys';
 import { TerminalInstance } from '@/components/terminal/TerminalInstance';
 import { TerminalTabs } from '@/components/terminal/TerminalTabs';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,13 @@ export function TerminalPanel() {
   const handleCloseTerminal = useCallback(async (sessionId: string) => {
     await closeSession(sessionId);
   }, [closeSession]);
+
+  // Register terminal keyboard shortcuts
+  useTerminalHotkeys({
+    onNewTerminal: handleNewTerminal,
+    onCloseTerminal: handleCloseTerminal,
+    enabled: true,
+  });
 
   // Full terminal panel with resize handle
   return (
@@ -106,6 +114,7 @@ export function TerminalPanel() {
                 <TerminalInstance
                   sessionId={session.id}
                   isActive={session.id === activeSessionId}
+                  onExit={() => handleCloseTerminal(session.id)}
                 />
               </div>
             ))}

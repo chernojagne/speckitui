@@ -134,10 +134,12 @@ export function AppShell() {
               <DetailPane />
             </main>
             <TerminalPanel />
-            <StatusBar />
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      {/* Status bar spans full width below nav and main content */}
+      <StatusBar />
     </div>
   );
 }

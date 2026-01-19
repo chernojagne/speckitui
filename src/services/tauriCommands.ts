@@ -158,6 +158,31 @@ export async function checkGitHubAuth(): Promise<GitHubAuthStatus> {
   return invoke('check_github_auth');
 }
 
+export async function githubLogin(): Promise<GitHubAuthStatus> {
+  return invoke('github_login');
+}
+
+export async function githubLogout(): Promise<void> {
+  return invoke('github_logout');
+}
+
+// Device flow OAuth
+export interface DeviceCodeResponse {
+  deviceCode: string;
+  userCode: string;
+  verificationUri: string;
+  expiresIn: number;
+  interval: number;
+}
+
+export async function githubOAuthStart(clientId: string): Promise<DeviceCodeResponse> {
+  return invoke('github_oauth_start', { clientId });
+}
+
+export async function githubOAuthComplete(clientId: string, deviceCode: string): Promise<GitHubAuthStatus> {
+  return invoke('github_oauth_complete', { clientId, deviceCode });
+}
+
 export async function getPullRequests(projectPath: string): Promise<PRFeedback[]> {
   return invoke('get_pull_requests', { projectPath });
 }

@@ -19,6 +19,7 @@ interface TerminalInstanceProps {
   onReady?: () => void;
   onData?: (data: string) => void;
   onError?: (error: string) => void;
+  onExit?: () => void;
 }
 
 // Backend emits just the data string as payload
@@ -41,6 +42,7 @@ export function TerminalInstance({
   onReady,
   onData,
   onError,
+  onExit,
 }: TerminalInstanceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<Terminal | null>(null);
@@ -68,13 +70,15 @@ export function TerminalInstance({
   const onReadyRef = useRef(onReady);
   const onDataRef = useRef(onData);
   const onErrorRef = useRef(onError);
+  const onExitRef = useRef(onExit);
   
   // Keep refs up to date
   useEffect(() => {
     onReadyRef.current = onReady;
     onDataRef.current = onData;
     onErrorRef.current = onError;
-  }, [onReady, onData, onError]);
+    onExitRef.current = onExit;
+  }, [onReady, onData, onError, onExit]);
 
   // Initialize terminal - only depends on sessionId
   useEffect(() => {
@@ -220,6 +224,8 @@ export function TerminalInstance({
               terminalRef.current.write('\r\n\x1b[90m[Process exited]\x1b[0m\r\n');
             }
             onErrorRef.current?.('Terminal process exited');
+            // Auto-close the tab when shell exits
+            onExitRef.current?.();
           }
         );
         
@@ -297,12 +303,32 @@ export function TerminalInstance({
     };
   }, [handleResize]);
 
-  // Focus terminal when active
+  // Focus terminal when active or when terminal becomes ready while active
+  // Also refit terminal to fix content truncation when switching tabs
   useEffect(() => {
     if (isActive && terminalRef.current) {
-      terminalRef.current.focus();
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        terminalRef.current?.focus();
+        // Refit terminal to fix truncation after tab switch
+        if (fitAddonRef.current) {
+          fitAddonRef.current.fit();
+        }
+      });
     }
   }, [isActive]);
+
+  // Also focus on initial mount if active (for new terminals)
+  const initialFocusRef = useRef(false);
+  useEffect(() => {
+    if (isActive && terminalRef.current && !initialFocusRef.current) {
+      initialFocusRef.current = true;
+      // Small delay to ensure terminal is fully initialized
+      setTimeout(() => {
+        terminalRef.current?.focus();
+      }, 50);
+    }
+  });
 
   return (
     <div 

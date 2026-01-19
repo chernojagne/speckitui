@@ -91,6 +91,8 @@ pub fn run() {
             github::check_github_auth,
             github::set_github_token,
             github::clear_github_token,
+            github::github_login,
+            github::github_logout,
             github::github_oauth_start,
             github::github_oauth_complete,
             github::get_pull_requests,

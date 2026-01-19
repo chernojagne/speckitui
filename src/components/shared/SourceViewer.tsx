@@ -150,15 +150,18 @@ export function SourceViewer({
   const highlightSet = useMemo(() => new Set(highlightLines), [highlightLines]);
 
   return (
-    <div className="flex flex-col border border-border rounded-md overflow-hidden bg-card" style={{ maxHeight }}>
+    <div 
+      className="flex flex-col border border-border rounded-md overflow-hidden bg-card h-full" 
+      style={{ maxHeight: maxHeight === '100%' ? undefined : maxHeight }}
+    >
       {fileName && (
-        <div className="flex items-center justify-between px-3 py-2 bg-muted border-b border-border text-[0.8125rem]">
+        <div className="flex items-center justify-between px-3 py-2 bg-muted border-b border-border text-[0.8125rem] shrink-0">
           <span className="font-mono font-medium text-foreground">{fileName}</span>
           <span className="text-muted-foreground uppercase text-[0.6875rem] font-semibold">{resolvedLanguage}</span>
         </div>
       )}
       
-      <div className="flex overflow-auto">
+      <div className="flex flex-1 overflow-auto min-h-0">
         {resolvedShowLineNumbers && (
           <div className="shrink-0 py-3 bg-muted border-r border-border text-right select-none">
             {lines.map((_, idx) => (

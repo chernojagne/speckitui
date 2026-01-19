@@ -3,7 +3,6 @@ import { workflowSteps } from '@/config/workflowSteps';
 import { useWorkflowStore } from '@/stores/workflowStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useGitHub } from '@/hooks/useGitHub';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -25,7 +24,6 @@ interface NavPaneProps {
 export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onToggleCollapse }: NavPaneProps) {
   const { selectedStep, setSelectedStep, stepContentStatus } = useWorkflowStore();
   const { project, activeSpec } = useProjectStore();
-  const { isAuthenticated } = useGitHub();
   
   // Sidebar settings from store
   const showIcons = useSettingsStore((state) => state.sidebarShowIcons);
@@ -90,7 +88,6 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
 
         {/* Avatar at bottom */}
         <AvatarMenu
-          isLoggedIn={isAuthenticated}
           onSettings={onSettings}
           isCollapsed={true}
         />
@@ -189,7 +186,6 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
 
       {/* Avatar Menu */}
       <AvatarMenu
-        isLoggedIn={isAuthenticated}
         onSettings={onSettings}
       />
     </nav>

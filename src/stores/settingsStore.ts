@@ -56,6 +56,7 @@ interface SettingsState extends AppSettings {
   setTerminalFontFamily: (family: string) => void;
   setTerminalTheme: (theme: TerminalThemeSetting) => void;
   setTerminalCursorBlink: (blink: boolean) => void;
+  setDefaultTerminal: (shell: 'cmd' | 'powershell' | 'bash') => void;
   // Navigation pane settings actions
   setNavPaneWidth: (width: number) => void;
   setNavPaneCollapsed: (collapsed: boolean) => void;
@@ -84,6 +85,7 @@ export const useSettingsStore = create<SettingsState>()(
       terminalFontFamily: 'Consolas, "Courier New", monospace',
       terminalTheme: 'auto',
       terminalCursorBlink: true,
+      defaultTerminal: 'bash',
       // Navigation pane settings
       navPaneWidth: 220,
       navPaneCollapsed: false,
@@ -126,6 +128,7 @@ export const useSettingsStore = create<SettingsState>()(
       setTerminalFontFamily: (family) => set({ terminalFontFamily: family }),
       setTerminalTheme: (theme) => set({ terminalTheme: theme }),
       setTerminalCursorBlink: (blink) => set({ terminalCursorBlink: blink }),
+      setDefaultTerminal: (shell) => set({ defaultTerminal: shell }),
 
       // Navigation pane settings actions
       setNavPaneWidth: (width) =>
