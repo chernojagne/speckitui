@@ -11,7 +11,7 @@ import { ProjectHeader } from './ProjectHeader';
 import { SpecSelector } from './SpecSelector';
 import { AvatarMenu } from './AvatarMenu';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, Github } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Github, ScrollText } from 'lucide-react';
 import type { WorkflowStepId } from '@/types';
 
 interface NavPaneProps {
@@ -35,6 +35,8 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
 
   // Collapsed icon rail mode
   if (isCollapsed) {
+    const isConstitutionSelected = selectedStep === 'constitution';
+    
     return (
       <nav className="flex h-full flex-col w-full bg-card border-r border-border items-center py-2">
         {/* Expand button - aligned to right */}
@@ -53,6 +55,29 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
             <TooltipContent side="right">Expand sidebar</TooltipContent>
           </Tooltip>
         </div>
+
+        {/* Constitution nav item */}
+        {project && (
+          <>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={isConstitutionSelected ? "secondary" : "ghost"}
+                  size="icon"
+                  className={cn(
+                    "h-8 w-8 relative",
+                    isConstitutionSelected && "bg-accent text-accent-foreground"
+                  )}
+                  onClick={() => handleStepClick('constitution')}
+                >
+                  <ScrollText className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Constitution</TooltipContent>
+            </Tooltip>
+            <Separator className="my-1 w-6" />
+          </>
+        )}
 
         {/* Workflow step icons */}
         <div className="flex-1 flex flex-col items-center gap-1 overflow-auto">
@@ -136,6 +161,25 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
       {project && project.specInstances.length > 0 && (
         <div className="px-3 py-2 border-b border-border">
           <SpecSelector />
+        </div>
+      )}
+
+      {/* Constitution nav item */}
+      {project && (
+        <div className={cn("px-2", compactMode ? "py-0.5" : "py-1")}>
+          <Button
+            variant={selectedStep === 'constitution' ? "secondary" : "ghost"}
+            className={cn(
+              "w-full justify-start gap-2",
+              compactMode ? "h-7" : "h-9",
+              selectedStep === 'constitution' && "bg-accent text-accent-foreground"
+            )}
+            onClick={() => handleStepClick('constitution')}
+          >
+            {showIcons && <ScrollText className={cn("shrink-0", compactMode ? "h-3.5 w-3.5" : "h-4 w-4")} />}
+            <span className={cn("flex-1 text-left", compactMode ? "text-xs" : "text-sm")}>Constitution</span>
+          </Button>
+          <Separator className="mt-1" />
         </div>
       )}
       

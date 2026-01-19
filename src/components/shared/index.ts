@@ -1,3 +1,4 @@
+export { AgentSelector } from './AgentSelector';
 export { ChecklistItem } from './ChecklistItem';
 export { EmptyState } from './EmptyState';
 export { ErrorBoundary, ErrorDisplay } from './ErrorBoundary';
@@ -12,8 +13,10 @@ export {
   SkeletonMarkdown,
   SkeletonNavPane,
 } from './LoadingSkeleton';
+export { MarkdownEditor } from './MarkdownEditor';
 export { MarkdownRenderer } from './MarkdownRenderer';
 export { OfflineMessage } from './OfflineMessage';
 export { ProgressIndicator, ProgressBadge } from './ProgressIndicator';
+export { RichComposer } from './RichComposer';
 export { SourceViewer } from './SourceViewer';
 export { TabContainer } from './TabContainer';

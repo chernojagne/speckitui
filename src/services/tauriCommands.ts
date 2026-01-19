@@ -257,7 +257,9 @@ export async function createDirectory(path: string): Promise<CreateDirectoryResp
   return invoke('create_directory', { path });
 }
 
-export type AgentType = 'copilot' | 'claude' | 'gemini';
+// AgentType re-exported from types for convenience
+import type { AgentType } from '@/types';
+export type { AgentType };
 
 export interface UpdateAgentContextResponse {
   success: boolean;
@@ -268,7 +270,7 @@ export interface UpdateAgentContextResponse {
 /**
  * Update an AI agent context file with new content.
  * Uses markers to avoid overwriting existing spec-kit sections.
- * @param agentType - Agent type (copilot, claude, gemini)
+ * @param agentType - Agent type (copilot, claude, etc.)
  * @param content - Markdown content to add
  * @param featureName - Feature name for header
  * @param repoPath - Path to repository root

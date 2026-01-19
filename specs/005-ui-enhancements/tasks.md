@@ -63,12 +63,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Create useMarkdownEditor hook with edit/save logic in src/hooks/useMarkdownEditor.ts
-- [ ] T019 [US1] Create MarkdownEditor shared component with edit/preview toggle in src/components/shared/MarkdownEditor.tsx
-- [ ] T020 [US1] Modify ConstitutionView to use MarkdownEditor for editing in src/components/settings/ConstitutionView.tsx
-- [ ] T020a [US1] Handle missing constitution.md - show create prompt or create empty file in src/components/settings/ConstitutionView.tsx
-- [ ] T021 [US1] Add file watching for constitution.md to update view on external changes in src/components/settings/ConstitutionView.tsx
-- [ ] T022 [US1] Add unsaved changes warning dialog using editorStore in src/components/settings/ConstitutionView.tsx
+- [X] T018 [P] [US1] Create useMarkdownEditor hook with edit/save logic in src/hooks/useMarkdownEditor.ts
+- [X] T019 [US1] Create MarkdownEditor shared component with edit/preview toggle in src/components/shared/MarkdownEditor.tsx
+- [X] T020 [US1] Modify ConstitutionView to use MarkdownEditor for editing in src/components/settings/ConstitutionView.tsx
+- [X] T020a [US1] Handle missing constitution.md - show create prompt or create empty file in src/components/settings/ConstitutionView.tsx
+- [X] T021 [US1] Add file watching for constitution.md to update view on external changes in src/components/settings/ConstitutionView.tsx
+- [X] T022 [US1] Add unsaved changes warning dialog using editorStore in src/components/settings/ConstitutionView.tsx
 
 **Checkpoint**: User Story 1 complete - Constitution is editable and saveable
 
@@ -84,9 +84,9 @@
 
 ### Implementation for User Story 8
 
-- [ ] T023 [US8] Add Constitution nav item in NavPane below header section in src/components/layout/NavPane.tsx
-- [ ] T024 [US8] Style Constitution nav item and update NavPane.css in src/components/layout/NavPane.css
-- [ ] T025 [US8] Wire Constitution nav click to display ConstitutionView in detail pane in src/App.tsx or routing
+- [X] T023 [US8] Add Constitution nav item in NavPane below header section in src/components/layout/NavPane.tsx
+- [X] T024 [US8] Style Constitution nav item and update NavPane.css in src/components/layout/NavPane.css
+- [X] T025 [US8] Wire Constitution nav click to display ConstitutionView in detail pane in src/App.tsx or routing
 
 **Checkpoint**: User Story 8 complete - Constitution accessible via navbar
 
@@ -100,14 +100,14 @@
 
 ### Implementation for User Story 2
 
-- [ ] T026 [P] [US2] Create RichComposer component with markdown textarea in src/components/shared/RichComposer.tsx
-- [ ] T027 [P] [US2] Add code snippet paste handling with syntax highlighting in src/components/shared/RichComposer.tsx
-- [ ] T028 [US2] Add image paste/upload handling with base64 inline display in src/components/shared/RichComposer.tsx
-- [ ] T029 [US2] Add link insertion support in src/components/shared/RichComposer.tsx
-- [ ] T030 [US2] Add file upload handling with file reference display in src/components/shared/RichComposer.tsx
-- [ ] T031 [US2] Create useComposer hook for auto-save to description.md in src/hooks/useComposer.ts
-- [ ] T032 [US2] Integrate RichComposer into DescribeView replacing existing composer in src/components/workflow/DescribeView.tsx
-- [ ] T033 [US2] Add preview mode toggle to show rendered markdown in src/components/shared/RichComposer.tsx
+- [X] T026 [P] [US2] Create RichComposer component with markdown textarea in src/components/shared/RichComposer.tsx
+- [X] T027 [P] [US2] Add code snippet paste handling with syntax highlighting in src/components/shared/RichComposer.tsx
+- [X] T028 [US2] Add image paste/upload handling with base64 inline display in src/components/shared/RichComposer.tsx
+- [X] T029 [US2] Add link insertion support in src/components/shared/RichComposer.tsx
+- [X] T030 [US2] Add file upload handling with file reference display in src/components/shared/RichComposer.tsx
+- [X] T031 [US2] Create useComposer hook for auto-save to description.md in src/hooks/useComposer.ts
+- [X] T032 [US2] Integrate RichComposer into DescribeView replacing existing composer in src/components/workflow/DescribeView.tsx
+- [X] T033 [US2] Add preview mode toggle to show rendered markdown in src/components/shared/RichComposer.tsx
 
 **Checkpoint**: User Story 2 complete - Rich composer with mixed content support
 
@@ -121,12 +121,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T034 [P] [US3] Create AgentSelector dialog component with agent options in src/components/shared/AgentSelector.tsx
-- [ ] T035 [US3] Add agent configuration constants (file paths, markers) in src/config/agentConfig.ts
-- [ ] T036 [US3] Add "Add to Agent Context" button to DescribeView in src/components/workflow/DescribeView.tsx
-- [ ] T037 [US3] Implement agent file update logic using update_agent_context IPC in src/components/shared/AgentSelector.tsx
-- [ ] T037a [US3] Handle missing agent context file - create with spec-kit template markers in src-tauri/src/commands/file_write.rs
-- [ ] T038 [US3] Show success/error toast after agent context update in src/components/shared/AgentSelector.tsx
+- [X] T034 [P] [US3] Create AgentSelector dialog component with agent options in src/components/shared/AgentSelector.tsx
+- [X] T035 [US3] Add agent configuration constants (file paths, markers) in src/config/agentConfig.ts
+- [X] T036 [US3] Add "Add to Agent Context" button to DescribeView in src/components/workflow/DescribeView.tsx
+- [X] T037 [US3] Implement agent file update logic using update_agent_context IPC in src/components/shared/AgentSelector.tsx
+- [X] T037a [US3] Handle missing agent context file - create with spec-kit template markers in src-tauri/src/commands/file_write.rs
+- [X] T038 [US3] Show success/error toast after agent context update in src/components/shared/AgentSelector.tsx
 
 **Checkpoint**: User Story 3 complete - Composer content flows to agent context files
 

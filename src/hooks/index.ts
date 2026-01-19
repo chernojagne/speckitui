@@ -7,6 +7,7 @@ export { useDescription } from './useDescription';
 export { useFileWatcher, useArtifactWatcher, type FileChangeEvent } from './useFileWatcher';
 export { useGitBranch } from './useGitBranch';
 export { useGitHub } from './useGitHub';
+export { useMarkdownEditor } from './useMarkdownEditor';
 export { useProject } from './useProject';
 export { useSpecInstance } from './useSpecInstance';
 export { useTerminal } from './useTerminal';

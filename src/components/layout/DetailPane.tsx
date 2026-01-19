@@ -9,6 +9,7 @@ import { TestView } from '../workflow/TestView';
 import { PushView } from '../workflow/PushView';
 import { PRView } from '../workflow/PRView';
 import { BugFixView } from '../workflow/BugFixView';
+import { ConstitutionView } from '../settings/ConstitutionView';
 import { EmptyState } from '../shared/EmptyState';
 import { FolderOpen, FileText, HelpCircle } from 'lucide-react';
 
@@ -29,7 +30,12 @@ export function DetailPane() {
     );
   }
 
-  // No spec instances found
+  // Constitution view works without a spec
+  if (selectedStep === 'constitution') {
+    return <div className="flex-1 flex flex-col overflow-hidden bg-background"><ConstitutionView /></div>;
+  }
+
+  // No spec instances found (for non-constitution views)
   if (!activeSpec) {
     return (
       <div className="flex-1 flex flex-col overflow-hidden bg-background">

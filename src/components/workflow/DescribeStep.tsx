@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { DescribeEditor } from './DescribeEditor';
+import { RichComposer } from '@/components/shared/RichComposer';
+import { AgentSelector } from '@/components/shared/AgentSelector';
 import { useDescription } from '@/hooks/useDescription';
 import { useProjectStore } from '@/stores/projectStore';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { writeTerminal } from '@/services/tauriCommands';
-import { Loader2, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, Send, CheckCircle2, AlertCircle, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -12,6 +13,7 @@ export function DescribeStep() {
   const { project, activeSpec } = useProjectStore();
   const { activeSessionId } = useTerminalStore();
   const [sendStatus, setSendStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [showAgentSelector, setShowAgentSelector] = useState(false);
   const {
     content,
     isDirty,
@@ -72,45 +74,68 @@ export function DescribeStep() {
       {/* Header */}
       <div className="flex items-center gap-4 p-4 bg-card border-b border-border">
         <h3 className="text-sm font-semibold m-0">Describe</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleSendToTerminal}
-          disabled={!activeSessionId || isLoading || !content.trim()}
-          className={cn(
-            "gap-1.5 ml-auto",
-            sendStatus === 'success' && "border-success text-success",
-            sendStatus === 'error' && "border-destructive text-destructive"
-          )}
-        >
-          {sendStatus === 'success' ? (
-            <>
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Sent!
-            </>
-          ) : sendStatus === 'error' ? (
-            <>
-              <AlertCircle className="h-3.5 w-3.5" />
-              Failed
-            </>
-          ) : (
-            <>
-              <Send className="h-3.5 w-3.5" />
-              Send to Terminal
-            </>
-          )}
-        </Button>
+        
+        <div className="flex items-center gap-2 ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAgentSelector(true)}
+            disabled={isLoading || !content.trim()}
+            className="gap-1.5"
+          >
+            <Bot className="h-3.5 w-3.5" />
+            Add to Agent
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSendToTerminal}
+            disabled={!activeSessionId || isLoading || !content.trim()}
+            className={cn(
+              "gap-1.5",
+              sendStatus === 'success' && "border-success text-success",
+              sendStatus === 'error' && "border-destructive text-destructive"
+            )}
+          >
+            {sendStatus === 'success' ? (
+              <>
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Sent!
+              </>
+            ) : sendStatus === 'error' ? (
+              <>
+                <AlertCircle className="h-3.5 w-3.5" />
+                Failed
+              </>
+            ) : (
+              <>
+                <Send className="h-3.5 w-3.5" />
+                Send to Terminal
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
-      <div className="flex-1 min-h-0 p-4">
-        <DescribeEditor
+      <div className="flex-1 min-h-0">
+        <RichComposer
           content={content}
           onChange={updateContent}
           isSaving={isSaving}
           isDirty={isDirty}
           isLoading={isLoading}
+          placeholder="Describe the feature you want to build. This description will be used to generate the specification..."
+          heightClass="h-full"
         />
       </div>
+      
+      {/* Agent Selector Dialog */}
+      <AgentSelector
+        open={showAgentSelector}
+        onOpenChange={setShowAgentSelector}
+        content={content}
+      />
     </div>
   );
 }

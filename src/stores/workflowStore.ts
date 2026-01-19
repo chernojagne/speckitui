@@ -22,6 +22,7 @@ const getInitialContentStatus = (): Record<WorkflowStepId, boolean> => ({
   push: false,
   pr: false,
   bugfix: false,
+  constitution: false,
 });
 
 export const useWorkflowStore = create<WorkflowState>((set, get) => ({
@@ -52,6 +53,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
         push: true, // Always show (git status)
         pr: false, // Depends on GitHub connection
         bugfix: false, // Depends on GitHub connection
+        constitution: true, // Always available at project level
       },
     });
   },

@@ -125,7 +125,8 @@ export type WorkflowStepId =
   | 'test'
   | 'push'
   | 'pr'
-  | 'bugfix';
+  | 'bugfix'
+  | 'constitution';
 
 export interface WorkflowStep {
   id: WorkflowStepId;
@@ -271,14 +272,23 @@ export interface ComposerAsset {
 }
 
 /** Supported AI agent CLI tools */
-export type AgentType = 'copilot' | 'claude' | 'gemini';
+export type AgentType = 'copilot' | 'claude' | 'cursor' | 'custom';
 
 export interface AgentConfig {
-  type: AgentType;
-  displayName: string;
-  filePath: string;
-  markerStart: string;
-  markerEnd: string;
+  /** Unique identifier matching AgentType */
+  id: AgentType;
+  /** Display name for UI */
+  name: string;
+  /** File name only */
+  fileName: string;
+  /** Path relative to project root */
+  relativePath: string;
+  /** Start marker for context insertion */
+  startMarker: string;
+  /** End marker for context insertion */
+  endMarker: string;
+  /** Description of the agent */
+  description: string;
 }
 
 /** Git status for an artifact file */

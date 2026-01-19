@@ -63,7 +63,7 @@ struct AgentConfig {
 fn get_agent_config(agent_type: &str) -> Result<AgentConfig, String> {
     match agent_type {
         "copilot" => Ok(AgentConfig {
-            file_path: ".github/agents/copilot-instructions.md",
+            file_path: ".github/copilot-instructions.md",
             marker_start: "<!-- SPECKITUI-DESCRIBE-START -->",
             marker_end: "<!-- SPECKITUI-DESCRIBE-END -->",
         }),
@@ -72,8 +72,13 @@ fn get_agent_config(agent_type: &str) -> Result<AgentConfig, String> {
             marker_start: "<!-- SPECKITUI-DESCRIBE-START -->",
             marker_end: "<!-- SPECKITUI-DESCRIBE-END -->",
         }),
-        "gemini" => Ok(AgentConfig {
-            file_path: "GEMINI.md",
+        "cursor" => Ok(AgentConfig {
+            file_path: ".cursorrules",
+            marker_start: "# SPECKITUI-DESCRIBE-START",
+            marker_end: "# SPECKITUI-DESCRIBE-END",
+        }),
+        "custom" => Ok(AgentConfig {
+            file_path: ".specify/memory/agent-context.md",
             marker_start: "<!-- SPECKITUI-DESCRIBE-START -->",
             marker_end: "<!-- SPECKITUI-DESCRIBE-END -->",
         }),
