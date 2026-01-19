@@ -127,6 +127,84 @@ pub async fn clear_github_token(state: State<'_, GitHubState>) -> Result<(), Str
     Ok(())
 }
 
+/// Runs `gh auth login` to authenticate with GitHub
+/// This opens the browser for the OAuth flow
+#[tauri::command]
+pub async fn github_login(state: State<'_, GitHubState>) -> Result<GitHubAuth, String> {
+    use std::process::Command;
+    
+    log::info!("Starting gh auth login...");
+    
+    // Run gh auth login with web flow
+    #[cfg(windows)]
+    let result = Command::new("cmd")
+        .args(["/C", "gh", "auth", "login", "--web", "-h", "github.com"])
+        .status();
+    
+    #[cfg(not(windows))]
+    let result = Command::new("gh")
+        .args(["auth", "login", "--web", "-h", "github.com"])
+        .status();
+    
+    match result {
+        Ok(status) => {
+            if status.success() {
+                log::info!("gh auth login completed successfully");
+                // Refresh token from CLI
+                state.0.refresh_from_cli();
+                // Return updated auth status
+                check_github_auth(state).await
+            } else {
+                Err("GitHub login was cancelled or failed".to_string())
+            }
+        }
+        Err(e) => {
+            log::error!("Failed to run gh auth login: {}", e);
+            Err(format!("Failed to run gh CLI: {}. Is gh installed?", e))
+        }
+    }
+}
+
+/// Runs `gh auth logout` to log out from GitHub
+#[tauri::command]
+pub async fn github_logout(state: State<'_, GitHubState>) -> Result<(), String> {
+    use std::process::Command;
+    
+    log::info!("Starting gh auth logout...");
+    
+    // Clear local token first
+    state.0.clear_token();
+    
+    // Run gh auth logout
+    #[cfg(windows)]
+    let result = Command::new("cmd")
+        .args(["/C", "gh", "auth", "logout", "-h", "github.com"])
+        .status();
+    
+    #[cfg(not(windows))]
+    let result = Command::new("gh")
+        .args(["auth", "logout", "-h", "github.com"])
+        .status();
+    
+    match result {
+        Ok(status) => {
+            if status.success() {
+                log::info!("gh auth logout completed successfully");
+                Ok(())
+            } else {
+                // Even if gh logout fails, we've cleared the local token
+                log::warn!("gh auth logout returned non-zero status");
+                Ok(())
+            }
+        }
+        Err(e) => {
+            log::error!("Failed to run gh auth logout: {}", e);
+            // Still return Ok since we cleared the local token
+            Ok(())
+        }
+    }
+}
+
 /// Checks GitHub authentication status
 #[tauri::command]
 pub async fn check_github_auth(state: State<'_, GitHubState>) -> Result<GitHubAuth, String> {

@@ -143,6 +143,7 @@ export interface TerminalSession {
   label: string;
   cwd: string;
   shell: string;
+  shellType: 'cmd' | 'powershell' | 'bash' | 'default';
   status: 'running' | 'exited';
   exitCode?: number;
   isActive: boolean;
@@ -228,6 +229,7 @@ export interface AppSettings {
   terminalFontFamily: string;
   terminalTheme: 'auto' | 'dark' | 'light' | 'caffeine-dark' | 'caffeine-light' | 'monokai' | 'dracula';
   terminalCursorBlink: boolean;
+  defaultTerminal: 'cmd' | 'powershell' | 'bash';
 }
 
 // ============ Git Types ============

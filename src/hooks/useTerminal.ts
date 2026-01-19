@@ -14,29 +14,23 @@ import {
   resizeTerminal,
 } from '@/services/tauriCommands';
 
-export type ShellType = 'powershell' | 'bash' | 'default';
+export type ShellType = 'cmd' | 'powershell' | 'bash' | 'default';
 
 interface UseTerminalReturn {
   // State
   sessions: TerminalSession[];
   activeSession: TerminalSession | null;
   activeSessionId: string | null;
-  isCollapsed: boolean;
   
   // Session Management
   createSession: (shell?: ShellType, label?: string) => Promise<string | null>;
-  closeSession: (sessionId: string) => Promise<void>;
+  closeSession: (sessionId: string, skipBackend?: boolean) => Promise<void>;
   closeAllSessions: () => Promise<void>;
   setActiveSession: (sessionId: string) => void;
   
   // Terminal Operations
   write: (sessionId: string, data: string) => Promise<void>;
   resize: (sessionId: string, rows: number, cols: number) => Promise<void>;
-  
-  // Panel Controls
-  togglePanel: () => void;
-  collapsePanel: () => void;
-  expandPanel: () => void;
 }
 
 export function useTerminal(): UseTerminalReturn {
@@ -44,11 +38,9 @@ export function useTerminal(): UseTerminalReturn {
   const {
     sessions,
     activeSessionId,
-    isCollapsed,
     addSession,
     removeSession,
     setActiveSession: storeSetActiveSession,
-    setCollapsed,
   } = useTerminalStore();
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
@@ -64,6 +56,8 @@ export function useTerminal(): UseTerminalReturn {
   // Get shell executable path
   const getShellPath = useCallback((shell: ShellType): string | undefined => {
     switch (shell) {
+      case 'cmd':
+        return 'cmd.exe';
       case 'powershell':
         return 'powershell.exe';
       case 'bash':
@@ -80,6 +74,8 @@ export function useTerminal(): UseTerminalReturn {
   // Get shell display name
   const getShellLabel = useCallback((shell: ShellType): string => {
     switch (shell) {
+      case 'cmd':
+        return 'cmd';
       case 'powershell':
         return 'PowerShell';
       case 'bash':
@@ -102,30 +98,32 @@ export function useTerminal(): UseTerminalReturn {
         label: label || `${shellLabel} ${sessions.length + 1}`,
         cwd,
         shell: result.shell,
+        shellType: shell,
         status: 'running',
         isActive: true,
       };
       
       addSession(newSession);
       storeSetActiveSession(result.sessionId);
-      setCollapsed(false);
       
       return result.sessionId;
     } catch (err) {
       console.error('Failed to create terminal session:', err, shell);
       return null;
     }
-  }, [getCwd, getShellPath, getShellLabel, sessions.length, addSession, storeSetActiveSession, setCollapsed]);
+  }, [getCwd, getShellPath, getShellLabel, sessions.length, addSession, storeSetActiveSession]);
 
   // Close a terminal session
-  const closeSession = useCallback(async (sessionId: string): Promise<void> => {
-    try {
-      await closeTerminal(sessionId);
-    } catch (err) {
-      console.warn('Failed to close terminal backend:', err);
-    } finally {
-      removeSession(sessionId);
+  // If skipBackend is true, only remove from store (used when terminal already exited)
+  const closeSession = useCallback(async (sessionId: string, skipBackend = false): Promise<void> => {
+    if (!skipBackend) {
+      try {
+        await closeTerminal(sessionId);
+      } catch (err) {
+        console.warn('Failed to close terminal backend:', err);
+      }
     }
+    removeSession(sessionId);
   }, [removeSession]);
 
   // Close all terminal sessions
@@ -157,19 +155,6 @@ export function useTerminal(): UseTerminalReturn {
     await resizeTerminal(sessionId, rows, cols);
   }, []);
 
-  // Panel controls
-  const togglePanel = useCallback(() => {
-    setCollapsed(!isCollapsed);
-  }, [isCollapsed, setCollapsed]);
-
-  const collapsePanel = useCallback(() => {
-    setCollapsed(true);
-  }, [setCollapsed]);
-
-  const expandPanel = useCallback(() => {
-    setCollapsed(false);
-  }, [setCollapsed]);
-
   // Clean up sessions on unmount
   useEffect(() => {
     return () => {
@@ -183,7 +168,6 @@ export function useTerminal(): UseTerminalReturn {
     sessions,
     activeSession,
     activeSessionId,
-    isCollapsed,
     
     // Session Management
     createSession,
@@ -194,10 +178,5 @@ export function useTerminal(): UseTerminalReturn {
     // Terminal Operations
     write,
     resize,
-    
-    // Panel Controls
-    togglePanel,
-    collapsePanel,
-    expandPanel,
   };
 }

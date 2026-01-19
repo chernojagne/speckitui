@@ -202,15 +202,13 @@ export function ImplementView() {
           ) : !fileContent ? (
             <LoadingSpinner message="Loading file..." />
           ) : (
-            <div className="flex flex-col h-full overflow-hidden">
-              <SourceViewer
-                code={fileContent.content}
-                language={fileContent.language}
-                fileName={selectedPath.split('/').pop()}
-                showLineNumbers={true}
-                maxHeight="100%"
-              />
-            </div>
+            <SourceViewer
+              code={fileContent.content}
+              language={fileContent.language}
+              fileName={selectedPath.split('/').pop()}
+              showLineNumbers={true}
+              maxHeight="100%"
+            />
           )}
         </div>
       </div>

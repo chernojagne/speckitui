@@ -15,6 +15,7 @@ use std::sync::{Arc, Mutex};
 pub fn run() {
     // Create terminal manager
     let terminal_manager = Arc::new(TerminalManager::new());
+    let terminal_manager_clone = terminal_manager.clone();
     
     // Create GitHub client
     let github_client = Arc::new(GitHubClient::new());
@@ -45,6 +46,13 @@ pub fn run() {
                 )?;
             }
             Ok(())
+        })
+        .on_window_event(move |_window, event| {
+            // Clean up all terminal sessions when window is closing
+            if let tauri::WindowEvent::Destroyed = event {
+                log::info!("Window closing - cleaning up terminal sessions");
+                terminal_manager_clone.close_all_sessions();
+            }
         })
         .invoke_handler(tauri::generate_handler![
             // Project commands
@@ -77,10 +85,14 @@ pub fn run() {
             network::start_network_monitoring,
             network::stop_network_monitoring,
             network::check_github_reachable,
+            // Git commands
+            git::get_git_branch,
             // GitHub commands
             github::check_github_auth,
             github::set_github_token,
             github::clear_github_token,
+            github::github_login,
+            github::github_logout,
             github::github_oauth_start,
             github::github_oauth_complete,
             github::get_pull_requests,

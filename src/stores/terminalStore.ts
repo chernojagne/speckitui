@@ -6,7 +6,6 @@ interface TerminalState {
   sessions: TerminalSession[];
   activeSessionId: string | null;
   panelHeight: number;
-  isCollapsed: boolean;
 
   // Actions
   addSession: (session: TerminalSession) => void;
@@ -14,8 +13,8 @@ interface TerminalState {
   setActiveSession: (sessionId: string | null) => void;
   updateSession: (sessionId: string, updates: Partial<TerminalSession>) => void;
   setPanelHeight: (height: number) => void;
-  setCollapsed: (collapsed: boolean) => void;
-  toggleCollapsed: () => void;
+  renameSession: (sessionId: string, label: string) => void;
+  reorderSessions: (fromIndex: number, toIndex: number) => void;
 }
 
 export const useTerminalStore = create<TerminalState>((set) => ({
@@ -23,14 +22,12 @@ export const useTerminalStore = create<TerminalState>((set) => ({
   sessions: [],
   activeSessionId: null,
   panelHeight: 200,
-  isCollapsed: true,
 
   // Actions
   addSession: (session) =>
     set((state) => ({
       sessions: [...state.sessions, session],
       activeSessionId: session.id,
-      isCollapsed: false, // Auto-expand when adding a terminal
     })),
 
   removeSession: (sessionId) =>
@@ -50,9 +47,28 @@ export const useTerminalStore = create<TerminalState>((set) => ({
       sessions: state.sessions.map((s) => (s.id === sessionId ? { ...s, ...updates } : s)),
     })),
 
-  setPanelHeight: (height) => set({ panelHeight: Math.max(100, Math.min(600, height)) }),
+  // Remove max height constraint - only enforce minimum of 100px
+  setPanelHeight: (height) => set({ panelHeight: Math.max(100, height) }),
 
-  setCollapsed: (isCollapsed) => set({ isCollapsed }),
+  // Rename a terminal session - empty names revert to default "Terminal N"
+  renameSession: (sessionId, label) =>
+    set((state) => {
+      const sessionIndex = state.sessions.findIndex((s) => s.id === sessionId);
+      const newLabel = label.trim() || `Terminal ${sessionIndex + 1}`;
+      return {
+        sessions: state.sessions.map((s) =>
+          s.id === sessionId ? { ...s, label: newLabel } : s
+        ),
+      };
+    }),
 
-  toggleCollapsed: () => set((state) => ({ isCollapsed: !state.isCollapsed })),
+  // Reorder sessions by moving a tab from one index to another
+  reorderSessions: (fromIndex, toIndex) =>
+    set((state) => {
+      if (fromIndex === toIndex) return state;
+      const sessions = [...state.sessions];
+      const [removed] = sessions.splice(fromIndex, 1);
+      sessions.splice(toIndex, 0, removed);
+      return { sessions };
+    }),
 }));

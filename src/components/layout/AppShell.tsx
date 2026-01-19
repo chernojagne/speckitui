@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { NavPane } from './NavPane';
 import { DetailPane } from './DetailPane';
+import { StatusBar } from './StatusBar';
 import { TerminalPanel } from './TerminalPanel';
 import { TitleBar } from './TitleBar';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
@@ -10,7 +11,6 @@ import {
   ResizableHandle,
 } from '@/components/ui/resizable';
 import { useProjectStore } from '@/stores/projectStore';
-import { useTerminalStore } from '@/stores/terminalStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { open } from '@tauri-apps/plugin-dialog';
 import { openProject } from '@/services/tauriCommands';
@@ -22,7 +22,6 @@ export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { error, setProject, setLoading, setError, setActiveSpec } =
     useProjectStore();
-  const { isCollapsed: terminalCollapsed } = useTerminalStore();
   const { updateContentStatus } = useWorkflowStore();
   const { 
     addRecentProject, 
@@ -128,26 +127,19 @@ export function AppShell() {
           />
         </ResizablePanel>
         <ResizableHandle disabled={navPaneCollapsed} className="hover:bg-primary/20 transition-colors" />
-        <ResizablePanel id="main-content">
-          {/* Vertical split: DetailPane on top, Terminal on bottom */}
-          <ResizablePanelGroup orientation="vertical" className="h-full">
-            <ResizablePanel id="detail-pane" defaultSize={terminalCollapsed ? "100%" : "70%"} minSize="200px">
-              <main className="flex flex-col flex-1 h-full overflow-hidden">
-                <DetailPane />
-              </main>
-            </ResizablePanel>
-            <ResizableHandle disabled={terminalCollapsed} className="hover:bg-primary/20 transition-colors" />
-            <ResizablePanel 
-              id="terminal-pane" 
-              defaultSize={terminalCollapsed ? "32px" : "30%"} 
-              minSize={terminalCollapsed ? "32px" : "100px"}
-              maxSize={terminalCollapsed ? "32px" : undefined}
-            >
-              <TerminalPanel minimized={terminalCollapsed} />
-            </ResizablePanel>
-          </ResizablePanelGroup>
+        <ResizablePanel id="main-content" className="!overflow-hidden">
+          {/* Vertical layout: DetailPane fills remaining space, Terminal at bottom with fixed height */}
+          <div className="flex flex-col h-full overflow-hidden">
+            <main className="flex-1 flex flex-col overflow-hidden min-h-0">
+              <DetailPane />
+            </main>
+            <TerminalPanel />
+          </div>
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      {/* Status bar spans full width below nav and main content */}
+      <StatusBar />
     </div>
   );
 }

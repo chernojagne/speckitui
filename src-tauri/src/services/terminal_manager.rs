@@ -93,25 +93,56 @@ impl TerminalManager {
         });
 
         // Store the session
-        self.sessions.lock().unwrap().insert(id.clone(), session);
+        self.sessions.lock().unwrap().insert(id.clone(), session.clone());
 
         // Spawn a thread to read output and emit events
         let session_id = id.clone();
+        let session_id_for_output = id.clone();
+        let app_handle_for_child = app_handle.clone();
+        
+        // Thread to read PTY output
         thread::spawn(move || {
             let mut buf = [0u8; 4096];
             loop {
                 match reader.read(&mut buf) {
                     Ok(0) => {
                         // EOF - terminal closed
-                        let _ = app_handle.emit(&format!("terminal-exit-{}", session_id), ());
+                        log::info!("PTY EOF for session {}", session_id_for_output);
+                        let _ = app_handle.emit(&format!("terminal-exit-{}", session_id_for_output), ());
                         break;
                     }
                     Ok(n) => {
                         let data = String::from_utf8_lossy(&buf[..n]).to_string();
-                        let _ = app_handle.emit(&format!("terminal-output-{}", session_id), data);
+                        let _ = app_handle.emit(&format!("terminal-output-{}", session_id_for_output), data);
                     }
                     Err(e) => {
                         log::error!("Error reading from PTY: {}", e);
+                        let _ = app_handle.emit(&format!("terminal-exit-{}", session_id_for_output), ());
+                        break;
+                    }
+                }
+            }
+        });
+        
+        // Thread to monitor child process exit (Windows ConPTY may not signal EOF on exit)
+        let child_arc = session.child.clone();
+        thread::spawn(move || {
+            // Wait for child process to exit
+            loop {
+                thread::sleep(std::time::Duration::from_millis(100));
+                let mut child = child_arc.lock().unwrap();
+                match child.try_wait() {
+                    Ok(Some(status)) => {
+                        log::info!("Child process exited with status {:?} for session {}", status, session_id);
+                        let _ = app_handle_for_child.emit(&format!("terminal-exit-{}", session_id), ());
+                        break;
+                    }
+                    Ok(None) => {
+                        // Still running
+                        continue;
+                    }
+                    Err(e) => {
+                        log::error!("Error checking child status: {}", e);
                         break;
                     }
                 }
@@ -157,17 +188,48 @@ impl TerminalManager {
         Ok(())
     }
 
-    /// Closes a terminal session
+    /// Closes a terminal session with proper cleanup
     pub fn close_session(&self, id: &str) -> Result<(), String> {
         let mut sessions = self.sessions.lock().unwrap();
         
         if let Some(session) = sessions.remove(id) {
-            // Kill the child process
+            // Kill the child process and wait for it to exit
             let mut child = session.child.lock().unwrap();
-            let _ = child.kill();
+            
+            // First, try to kill the child process
+            if let Err(e) = child.kill() {
+                log::warn!("Failed to kill terminal child process {}: {}", id, e);
+            }
+            
+            // Wait for the child process to fully exit to prevent orphaned processes
+            match child.wait() {
+                Ok(status) => {
+                    log::info!("Terminal session {} closed with status: {:?}", id, status);
+                }
+                Err(e) => {
+                    log::warn!("Failed to wait for terminal child process {}: {}", id, e);
+                }
+            }
+            
+            log::debug!("Terminal session {} cleanup complete", id);
             Ok(())
         } else {
             Err(format!("Terminal session not found: {}", id))
+        }
+    }
+
+    /// Closes all terminal sessions (called on app exit)
+    pub fn close_all_sessions(&self) {
+        let mut sessions = self.sessions.lock().unwrap();
+        let ids: Vec<String> = sessions.keys().cloned().collect();
+        
+        for id in ids {
+            if let Some(session) = sessions.remove(&id) {
+                let mut child = session.child.lock().unwrap();
+                let _ = child.kill();
+                let _ = child.wait();
+                log::info!("Cleaned up terminal session: {}", id);
+            }
         }
     }
 
