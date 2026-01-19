@@ -29,11 +29,11 @@ pub async fn create_terminal(
             .unwrap_or_else(|_| "/".to_string())
     });
 
-    // Detect default shell
+    // Detect default shell - Windows uses cmd.exe by default
     let shell = shell.unwrap_or_else(|| {
         #[cfg(windows)]
         {
-            "powershell.exe".to_string()
+            "cmd.exe".to_string()
         }
         #[cfg(not(windows))]
         {

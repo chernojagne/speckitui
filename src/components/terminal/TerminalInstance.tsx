@@ -28,6 +28,13 @@ type TerminalOutputPayload = string;
 // This prevents duplicate terminals in React StrictMode
 const terminalInstances = new Map<string, { terminal: Terminal; fitAddon: FitAddon }>();
 
+// Development logging helper
+const logTerminalDebug = (message: string, sessionId: string) => {
+  if (import.meta.env.DEV) {
+    console.debug(`[Terminal ${sessionId.slice(0, 8)}] ${message} | Active instances: ${terminalInstances.size}`);
+  }
+};
+
 export function TerminalInstance({
   sessionId,
   isActive,
@@ -110,6 +117,7 @@ export function TerminalInstance({
     
     // Store in global map
     terminalInstances.set(sessionId, { terminal, fitAddon });
+    logTerminalDebug('Created new terminal instance', sessionId);
 
     // Handle user input - use ref for callback
     terminal.onData((data) => {
@@ -127,11 +135,13 @@ export function TerminalInstance({
     // We use a timeout to distinguish StrictMode remount from real unmount
     return () => {
       mountedRef.current = false;
+      logTerminalDebug('Cleanup started (100ms delay)', sessionId);
       
       // Delay cleanup to allow StrictMode remount to claim the terminal
       setTimeout(() => {
         if (!mountedRef.current) {
           // Component didn't remount - truly unmounting
+          logTerminalDebug('Disposing terminal (no remount)', sessionId);
           terminalInstances.delete(sessionId);
           terminal.dispose();
           terminalRef.current = null;
@@ -195,6 +205,42 @@ export function TerminalInstance({
     };
   }, [sessionId]);
 
+  // Listen for terminal exit events (PTY process terminated unexpectedly)
+  useEffect(() => {
+    let unlisten: UnlistenFn | null = null;
+    let cancelled = false;
+
+    const setupExitListener = async () => {
+      try {
+        const unlistenFn = await listen<void>(
+          `terminal-exit-${sessionId}`,
+          () => {
+            // Terminal process exited - write message and notify
+            if (terminalRef.current) {
+              terminalRef.current.write('\r\n\x1b[90m[Process exited]\x1b[0m\r\n');
+            }
+            onErrorRef.current?.('Terminal process exited');
+          }
+        );
+        
+        if (cancelled) {
+          unlistenFn();
+        } else {
+          unlisten = unlistenFn;
+        }
+      } catch (err) {
+        console.error('Failed to setup terminal exit listener:', err);
+      }
+    };
+
+    setupExitListener();
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  }, [sessionId]);
+
   // Handle resize
   const handleResize = useCallback(() => {
     if (fitAddonRef.current && terminalRef.current) {
@@ -207,18 +253,47 @@ export function TerminalInstance({
     }
   }, [sessionId]);
 
-  // Resize on container size change
+  // Debounced resize with dimension tracking
+  const lastDimensionsRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const resizeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Resize on container size change with debouncing
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const resizeObserver = new ResizeObserver(() => {
-      handleResize();
+    const resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+
+      const { width, height } = entry.contentRect;
+      const lastDims = lastDimensionsRef.current;
+
+      // Only trigger resize if dimensions actually changed
+      if (width === lastDims.width && height === lastDims.height) {
+        return;
+      }
+
+      lastDimensionsRef.current = { width, height };
+
+      // Cancel pending resize
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+
+      // Debounce resize calls by 50ms
+      resizeTimeoutRef.current = setTimeout(() => {
+        handleResize();
+        resizeTimeoutRef.current = null;
+      }, 50);
     });
 
     resizeObserver.observe(containerRef.current);
 
     return () => {
       resizeObserver.disconnect();
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
     };
   }, [handleResize]);
 

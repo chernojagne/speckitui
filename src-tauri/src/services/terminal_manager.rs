@@ -157,17 +157,48 @@ impl TerminalManager {
         Ok(())
     }
 
-    /// Closes a terminal session
+    /// Closes a terminal session with proper cleanup
     pub fn close_session(&self, id: &str) -> Result<(), String> {
         let mut sessions = self.sessions.lock().unwrap();
         
         if let Some(session) = sessions.remove(id) {
-            // Kill the child process
+            // Kill the child process and wait for it to exit
             let mut child = session.child.lock().unwrap();
-            let _ = child.kill();
+            
+            // First, try to kill the child process
+            if let Err(e) = child.kill() {
+                log::warn!("Failed to kill terminal child process {}: {}", id, e);
+            }
+            
+            // Wait for the child process to fully exit to prevent orphaned processes
+            match child.wait() {
+                Ok(status) => {
+                    log::info!("Terminal session {} closed with status: {:?}", id, status);
+                }
+                Err(e) => {
+                    log::warn!("Failed to wait for terminal child process {}: {}", id, e);
+                }
+            }
+            
+            log::debug!("Terminal session {} cleanup complete", id);
             Ok(())
         } else {
             Err(format!("Terminal session not found: {}", id))
+        }
+    }
+
+    /// Closes all terminal sessions (called on app exit)
+    pub fn close_all_sessions(&self) {
+        let mut sessions = self.sessions.lock().unwrap();
+        let ids: Vec<String> = sessions.keys().cloned().collect();
+        
+        for id in ids {
+            if let Some(session) = sessions.remove(&id) {
+                let mut child = session.child.lock().unwrap();
+                let _ = child.kill();
+                let _ = child.wait();
+                log::info!("Cleaned up terminal session: {}", id);
+            }
         }
     }
 

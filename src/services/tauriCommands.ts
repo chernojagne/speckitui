@@ -189,3 +189,15 @@ export async function loadSettings(): Promise<AppSettings> {
 export async function saveSettings(settings: AppSettings): Promise<void> {
   return invoke('save_settings', { settings });
 }
+
+// ============ Git Commands ============
+
+export interface GitBranchInfo {
+  branch: string | null;
+  isDetached: boolean;
+  commitHash: string | null;
+}
+
+export async function getGitBranch(projectPath: string): Promise<GitBranchInfo> {
+  return invoke('get_git_branch', { projectPath });
+}
