@@ -6,6 +6,7 @@ import { TerminalTabs } from '@/components/terminal/TerminalTabs';
 import { Button } from '@/components/ui/button';
 import { Plus, Terminal } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import './TerminalPanel.css';
 
 const MIN_PANEL_HEIGHT = 100;
 
@@ -55,7 +56,7 @@ export function TerminalPanel() {
     <div 
       ref={panelRef}
       className={cn(
-        "relative flex flex-col bg-background border-t border-border",
+        "relative flex flex-col bg-background border-t border-border shrink-0",
         isResizing && "select-none"
       )}
       style={{ height: `${panelHeight}px` }}

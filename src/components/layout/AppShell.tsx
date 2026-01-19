@@ -127,9 +127,9 @@ export function AppShell() {
           />
         </ResizablePanel>
         <ResizableHandle disabled={navPaneCollapsed} className="hover:bg-primary/20 transition-colors" />
-        <ResizablePanel id="main-content">
+        <ResizablePanel id="main-content" className="!overflow-hidden">
           {/* Vertical layout: DetailPane fills remaining space, Terminal at bottom with fixed height */}
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full overflow-hidden">
             <main className="flex-1 flex flex-col overflow-hidden min-h-0">
               <DetailPane />
             </main>
