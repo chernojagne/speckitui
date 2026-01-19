@@ -249,3 +249,165 @@ export interface ChangedFile {
   status: 'added' | 'modified' | 'deleted' | 'renamed' | 'untracked';
   staged: boolean;
 }
+
+// ============ Editor & Composer Types (005-ui-enhancements) ============
+
+/** Rich content for the Describe view composer, persisted to description.md */
+export interface ComposerContent {
+  /** Raw markdown content (primary storage format) */
+  markdown: string;
+  /** ISO timestamp of last modification */
+  lastModified: string;
+  /** Embedded assets (images/files) */
+  assets: ComposerAsset[];
+}
+
+export interface ComposerAsset {
+  id: string;
+  type: 'image' | 'file';
+  filename: string;
+  /** For inline images: base64 data URI; for files: relative path to assets/ */
+  reference: string;
+}
+
+/** Supported AI agent CLI tools */
+export type AgentType = 'copilot' | 'claude' | 'gemini';
+
+export interface AgentConfig {
+  type: AgentType;
+  displayName: string;
+  filePath: string;
+  markerStart: string;
+  markerEnd: string;
+}
+
+/** Git status for an artifact file */
+export type GitFileStatus = 'clean' | 'modified' | 'untracked' | 'staged' | 'conflict';
+
+/** A markdown file associated with a workflow step */
+export interface ArtifactFile {
+  id: string;
+  filename: string;
+  path: string;
+  content: string;
+  exists: boolean;
+  isModified: boolean;
+  gitStatus: GitFileStatus;
+  lastLoaded: string;
+}
+
+/** Editor state for markdown editing */
+export interface EditorState {
+  activeArtifact: string | null;
+  unsavedChanges: Record<string, string>;
+  isEditing: boolean;
+}
+
+/** Input for creating a new feature spec */
+export interface NewSpecInput {
+  shortName: string;
+  description: string;
+}
+
+export interface NewSpecResult {
+  branchName: string;
+  specFile: string;
+  featureNum: string;
+}
+
+/** Input for creating a new project */
+export interface NewProjectInput {
+  name: string;
+  location: string;
+}
+
+export interface NewProjectResult {
+  path: string;
+  initCommand: string;
+}
+
+// ============ IPC Request/Response Types (005-ui-enhancements) ============
+
+export interface WriteFileRequest {
+  path: string;
+  content: string;
+}
+
+export interface WriteFileResponse {
+  success: boolean;
+  path: string;
+  bytesWritten: number;
+}
+
+export interface ExecuteShellRequest {
+  scriptPath: string;
+  args: string[];
+  cwd?: string;
+}
+
+export interface ExecuteShellResponse {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}
+
+export interface GitStatusRequest {
+  repoPath: string;
+  files: string[];
+}
+
+export interface GitStatusResponse {
+  statuses: Record<string, GitFileStatus>;
+}
+
+export interface CreateDirectoryRequest {
+  path: string;
+}
+
+export interface CreateDirectoryResponse {
+  success: boolean;
+  path: string;
+}
+
+export interface WatchArtifactRequest {
+  specDir: string;
+  files: string[];
+}
+
+export interface WatchArtifactResponse {
+  watchId: string;
+}
+
+export interface UnwatchArtifactRequest {
+  watchId: string;
+}
+
+export interface UnwatchArtifactResponse {
+  success: boolean;
+}
+
+export interface UpdateAgentContextRequest {
+  agentType: AgentType;
+  content: string;
+  featureName: string;
+  repoPath: string;
+}
+
+export interface UpdateAgentContextResponse {
+  success: boolean;
+  filePath: string;
+  created: boolean;
+}
+
+export interface ArtifactFileChangedEvent {
+  watchId: string;
+  file: string;
+  path: string;
+  changeType: 'modified' | 'created' | 'deleted';
+}
+
+export interface GitStatusChangedEvent {
+  repoPath: string;
+  file: string;
+  status: GitFileStatus;
+}

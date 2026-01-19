@@ -19,9 +19,9 @@
 
 **Purpose**: Project initialization, types, and shared stores
 
-- [ ] T001 Add new type definitions (ComposerContent, AgentType, Artifact, EditorState, etc.) in src/types/index.ts
-- [ ] T002 [P] Create editorStore with unsaved changes tracking in src/stores/editorStore.ts
-- [ ] T003 [P] Create artifactStore with artifact file states in src/stores/artifactStore.ts
+- [X] T001 Add new type definitions (ComposerContent, AgentType, Artifact, EditorState, etc.) in src/types/index.ts
+- [X] T002 [P] Create editorStore with unsaved changes tracking in src/stores/editorStore.ts
+- [X] T003 [P] Create artifactStore with artifact file states in src/stores/artifactStore.ts
 
 ---
 
@@ -33,23 +33,23 @@
 
 ### Rust Backend Commands
 
-- [ ] T004 Write unit tests for write_file command in src-tauri/src/commands/file_write.rs
-- [ ] T005 Implement write_file command in src-tauri/src/commands/file_write.rs
-- [ ] T006 [P] Write unit tests for execute_shell_script command in src-tauri/src/commands/shell_exec.rs
-- [ ] T007 [P] Implement execute_shell_script command in src-tauri/src/commands/shell_exec.rs
-- [ ] T008 [P] Write unit tests for get_git_status command in src-tauri/src/services/git_status.rs
-- [ ] T009 [P] Implement get_git_status command in src-tauri/src/services/git_status.rs
-- [ ] T010 [P] Write unit tests for create_directory command in src-tauri/src/commands/file_write.rs
-- [ ] T011 [P] Implement create_directory command in src-tauri/src/commands/file_write.rs
+- [X] T004 Write unit tests for write_file command in src-tauri/src/commands/file_write.rs
+- [X] T005 Implement write_file command in src-tauri/src/commands/file_write.rs
+- [X] T006 [P] Write unit tests for execute_shell_script command in src-tauri/src/commands/shell_exec.rs
+- [X] T007 [P] Implement execute_shell_script command in src-tauri/src/commands/shell_exec.rs
+- [X] T008 [P] Write unit tests for get_git_status command in src-tauri/src/services/git_status.rs
+- [X] T009 [P] Implement get_git_status command in src-tauri/src/services/git_status.rs
+- [X] T010 [P] Write unit tests for create_directory command in src-tauri/src/commands/file_write.rs
+- [X] T011 [P] Implement create_directory command in src-tauri/src/commands/file_write.rs
 - [ ] T012 Extend file_watcher.rs to support watch_artifact_files and unwatch_artifact_files in src-tauri/src/services/file_watcher.rs
-- [ ] T013 Implement update_agent_context command in src-tauri/src/commands/file_write.rs
-- [ ] T014 Register all new commands in src-tauri/src/commands/mod.rs
-- [ ] T015 Register commands in Tauri app builder in src-tauri/src/lib.rs
+- [X] T013 Implement update_agent_context command in src-tauri/src/commands/file_write.rs
+- [X] T014 Register all new commands in src-tauri/src/commands/mod.rs
+- [X] T015 Register commands in Tauri app builder in src-tauri/src/lib.rs
 
 ### Frontend Command Bindings
 
-- [ ] T016 Add TypeScript bindings for write_file, execute_shell_script, get_git_status in src/services/tauriCommands.ts
-- [ ] T017 Add TypeScript bindings for create_directory, watch_artifact_files, update_agent_context in src/services/tauriCommands.ts
+- [X] T016 Add TypeScript bindings for write_file, execute_shell_script, get_git_status in src/services/tauriCommands.ts
+- [X] T017 Add TypeScript bindings for create_directory, watch_artifact_files, update_agent_context in src/services/tauriCommands.ts
 
 **Checkpoint**: Foundation ready - all Rust commands tested and available via IPC
 
