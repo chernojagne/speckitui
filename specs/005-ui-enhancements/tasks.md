@@ -66,6 +66,7 @@
 - [ ] T018 [P] [US1] Create useMarkdownEditor hook with edit/save logic in src/hooks/useMarkdownEditor.ts
 - [ ] T019 [US1] Create MarkdownEditor shared component with edit/preview toggle in src/components/shared/MarkdownEditor.tsx
 - [ ] T020 [US1] Modify ConstitutionView to use MarkdownEditor for editing in src/components/settings/ConstitutionView.tsx
+- [ ] T020a [US1] Handle missing constitution.md - show create prompt or create empty file in src/components/settings/ConstitutionView.tsx
 - [ ] T021 [US1] Add file watching for constitution.md to update view on external changes in src/components/settings/ConstitutionView.tsx
 - [ ] T022 [US1] Add unsaved changes warning dialog using editorStore in src/components/settings/ConstitutionView.tsx
 
@@ -124,6 +125,7 @@
 - [ ] T035 [US3] Add agent configuration constants (file paths, markers) in src/config/agentConfig.ts
 - [ ] T036 [US3] Add "Add to Agent Context" button to DescribeView in src/components/workflow/DescribeView.tsx
 - [ ] T037 [US3] Implement agent file update logic using update_agent_context IPC in src/components/shared/AgentSelector.tsx
+- [ ] T037a [US3] Handle missing agent context file - create with spec-kit template markers in src-tauri/src/commands/file_write.rs
 - [ ] T038 [US3] Show success/error toast after agent context update in src/components/shared/AgentSelector.tsx
 
 **Checkpoint**: User Story 3 complete - Composer content flows to agent context files
@@ -300,16 +302,16 @@ T030 "Add file upload handling..."
 |-------|-------------|------------|
 | Phase 1 | Setup | 3 |
 | Phase 2 | Foundational | 14 |
-| Phase 3 | US1 - Constitution Editing | 5 |
+| Phase 3 | US1 - Constitution Editing | 6 |
 | Phase 4 | US8 - Constitution Navbar | 3 |
 | Phase 5 | US2 - Rich Composer | 8 |
-| Phase 6 | US3 - Agent Context | 5 |
+| Phase 6 | US3 - Agent Context | 6 |
 | Phase 7 | US6 - Edit All Markdown | 6 |
 | Phase 8 | US7 - File Watching | 6 |
 | Phase 9 | US4 - New Spec | 5 |
 | Phase 10 | US5 - New Project | 5 |
 | Phase 11 | Polish | 6 |
-| **Total** | | **66** |
+| **Total** | | **68** |
 
 ---
 

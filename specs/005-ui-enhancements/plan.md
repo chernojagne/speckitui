@@ -109,7 +109,7 @@ No constitution violations identified. All features use existing patterns and te
 |-------|--------------|--------|
 | Phase 0: Research | [research.md](research.md) | ✅ Complete |
 | Phase 1: Design | [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md) | ✅ Complete |
-| Phase 2: Tasks | [tasks.md](tasks.md) | 🔜 Next: Run `/speckit.tasks` |
+| Phase 2: Tasks | [tasks.md](tasks.md) | ✅ Complete |
 
 ## Next Steps
 
