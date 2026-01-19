@@ -93,25 +93,56 @@ impl TerminalManager {
         });
 
         // Store the session
-        self.sessions.lock().unwrap().insert(id.clone(), session);
+        self.sessions.lock().unwrap().insert(id.clone(), session.clone());
 
         // Spawn a thread to read output and emit events
         let session_id = id.clone();
+        let session_id_for_output = id.clone();
+        let app_handle_for_child = app_handle.clone();
+        
+        // Thread to read PTY output
         thread::spawn(move || {
             let mut buf = [0u8; 4096];
             loop {
                 match reader.read(&mut buf) {
                     Ok(0) => {
                         // EOF - terminal closed
-                        let _ = app_handle.emit(&format!("terminal-exit-{}", session_id), ());
+                        log::info!("PTY EOF for session {}", session_id_for_output);
+                        let _ = app_handle.emit(&format!("terminal-exit-{}", session_id_for_output), ());
                         break;
                     }
                     Ok(n) => {
                         let data = String::from_utf8_lossy(&buf[..n]).to_string();
-                        let _ = app_handle.emit(&format!("terminal-output-{}", session_id), data);
+                        let _ = app_handle.emit(&format!("terminal-output-{}", session_id_for_output), data);
                     }
                     Err(e) => {
                         log::error!("Error reading from PTY: {}", e);
+                        let _ = app_handle.emit(&format!("terminal-exit-{}", session_id_for_output), ());
+                        break;
+                    }
+                }
+            }
+        });
+        
+        // Thread to monitor child process exit (Windows ConPTY may not signal EOF on exit)
+        let child_arc = session.child.clone();
+        thread::spawn(move || {
+            // Wait for child process to exit
+            loop {
+                thread::sleep(std::time::Duration::from_millis(100));
+                let mut child = child_arc.lock().unwrap();
+                match child.try_wait() {
+                    Ok(Some(status)) => {
+                        log::info!("Child process exited with status {:?} for session {}", status, session_id);
+                        let _ = app_handle_for_child.emit(&format!("terminal-exit-{}", session_id), ());
+                        break;
+                    }
+                    Ok(None) => {
+                        // Still running
+                        continue;
+                    }
+                    Err(e) => {
+                        log::error!("Error checking child status: {}", e);
                         break;
                     }
                 }

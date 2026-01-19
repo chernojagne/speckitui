@@ -1,18 +1,36 @@
 import { useRef, useState, useCallback } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useTerminal, type ShellType } from '@/hooks/useTerminal';
 import { useTerminalHotkeys } from '@/hooks/useTerminalHotkeys';
 import { TerminalInstance } from '@/components/terminal/TerminalInstance';
 import { TerminalTabs } from '@/components/terminal/TerminalTabs';
 import { Button } from '@/components/ui/button';
-import { Plus, Terminal } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import './TerminalPanel.css';
 
 const MIN_PANEL_HEIGHT = 100;
 
+// Shell configuration for display names and icons
+const SHELL_CONFIG = {
+  cmd: {
+    name: 'Command Prompt',
+    icon: '>_',
+  },
+  powershell: {
+    name: 'PowerShell',
+    icon: 'PS',
+  },
+  bash: {
+    name: 'Bash',
+    icon: '$_',
+  },
+} as const;
+
 export function TerminalPanel() {
   const { sessions, activeSessionId, panelHeight, setPanelHeight } = useTerminalStore();
+  const { defaultTerminal } = useSettingsStore();
   const { createSession, closeSession } = useTerminal();
   const [isResizing, setIsResizing] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -91,16 +109,18 @@ export function TerminalPanel() {
       <div className="flex-1 overflow-hidden relative">
         {sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
-            <Terminal className="h-12 w-12" />
-            <p className="text-sm">Click + to open a new terminal</p>
+            <span className="font-mono text-4xl font-bold text-primary">
+              {SHELL_CONFIG[defaultTerminal].icon}
+            </span>
+            <p className="text-sm">Click to open a new {SHELL_CONFIG[defaultTerminal].name} terminal</p>
             <Button 
               variant="outline" 
               size="sm"
               className="gap-2"
-              onClick={() => handleNewTerminal('default')}
+              onClick={() => handleNewTerminal(defaultTerminal)}
             >
               <Plus className="h-4 w-4" />
-              New Terminal
+              New {SHELL_CONFIG[defaultTerminal].name}
             </Button>
           </div>
         ) : (
@@ -114,7 +134,7 @@ export function TerminalPanel() {
                 <TerminalInstance
                   sessionId={session.id}
                   isActive={session.id === activeSessionId}
-                  onExit={() => handleCloseTerminal(session.id)}
+                  onExit={() => closeSession(session.id, true)}
                 />
               </div>
             ))}

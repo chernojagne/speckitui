@@ -216,15 +216,18 @@ export function TerminalInstance({
 
     const setupExitListener = async () => {
       try {
+        console.log(`[Terminal ${sessionId}] Setting up exit listener`);
         const unlistenFn = await listen<void>(
           `terminal-exit-${sessionId}`,
           () => {
+            console.log(`[Terminal ${sessionId}] Exit event received!`);
             // Terminal process exited - write message and notify
             if (terminalRef.current) {
               terminalRef.current.write('\r\n\x1b[90m[Process exited]\x1b[0m\r\n');
             }
             onErrorRef.current?.('Terminal process exited');
             // Auto-close the tab when shell exits
+            console.log(`[Terminal ${sessionId}] Calling onExit callback...`);
             onExitRef.current?.();
           }
         );

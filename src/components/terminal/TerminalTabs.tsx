@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { X, ChevronDown, Check } from 'lucide-react';
+import { X, ChevronDown, Check, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Terminal shell configuration with icons and labels
@@ -67,9 +67,16 @@ export function TerminalTabs({
   const setDefaultTerminal = useSettingsStore((s) => s.setDefaultTerminal);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [dragState, setDragState] = useState<{
+    isDragging: boolean;
+    draggedIndex: number;
+    currentIndex: number;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  // Ref to access current sessions during drag (avoid stale closure)
+  const sessionsRef = useRef(sessions);
+  sessionsRef.current = sessions;
   
   // Get terminal theme to match selected tab background with terminal
   const terminalThemeSetting = useSettingsStore((s) => s.terminalTheme);
@@ -132,64 +139,71 @@ export function TerminalTabs({
     onNewTerminal?.(shell);
   };
 
-  // Drag and drop handlers for tab reordering
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', index.toString());
-    // Add a slight delay to allow the drag image to be created
-    requestAnimationFrame(() => {
-      (e.target as HTMLElement).style.opacity = '0.5';
-    });
-  };
-
-  const handleDragEnd = (e: React.DragEvent) => {
-    (e.target as HTMLElement).style.opacity = '1';
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  };
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  // Mouse-based drag handlers for real-time tab reordering
+  const handleTabDragStart = useCallback((e: React.MouseEvent, index: number) => {
+    if (e.button !== 0) return; // Only left click
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    if (draggedIndex !== null && index !== draggedIndex) {
-      setDragOverIndex(index);
-    }
-  };
-
-  const handleDragLeave = () => {
-    setDragOverIndex(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, toIndex: number) => {
-    e.preventDefault();
-    const fromIndex = draggedIndex;
-    if (fromIndex !== null && fromIndex !== toIndex) {
-      reorderSessions(fromIndex, toIndex);
-    }
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  };
+    
+    let currentIdx = index;
+    setDragState({ isDragging: true, draggedIndex: index, currentIndex: index });
+    
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!tabsContainerRef.current) return;
+      
+      const container = tabsContainerRef.current;
+      const tabs = Array.from(container.querySelectorAll('[data-tab-index]')) as HTMLElement[];
+      
+      // Find which tab position we're over based on mouse position
+      let newIndex = 0;
+      for (let i = 0; i < tabs.length; i++) {
+        const rect = tabs[i].getBoundingClientRect();
+        const midpoint = rect.left + rect.width / 2;
+        if (moveEvent.clientX > midpoint) {
+          newIndex = i + 1;
+        } else {
+          break;
+        }
+      }
+      newIndex = Math.min(newIndex, sessionsRef.current.length - 1);
+      newIndex = Math.max(newIndex, 0);
+      
+      if (currentIdx !== newIndex) {
+        // Reorder in real-time
+        reorderSessions(currentIdx, newIndex);
+        currentIdx = newIndex;
+        setDragState({ isDragging: true, draggedIndex: index, currentIndex: newIndex });
+      }
+    };
+    
+    const handleMouseUp = () => {
+      setDragState(null);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [sessions.length, reorderSessions]);
 
   return (
     <div className="flex items-center justify-between h-8 bg-card border-b border-border">
-      <div className="flex items-center gap-px overflow-x-auto flex-1 scrollbar-none">
+      <div ref={tabsContainerRef} className="flex items-center gap-px overflow-x-auto flex-1 scrollbar-none">
         {sessions.map((session, index) => {
           const displayLabel = session.label || `Terminal ${index + 1}`;
           const isEditing = editingTabId === session.id;
-          const isDragging = draggedIndex === index;
-          const isDragOver = dragOverIndex === index;
+          const isDragging = dragState?.currentIndex === index;
 
           return (
             <div
               key={session.id}
+              data-tab-index={index}
               className={cn(
-                "group flex items-center gap-1.5 h-8 px-3 text-xs border-r border-border transition-colors cursor-pointer",
+                "group flex items-center gap-1.5 h-8 px-3 text-xs border-r border-border transition-colors select-none",
                 session.id === activeSessionId 
                   ? "text-foreground" 
                   : "text-muted-foreground hover:bg-accent/50",
-                isDragging && "opacity-50",
-                isDragOver && "border-l-2 border-l-primary"
+                isDragging && dragState?.isDragging && "opacity-70 ring-2 ring-primary",
+                !isEditing && "cursor-grab active:cursor-grabbing"
               )}
               style={{ backgroundColor: session.id === activeSessionId ? terminalBackground : undefined }}
               onClick={() => handleTabClick(session.id)}
@@ -200,15 +214,11 @@ export function TerminalTabs({
                   e.preventDefault();
                   removeSession(session.id);
                   onCloseTerminal?.(session.id);
+                } else if (e.button === 0 && !isEditing) {
+                  // Left-click starts drag
+                  handleTabDragStart(e, index);
                 }
               }}
-              // Drag and drop for reordering
-              draggable={!isEditing}
-              onDragStart={(e) => handleDragStart(e, index)}
-              onDragEnd={handleDragEnd}
-              onDragOver={(e) => handleDragOver(e, index)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, index)}
               title={isEditing ? undefined : `${displayLabel} (drag to reorder, double-click to rename, middle-click to close)`}
               role="tab"
               aria-selected={session.id === activeSessionId}
@@ -256,11 +266,12 @@ export function TerminalTabs({
         <Button 
           variant="ghost" 
           size="sm" 
-          className="h-6 w-6 p-0"
+          className="h-6 px-1.5 gap-0.5"
           onClick={() => handleNewTerminal(defaultTerminal)}
           title={`New ${SHELL_CONFIG[defaultTerminal].fullName} (default)`}
         >
           <ShellIcon shell={defaultTerminal} className="text-muted-foreground" />
+          <Plus className="h-3 w-3 text-muted-foreground" />
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

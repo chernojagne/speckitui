@@ -24,7 +24,7 @@ interface UseTerminalReturn {
   
   // Session Management
   createSession: (shell?: ShellType, label?: string) => Promise<string | null>;
-  closeSession: (sessionId: string) => Promise<void>;
+  closeSession: (sessionId: string, skipBackend?: boolean) => Promise<void>;
   closeAllSessions: () => Promise<void>;
   setActiveSession: (sessionId: string) => void;
   
@@ -114,14 +114,16 @@ export function useTerminal(): UseTerminalReturn {
   }, [getCwd, getShellPath, getShellLabel, sessions.length, addSession, storeSetActiveSession]);
 
   // Close a terminal session
-  const closeSession = useCallback(async (sessionId: string): Promise<void> => {
-    try {
-      await closeTerminal(sessionId);
-    } catch (err) {
-      console.warn('Failed to close terminal backend:', err);
-    } finally {
-      removeSession(sessionId);
+  // If skipBackend is true, only remove from store (used when terminal already exited)
+  const closeSession = useCallback(async (sessionId: string, skipBackend = false): Promise<void> => {
+    if (!skipBackend) {
+      try {
+        await closeTerminal(sessionId);
+      } catch (err) {
+        console.warn('Failed to close terminal backend:', err);
+      }
     }
+    removeSession(sessionId);
   }, [removeSession]);
 
   // Close all terminal sessions
