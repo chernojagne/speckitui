@@ -326,3 +326,31 @@ export async function getGitFileStatus(
 ): Promise<GitFileStatusResponse> {
   return invoke('get_git_file_status', { repoPath, files });
 }
+
+// ============ File Watcher Commands (005-ui-enhancements) ============
+
+export interface WatchArtifactResponse {
+  success: boolean;
+  watchedPaths: string[];
+}
+
+/**
+ * Start watching artifact files for changes.
+ * @param paths - Array of absolute file paths to watch
+ */
+export async function watchArtifactFiles(paths: string[]): Promise<WatchArtifactResponse> {
+  return invoke('watch_artifact_files', { paths });
+}
+
+export interface UnwatchArtifactResponse {
+  success: boolean;
+  unwatchedPaths: string[];
+}
+
+/**
+ * Stop watching artifact files.
+ * @param paths - Array of absolute file paths to stop watching
+ */
+export async function unwatchArtifactFiles(paths: string[]): Promise<UnwatchArtifactResponse> {
+  return invoke('unwatch_artifact_files', { paths });
+}

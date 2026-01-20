@@ -80,6 +80,8 @@ pub fn run() {
             // File watcher commands
             file_watcher::start_file_watcher,
             file_watcher::stop_file_watcher,
+            file_watcher::watch_artifact_files,
+            file_watcher::unwatch_artifact_files,
             // Network commands
             network::get_network_status,
             network::start_network_monitoring,

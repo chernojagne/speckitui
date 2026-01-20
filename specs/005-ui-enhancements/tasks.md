@@ -41,7 +41,7 @@
 - [X] T009 [P] Implement get_git_status command in src-tauri/src/services/git_status.rs
 - [X] T010 [P] Write unit tests for create_directory command in src-tauri/src/commands/file_write.rs
 - [X] T011 [P] Implement create_directory command in src-tauri/src/commands/file_write.rs
-- [ ] T012 Extend file_watcher.rs to support watch_artifact_files and unwatch_artifact_files in src-tauri/src/services/file_watcher.rs
+- [X] T012 Extend file_watcher.rs to support watch_artifact_files and unwatch_artifact_files in src-tauri/src/services/file_watcher.rs
 - [X] T013 Implement update_agent_context command in src-tauri/src/commands/file_write.rs
 - [X] T014 Register all new commands in src-tauri/src/commands/mod.rs
 - [X] T015 Register commands in Tauri app builder in src-tauri/src/lib.rs
@@ -213,8 +213,8 @@
 - [X] T061 [P] Add keyboard shortcuts for save (Ctrl+S) across all editable views
 - [X] T062 [P] Add loading states for all async operations (file save, script exec)
 - [X] T063 Improve error handling with consistent toast messages throughout
-- [ ] T064 [P] Update existing E2E tests to account for new UI elements
-- [ ] T065 Run quickstart.md validation to verify all features work end-to-end
+- [X] T064 [P] Update existing E2E tests to account for new UI elements (N/A - no E2E tests exist yet)
+- [X] T065 Run quickstart.md validation to verify all features work end-to-end (manual validation)
 - [X] T066 Code review and cleanup - remove console.logs, add comments
 
 ---
