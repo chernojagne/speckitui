@@ -80,6 +80,8 @@ pub fn run() {
             // File watcher commands
             file_watcher::start_file_watcher,
             file_watcher::stop_file_watcher,
+            file_watcher::watch_artifact_files,
+            file_watcher::unwatch_artifact_files,
             // Network commands
             network::get_network_status,
             network::start_network_monitoring,
@@ -87,6 +89,7 @@ pub fn run() {
             network::check_github_reachable,
             // Git commands
             git::get_git_branch,
+            git::get_git_file_status,
             // GitHub commands
             github::check_github_auth,
             github::set_github_token,
@@ -102,6 +105,12 @@ pub fn run() {
             // Settings commands
             settings::load_settings,
             settings::save_settings,
+            // File write commands (005-ui-enhancements)
+            file_write::write_file,
+            file_write::create_directory,
+            file_write::update_agent_context,
+            // Shell execution commands (005-ui-enhancements)
+            shell_exec::execute_shell_script,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

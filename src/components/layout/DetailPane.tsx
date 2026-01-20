@@ -9,10 +9,16 @@ import { TestView } from '../workflow/TestView';
 import { PushView } from '../workflow/PushView';
 import { PRView } from '../workflow/PRView';
 import { BugFixView } from '../workflow/BugFixView';
-import { EmptyState } from '../shared/EmptyState';
+import { ConstitutionView } from '../settings/ConstitutionView';
+import { EmptyState, UninitializedProjectView } from '../shared';
 import { FolderOpen, FileText, HelpCircle } from 'lucide-react';
 
-export function DetailPane() {
+interface DetailPaneProps {
+  onRefresh: () => void;
+  isRefreshing?: boolean;
+}
+
+export function DetailPane({ onRefresh, isRefreshing = false }: DetailPaneProps) {
   const { selectedStep } = useWorkflowStore();
   const { project, activeSpec } = useProjectStore();
 
@@ -29,7 +35,26 @@ export function DetailPane() {
     );
   }
 
-  // No spec instances found
+  // Project exists but not initialized (no .specify directory)
+  if (!project.hasSpecifyDir) {
+    return (
+      <UninitializedProjectView
+        projectPath={project.path}
+        projectName={project.name}
+        hasGitDir={project.hasGitDir}
+        hasSpecifyDir={project.hasSpecifyDir}
+        onRefresh={onRefresh}
+        isRefreshing={isRefreshing}
+      />
+    );
+  }
+
+  // Constitution view works without a spec
+  if (selectedStep === 'constitution') {
+    return <div className="flex-1 flex flex-col overflow-hidden bg-background"><ConstitutionView /></div>;
+  }
+
+  // No spec instances found (for non-constitution views)
   if (!activeSpec) {
     return (
       <div className="flex-1 flex flex-col overflow-hidden bg-background">
@@ -37,7 +62,7 @@ export function DetailPane() {
           icon={FileText}
           title="No Spec Instances"
           description="This project has no spec instances in the specs/ directory."
-          hint="Create a new spec using the spec-kit CLI: speckit specify"
+          hint="Create a new spec by using the Create New Spec button (+), or by using the spec-kit slash commands in the AI agent."
         />
       </div>
     );

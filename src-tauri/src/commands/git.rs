@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
+use crate::services::git_status::{GitStatusService, GitFileStatus};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -82,4 +83,31 @@ pub async fn get_git_branch(project_path: String) -> Result<GitBranchInfo, Strin
             commit_hash: None,
         })
     }
+}
+
+/// Get git status for specific files (005-ui-enhancements)
+#[tauri::command]
+pub async fn get_git_file_status(
+    repo_path: String,
+    files: Vec<String>,
+) -> Result<serde_json::Value, String> {
+    let path = Path::new(&repo_path);
+    let statuses = GitStatusService::get_status_for_files(path, &files)?;
+    
+    // Convert to JSON-friendly format
+    let status_map: std::collections::HashMap<String, String> = statuses
+        .into_iter()
+        .map(|(file, status)| {
+            let status_str = match status {
+                GitFileStatus::Clean => "clean",
+                GitFileStatus::Modified => "modified",
+                GitFileStatus::Untracked => "untracked",
+                GitFileStatus::Staged => "staged",
+                GitFileStatus::Conflict => "conflict",
+            };
+            (file, status_str.to_string())
+        })
+        .collect();
+    
+    Ok(serde_json::json!({ "statuses": status_map }))
 }

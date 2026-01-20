@@ -226,3 +226,131 @@ export interface GitBranchInfo {
 export async function getGitBranch(projectPath: string): Promise<GitBranchInfo> {
   return invoke('get_git_branch', { projectPath });
 }
+
+// ============ File Write Commands (005-ui-enhancements) ============
+
+export interface WriteFileResponse {
+  success: boolean;
+  path: string;
+  bytesWritten: number;
+}
+
+/**
+ * Write content to a file, creating parent directories if needed.
+ * @param path - Absolute path to file
+ * @param content - File content to write
+ */
+export async function writeFile(path: string, content: string): Promise<WriteFileResponse> {
+  return invoke('write_file', { path, content });
+}
+
+export interface CreateDirectoryResponse {
+  success: boolean;
+  path: string;
+}
+
+/**
+ * Create a directory and parent directories.
+ * @param path - Absolute path to directory
+ */
+export async function createDirectory(path: string): Promise<CreateDirectoryResponse> {
+  return invoke('create_directory', { path });
+}
+
+// AgentType re-exported from types for convenience
+import type { AgentType } from '@/types';
+export type { AgentType };
+
+export interface UpdateAgentContextResponse {
+  success: boolean;
+  filePath: string;
+  created: boolean;
+}
+
+/**
+ * Update an AI agent context file with new content.
+ * Uses markers to avoid overwriting existing spec-kit sections.
+ * @param agentType - Agent type (copilot, claude, etc.)
+ * @param content - Markdown content to add
+ * @param featureName - Feature name for header
+ * @param repoPath - Path to repository root
+ */
+export async function updateAgentContext(
+  agentType: AgentType,
+  content: string,
+  featureName: string,
+  repoPath: string
+): Promise<UpdateAgentContextResponse> {
+  return invoke('update_agent_context', { agentType, content, featureName, repoPath });
+}
+
+// ============ Shell Execution Commands (005-ui-enhancements) ============
+
+export interface ExecuteShellResponse {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}
+
+/**
+ * Execute a shell script with arguments.
+ * Security: Only allows scripts within .specify/scripts/ directory.
+ * @param scriptPath - Relative path to script from repo root
+ * @param args - Command line arguments
+ * @param cwd - Working directory (defaults to repo root)
+ */
+export async function executeShellScript(
+  scriptPath: string,
+  args: string[],
+  cwd?: string
+): Promise<ExecuteShellResponse> {
+  return invoke('execute_shell_script', { scriptPath, args, cwd });
+}
+
+// ============ Git File Status Commands (005-ui-enhancements) ============
+
+export type GitFileStatus = 'clean' | 'modified' | 'untracked' | 'staged' | 'conflict';
+
+export interface GitFileStatusResponse {
+  statuses: Record<string, GitFileStatus>;
+}
+
+/**
+ * Get git status for specific files.
+ * @param repoPath - Path to git repository
+ * @param files - Files to check (relative to repo root)
+ */
+export async function getGitFileStatus(
+  repoPath: string,
+  files: string[]
+): Promise<GitFileStatusResponse> {
+  return invoke('get_git_file_status', { repoPath, files });
+}
+
+// ============ File Watcher Commands (005-ui-enhancements) ============
+
+export interface WatchArtifactResponse {
+  success: boolean;
+  watchedPaths: string[];
+}
+
+/**
+ * Start watching artifact files for changes.
+ * @param paths - Array of absolute file paths to watch
+ */
+export async function watchArtifactFiles(paths: string[]): Promise<WatchArtifactResponse> {
+  return invoke('watch_artifact_files', { paths });
+}
+
+export interface UnwatchArtifactResponse {
+  success: boolean;
+  unwatchedPaths: string[];
+}
+
+/**
+ * Stop watching artifact files.
+ * @param paths - Array of absolute file paths to stop watching
+ */
+export async function unwatchArtifactFiles(paths: string[]): Promise<UnwatchArtifactResponse> {
+  return invoke('unwatch_artifact_files', { paths });
+}

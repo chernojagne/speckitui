@@ -2,9 +2,11 @@
 pub mod artifacts;
 pub mod description;
 pub mod file_watcher;
+pub mod file_write;
 pub mod git;
 pub mod github;
 pub mod network;
 pub mod project;
 pub mod settings;
+pub mod shell_exec;
 pub mod terminal;

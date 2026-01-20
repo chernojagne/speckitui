@@ -10,28 +10,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus } from 'lucide-react';
-import { createSpec, getSpecInstances } from '@/services/tauriCommands';
+import { NewSpecDialog } from '../shared/NewSpecDialog';
 
 export function SpecSelector() {
-  const { project, activeSpec, setActiveSpec, setProject } = useProjectStore();
+  const { project, activeSpec, setActiveSpec } = useProjectStore();
   const { updateContentStatus } = useWorkflowStore();
   const { setLastProject } = useSettingsStore();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newSpecName, setNewSpecName] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   if (!project) {
     return null;
@@ -43,39 +31,6 @@ export function SpecSelector() {
       setActiveSpec(spec);
       updateContentStatus(spec.artifacts);
       setLastProject(project.path, spec.id);
-    }
-  };
-
-  const handleCreateSpec = async () => {
-    if (!newSpecName.trim()) {
-      setError('Please enter a spec name');
-      return;
-    }
-
-    setIsCreating(true);
-    setError(null);
-
-    try {
-      await createSpec(project.path, newSpecName.trim());
-      
-      // Refresh spec instances
-      const specs = await getSpecInstances(project.path);
-      setProject({ ...project, specInstances: specs });
-      
-      // Select the new spec
-      const newSpec = specs.find((s) => s.shortName === newSpecName.trim().toLowerCase().replace(/\s+/g, '-'));
-      if (newSpec) {
-        setActiveSpec(newSpec);
-        updateContentStatus(newSpec.artifacts);
-        setLastProject(project.path, newSpec.id);
-      }
-      
-      setIsDialogOpen(false);
-      setNewSpecName('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -120,53 +75,10 @@ export function SpecSelector() {
         </TooltipContent>
       </Tooltip>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Spec</DialogTitle>
-            <DialogDescription>
-              Enter a name for your new spec. It will be created in the specs/ directory.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            <Input
-              value={newSpecName}
-              onChange={(e) => setNewSpecName(e.target.value)}
-              placeholder="e.g., user-authentication"
-              disabled={isCreating}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleCreateSpec();
-                }
-              }}
-            />
-            {error && (
-              <p className="text-sm text-destructive mt-2">{error}</p>
-            )}
-          </div>
-          
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsDialogOpen(false);
-                setNewSpecName('');
-                setError(null);
-              }}
-              disabled={isCreating}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateSpec}
-              disabled={isCreating || !newSpecName.trim()}
-            >
-              {isCreating ? 'Creating...' : 'Create Spec'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <NewSpecDialog 
+        open={isDialogOpen} 
+        onOpenChange={setIsDialogOpen} 
+      />
     </div>
   );
 }

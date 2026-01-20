@@ -29,33 +29,35 @@ pub async fn open_project(path: String) -> Result<Project, String> {
     let specs_path = project_path.join("specs");
     project.has_specs_dir = specs_path.exists() && specs_path.is_dir();
 
-    if !project.has_specify_dir {
-        return Err("No .specify directory found. Is this a spec-kit project?".to_string());
-    }
+    // Check for .git directory
+    let git_path = project_path.join(".git");
+    project.has_git_dir = git_path.exists() && git_path.is_dir();
 
-    // Get git info
-    if let Ok(output) = Command::new("git")
-        .args(["remote", "get-url", "origin"])
-        .current_dir(&path)
-        .output()
-    {
-        if output.status.success() {
-            project.git_remote = Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
+    // Get git info (only if git directory exists)
+    if project.has_git_dir {
+        if let Ok(output) = Command::new("git")
+            .args(["remote", "get-url", "origin"])
+            .current_dir(&path)
+            .output()
+        {
+            if output.status.success() {
+                project.git_remote = Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
+            }
+        }
+
+        if let Ok(output) = Command::new("git")
+            .args(["branch", "--show-current"])
+            .current_dir(&path)
+            .output()
+        {
+            if output.status.success() {
+                project.git_branch = Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
+            }
         }
     }
 
-    if let Ok(output) = Command::new("git")
-        .args(["branch", "--show-current"])
-        .current_dir(&path)
-        .output()
-    {
-        if output.status.success() {
-            project.git_branch = Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
-        }
-    }
-
-    // Scan for spec instances
-    if project.has_specs_dir {
+    // Scan for spec instances (only if both .specify and specs exist)
+    if project.has_specify_dir && project.has_specs_dir {
         if let Ok(entries) = fs::read_dir(&specs_path) {
             for entry in entries.flatten() {
                 if entry.path().is_dir() {

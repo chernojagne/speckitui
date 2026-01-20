@@ -179,6 +179,32 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
   // Custom components for ReactMarkdown
   const components = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    img: (props: any) => {
+      const { src, alt, node, ...rest } = props;
+      // Handle base64 data URLs properly
+      const imageSrc = src || '';
+      
+      // Log for debugging if src is empty or malformed
+      if (!imageSrc || (!imageSrc.startsWith('data:') && !imageSrc.startsWith('http'))) {
+        console.warn('MarkdownRenderer: Invalid image src', { src, alt });
+      }
+      
+      return (
+        <img 
+          src={imageSrc} 
+          alt={alt || 'Image'} 
+          loading="lazy"
+          className="max-w-full h-auto rounded-md my-2"
+          onError={(e) => {
+            console.error('Image failed to load:', { src: imageSrc?.substring(0, 100), alt });
+            // Hide broken image icon by setting to transparent placeholder
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+          {...rest}
+        />
+      );
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     input: (props: any) => {
       if (props.type === 'checkbox') {
         // Find the line number for this checkbox
@@ -242,7 +268,11 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
       [&_.shiki-wrapper_code]:bg-transparent [&_.shiki-wrapper_code]:p-0 [&_.shiki-wrapper_code]:font-mono [&_.shiki-wrapper_code]:text-sm [&_.shiki-wrapper_code]:leading-relaxed
       [&_.shiki]:rounded-md
     ">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm]} 
+        components={components}
+        urlTransform={(url) => url}
+      >
         {localContent}
       </ReactMarkdown>
     </div>
