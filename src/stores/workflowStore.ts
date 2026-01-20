@@ -5,14 +5,30 @@ interface WorkflowState {
   // State
   selectedStep: WorkflowStepId;
   stepContentStatus: Record<WorkflowStepId, boolean>;
+  stepUncommittedStatus: Record<WorkflowStepId, boolean>;
 
   // Actions
   setSelectedStep: (step: WorkflowStepId) => void;
   updateContentStatus: (manifest: ArtifactManifest | null) => void;
+  updateUncommittedStatus: (stepId: WorkflowStepId, hasUncommitted: boolean) => void;
   hasContent: (step: WorkflowStepId) => boolean;
+  hasUncommittedChanges: (step: WorkflowStepId) => boolean;
 }
 
 const getInitialContentStatus = (): Record<WorkflowStepId, boolean> => ({
+  describe: false,
+  specify: false,
+  plan: false,
+  tasks: false,
+  implement: false,
+  test: false,
+  push: false,
+  pr: false,
+  bugfix: false,
+  constitution: false,
+});
+
+const getInitialUncommittedStatus = (): Record<WorkflowStepId, boolean> => ({
   describe: false,
   specify: false,
   plan: false,
@@ -29,6 +45,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   // Initial state
   selectedStep: 'describe',
   stepContentStatus: getInitialContentStatus(),
+  stepUncommittedStatus: getInitialUncommittedStatus(),
 
   // Actions
   setSelectedStep: (step) =>
@@ -58,5 +75,14 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     });
   },
 
+  updateUncommittedStatus: (stepId, hasUncommitted) =>
+    set((state) => ({
+      stepUncommittedStatus: {
+        ...state.stepUncommittedStatus,
+        [stepId]: hasUncommitted,
+      },
+    })),
+
   hasContent: (step) => get().stepContentStatus[step],
+  hasUncommittedChanges: (step) => get().stepUncommittedStatus[step],
 }));

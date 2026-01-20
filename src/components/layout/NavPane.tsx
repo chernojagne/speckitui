@@ -22,7 +22,7 @@ interface NavPaneProps {
 }
 
 export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onToggleCollapse }: NavPaneProps) {
-  const { selectedStep, setSelectedStep, stepContentStatus } = useWorkflowStore();
+  const { selectedStep, setSelectedStep, stepContentStatus, stepUncommittedStatus } = useWorkflowStore();
   const { project, activeSpec } = useProjectStore();
   
   // Sidebar settings from store
@@ -84,6 +84,7 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
           {workflowSteps.map((step) => {
             const isSelected = selectedStep === step.id;
             const hasContent = stepContentStatus[step.id];
+            const hasUncommitted = stepUncommittedStatus[step.id];
             const isDisabled = !project || !activeSpec;
 
             return (
@@ -102,6 +103,9 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
                     <step.icon className="h-4 w-4" />
                     {hasContent && (
                       <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-success" />
+                    )}
+                    {hasUncommitted && (
+                      <span className="absolute bottom-1 right-1 h-1.5 w-1.5 rounded-full bg-warning" title="Uncommitted changes" />
                     )}
                   </Button>
                 </TooltipTrigger>
@@ -188,6 +192,7 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
             {workflowSteps.map((step) => {
             const isSelected = selectedStep === step.id;
             const hasContent = stepContentStatus[step.id];
+            const hasUncommitted = stepUncommittedStatus[step.id];
             const isDisabled = !project || !activeSpec;
             // Add divider before PR step
             const showDivider = step.id === 'pr';
@@ -211,7 +216,10 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
                 >
                     {showIcons && <step.icon className={cn("shrink-0", compactMode ? "h-3.5 w-3.5" : "h-4 w-4")} />}
                     <span className={cn("flex-1 text-left", compactMode ? "text-xs" : "text-sm")}>{step.label}</span>
-                    {hasContent && !step.requiresGitHub && (
+                    {hasUncommitted && (
+                      <span className="h-2 w-2 rounded-full bg-warning" title="Uncommitted changes" />
+                    )}
+                    {hasContent && !step.requiresGitHub && !hasUncommitted && (
                     <span className="h-2 w-2 rounded-full bg-success" title="Has content" />
                     )}
                     {step.requiresGitHub && (

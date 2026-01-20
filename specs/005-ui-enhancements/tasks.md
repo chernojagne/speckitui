@@ -140,12 +140,12 @@
 
 ### Implementation for User Story 6
 
-- [ ] T039 [P] [US6] Add edit mode to SpecView using MarkdownEditor in src/components/workflow/SpecView.tsx
-- [ ] T040 [P] [US6] Add edit mode to PlanView using MarkdownEditor in src/components/workflow/PlanView.tsx
-- [ ] T041 [P] [US6] Add edit mode to TasksView using MarkdownEditor in src/components/workflow/TasksView.tsx
-- [ ] T042 [P] [US6] Add edit mode to ResearchView using MarkdownEditor in src/components/workflow/ResearchView.tsx
-- [ ] T043 [US6] Add unsaved changes prompt to all workflow views using editorStore in src/components/workflow/*.tsx
-- [ ] T044 [US6] Add Edit/Save toggle button to workflow view header pattern in src/components/workflow/*.tsx
+- [X] T039 [P] [US6] Add edit mode to SpecView using MarkdownEditor in src/components/workflow/SpecView.tsx
+- [X] T040 [P] [US6] Add edit mode to PlanView using MarkdownEditor in src/components/workflow/PlanView.tsx
+- [X] T041 [P] [US6] Add edit mode to TasksView using MarkdownEditor in src/components/workflow/TasksView.tsx
+- [X] T042 [P] [US6] Add edit mode to ResearchView using MarkdownEditor in src/components/workflow/ResearchView.tsx
+- [X] T043 [US6] Add unsaved changes prompt to all workflow views using editorStore in src/components/workflow/*.tsx
+- [X] T044 [US6] Add Edit/Save toggle button to workflow view header pattern in src/components/workflow/*.tsx
 
 **Checkpoint**: User Story 6 complete - All markdown artifacts editable inline
 
@@ -159,12 +159,12 @@
 
 ### Implementation for User Story 7
 
-- [ ] T045 [P] [US7] Create useGitStatus hook to poll/watch git status in src/hooks/useGitStatus.ts
-- [ ] T046 [P] [US7] Create useArtifactWatcher hook using watch_artifact_files IPC in src/hooks/useArtifactWatcher.ts
-- [ ] T047 [US7] Integrate useArtifactWatcher into workflow views for live updates in src/components/workflow/*.tsx
-- [ ] T048 [US7] Add uncommitted changes indicator (dot) to workflow view tabs in src/components/layout/DetailPane.tsx
-- [ ] T049 [US7] Style uncommitted indicator with appropriate color/icon in src/components/layout/DetailPane.css
-- [ ] T050 [US7] Update artifactStore with git status from events in src/stores/artifactStore.ts
+- [X] T045 [P] [US7] Create useGitStatus hook to poll/watch git status in src/hooks/useGitStatus.ts
+- [X] T046 [P] [US7] Create useArtifactWatcher hook using watch_artifact_files IPC in src/hooks/useArtifactWatcher.ts
+- [X] T047 [US7] Integrate useArtifactWatcher into workflow views for live updates in src/components/workflow/*.tsx
+- [X] T048 [US7] Add uncommitted changes indicator (dot) to workflow view tabs in src/components/layout/DetailPane.tsx
+- [X] T049 [US7] Style uncommitted indicator with appropriate color/icon in src/components/layout/DetailPane.css
+- [X] T050 [US7] Update artifactStore with git status from events in src/stores/artifactStore.ts
 
 **Checkpoint**: User Story 7 complete - Live file watching and git status indicators
 
@@ -178,11 +178,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T051 [P] [US4] Create NewSpecDialog component with name/description inputs in src/components/shared/NewSpecDialog.tsx
-- [ ] T052 [US4] Implement execute_shell_script call for create-new-feature.sh in src/components/shared/NewSpecDialog.tsx
-- [ ] T053 [US4] Add New Spec button to spec selector or appropriate UI location in src/components/layout/SpecSelector.tsx
-- [ ] T054 [US4] Handle script success - refresh spec list and auto-select new spec in src/components/shared/NewSpecDialog.tsx
-- [ ] T055 [US4] Handle script failure - show error toast with details in src/components/shared/NewSpecDialog.tsx
+- [X] T051 [P] [US4] Create NewSpecDialog component with name/description inputs in src/components/shared/NewSpecDialog.tsx
+- [X] T052 [US4] Implement execute_shell_script call for create-new-feature.sh in src/components/shared/NewSpecDialog.tsx
+- [X] T053 [US4] Add New Spec button to spec selector or appropriate UI location in src/components/layout/SpecSelector.tsx
+- [X] T054 [US4] Handle script success - refresh spec list and auto-select new spec in src/components/shared/NewSpecDialog.tsx
+- [X] T055 [US4] Handle script failure - show error toast with details in src/components/shared/NewSpecDialog.tsx
 
 **Checkpoint**: User Story 4 complete - New specs created via UI
 
@@ -196,11 +196,11 @@
 
 ### Implementation for User Story 5
 
-- [ ] T056 [P] [US5] Create NewProjectDialog component with name and folder picker in src/components/shared/NewProjectDialog.tsx
-- [ ] T057 [US5] Implement create_directory call for new project folder in src/components/shared/NewProjectDialog.tsx
-- [ ] T058 [US5] Add "New Project" option to ProjectHeader or menu in src/components/layout/ProjectHeader.tsx
-- [ ] T059 [US5] Switch active project context to new folder using projectStore in src/components/shared/NewProjectDialog.tsx
-- [ ] T060 [US5] Show advice message to run `speckit init` in terminal in src/components/shared/NewProjectDialog.tsx
+- [X] T056 [P] [US5] Create NewProjectDialog component with name and folder picker in src/components/shared/NewProjectDialog.tsx
+- [X] T057 [US5] Implement create_directory call for new project folder in src/components/shared/NewProjectDialog.tsx
+- [X] T058 [US5] Add "New Project" option to ProjectHeader or menu in src/components/layout/ProjectHeader.tsx
+- [X] T059 [US5] Switch active project context to new folder using projectStore in src/components/shared/NewProjectDialog.tsx
+- [X] T060 [US5] Show advice message to run `speckit init` in terminal in src/components/shared/NewProjectDialog.tsx
 
 **Checkpoint**: User Story 5 complete - New projects created via UI
 
@@ -210,12 +210,12 @@
 
 **Purpose**: Final cleanup and cross-cutting improvements
 
-- [ ] T061 [P] Add keyboard shortcuts for save (Ctrl+S) across all editable views
-- [ ] T062 [P] Add loading states for all async operations (file save, script exec)
-- [ ] T063 Improve error handling with consistent toast messages throughout
+- [X] T061 [P] Add keyboard shortcuts for save (Ctrl+S) across all editable views
+- [X] T062 [P] Add loading states for all async operations (file save, script exec)
+- [X] T063 Improve error handling with consistent toast messages throughout
 - [ ] T064 [P] Update existing E2E tests to account for new UI elements
 - [ ] T065 Run quickstart.md validation to verify all features work end-to-end
-- [ ] T066 Code review and cleanup - remove console.logs, add comments
+- [X] T066 Code review and cleanup - remove console.logs, add comments
 
 ---
 
