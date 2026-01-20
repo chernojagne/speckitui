@@ -31,6 +31,28 @@ pub struct ExecuteShellResponse {
 /// Allowed script directory prefix for security
 const ALLOWED_SCRIPT_PREFIX: &str = ".specify/scripts/";
 
+// ============ Helper Functions ============
+
+/// Convert a Windows path to Unix-style path for Git Bash
+/// C:\repos\project -> /c/repos/project
+#[cfg(target_os = "windows")]
+fn convert_windows_path_to_unix(windows_path: &str) -> String {
+    let path = windows_path.replace('\\', "/");
+    
+    // Check if it starts with a drive letter like C:
+    if path.len() >= 2 && path.chars().nth(1) == Some(':') {
+        let drive = path.chars().next().unwrap().to_lowercase().next().unwrap();
+        format!("/{}{}", drive, &path[2..])
+    } else {
+        path
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn convert_windows_path_to_unix(path: &str) -> String {
+    path.to_string()
+}
+
 // ============ Tauri Commands ============
 
 /// Execute a shell script with arguments
@@ -84,8 +106,10 @@ pub async fn execute_shell_script(
 
     // Build the command
     let script_with_args = if cfg!(target_os = "windows") && script_path.ends_with(".sh") {
-        // For bash on Windows, use the script path directly
-        let mut cmd_parts = vec![full_script_path.to_string_lossy().to_string()];
+        // For bash on Windows (Git Bash), use the relative script path
+        // bash -c works better with relative paths when current_dir is set
+        let unix_script_path = script_path.replace('\\', "/");
+        let mut cmd_parts = vec![format!("./{}", unix_script_path)];
         cmd_parts.extend(args.iter().map(|a| format!("\"{}\"", a)));
         cmd_parts.join(" ")
     } else if cfg!(target_os = "windows") {
@@ -94,11 +118,13 @@ pub async fn execute_shell_script(
         cmd_parts.extend(args.clone());
         cmd_parts.join(" ")
     } else {
-        // Unix: make script executable and run
-        let mut cmd_parts = vec![full_script_path.to_string_lossy().to_string()];
+        // Unix: use relative path
+        let mut cmd_parts = vec![format!("./{}", script_path)];
         cmd_parts.extend(args.iter().map(|a| format!("\"{}\"", a)));
         cmd_parts.join(" ")
     };
+
+    log::info!("work_path: {}, Running: {} {} {}", work_path.display(), shell, shell_arg, script_with_args);
 
     // Execute with timeout
     let output = if cfg!(target_os = "windows") && !script_path.ends_with(".sh") {

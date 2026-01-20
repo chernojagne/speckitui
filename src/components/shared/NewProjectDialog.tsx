@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useProjectStore } from '@/stores/projectStore';
 import { createDirectory, openProject } from '@/services/tauriCommands';
-import { Loader2, FolderPlus, AlertCircle, CheckCircle2, Terminal } from 'lucide-react';
+import { Loader2, FolderPlus, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface NewProjectDialogProps {
   open: boolean;
@@ -46,17 +46,23 @@ export function NewProjectDialog({ open, onOpenChange, onSelectFolder }: NewProj
       const projectPath = `${parentPath.replace(/[\\/]+$/, '')}/${name.trim()}`;
       
       await createDirectory(projectPath);
-
       setCreatedPath(projectPath);
-      setSuccess(true);
 
-      // Try to load as a project (it will be empty but valid)
+      // Open the project - it will be uninitialized and show the initialization guide
       try {
         const newProject = await openProject(projectPath);
         setProject(newProject);
-      } catch {
-        // Expected - new project won't have specs yet
-        console.log('New project created, needs speckit init');
+        setSuccess(true);
+        
+        // Auto-close dialog after successful creation and switch
+        setTimeout(() => {
+          onOpenChange(false);
+          resetForm();
+        }, 500);
+      } catch (openErr) {
+        // Project created but couldn't open - still a partial success
+        console.warn('Project created but could not auto-open:', openErr);
+        setError(`Project folder created at ${projectPath}, but failed to open: ${openErr}`);
       }
 
     } catch (err) {
@@ -64,7 +70,7 @@ export function NewProjectDialog({ open, onOpenChange, onSelectFolder }: NewProj
     } finally {
       setIsCreating(false);
     }
-  }, [name, parentPath, setProject]);
+  }, [name, parentPath, setProject, onOpenChange]);
 
   const resetForm = () => {
     setName('');
@@ -99,7 +105,7 @@ export function NewProjectDialog({ open, onOpenChange, onSelectFolder }: NewProj
             Create New Project
           </DialogTitle>
           <DialogDescription>
-            Create a new project folder. You'll need to run `speckit init` to initialize it.
+            Create a new project folder. You'll need to initialize it with <code className="text-xs bg-muted px-1 rounded">specify init .</code> to set it up, and <code className="text-xs bg-muted px-1 rounded">git init</code> if you want to track it in git.
           </DialogDescription>
         </DialogHeader>
 
@@ -153,25 +159,9 @@ export function NewProjectDialog({ open, onOpenChange, onSelectFolder }: NewProj
           )}
 
           {success && createdPath && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 p-3 rounded-md bg-success/10 text-success text-sm">
-                <CheckCircle2 className="h-4 w-4" />
-                <span>Project folder created!</span>
-              </div>
-              
-              <div className="p-4 rounded-md bg-muted">
-                <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Terminal className="h-4 w-4" />
-                  Next Steps
-                </div>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Open a terminal in your new project folder and run:
-                </p>
-                <code className="block p-2 rounded bg-background text-xs font-mono">
-                  cd "{createdPath}"<br />
-                  speckit init
-                </code>
-              </div>
+            <div className="flex items-center gap-2 p-3 rounded-md bg-success/10 text-success text-sm">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>Project created and initialized! Switching to it now...</span>
             </div>
           )}
         </div>

@@ -146,7 +146,7 @@ export function SpecifyView() {
         icon={FileText}
         title="No Spec Artifacts"
         description="This spec instance has no spec.md or checklists yet."
-        hint="Run: speckit specify"
+        hint="Run: specify new"
       />
     );
   }

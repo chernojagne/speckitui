@@ -5,6 +5,7 @@ import { StatusBar } from './StatusBar';
 import { TerminalPanel } from './TerminalPanel';
 import { TitleBar } from './TitleBar';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
+import { useProjectMonitor } from '@/hooks/useProjectMonitor';
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -20,8 +21,12 @@ import { X, AlertTriangle } from 'lucide-react';
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { error, setProject, setLoading, setError, setActiveSpec } =
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { error, project, setProject, setLoading, setError, setActiveSpec } =
     useProjectStore();
+  
+  // Monitor for project initialization changes
+  useProjectMonitor();
   const { updateContentStatus } = useWorkflowStore();
   const { 
     addRecentProject, 
@@ -83,6 +88,28 @@ export function AppShell() {
     setIsSettingsOpen(true);
   };
 
+  // Manual refresh - reloads project from disk
+  const handleRefreshProject = useCallback(async () => {
+    if (!project?.path || isRefreshing) return;
+    
+    setIsRefreshing(true);
+    try {
+      const proj = await openProject(project.path);
+      setProject(proj);
+      
+      // Re-select active spec if available
+      if (proj.specInstances.length > 0) {
+        const spec = proj.specInstances[0];
+        setActiveSpec(spec);
+        updateContentStatus(spec.artifacts);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [project?.path, isRefreshing, setProject, setActiveSpec, updateContentStatus, setError]);
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Custom title bar */}
@@ -124,6 +151,8 @@ export function AppShell() {
             onSettings={handleOpenSettings}
             isCollapsed={navPaneCollapsed}
             onToggleCollapse={toggleNavPaneCollapsed}
+            onRefresh={handleRefreshProject}
+            isRefreshing={isRefreshing}
           />
         </ResizablePanel>
         <ResizableHandle disabled={navPaneCollapsed} className="hover:bg-primary/20 transition-colors" />
@@ -131,7 +160,7 @@ export function AppShell() {
           {/* Vertical layout: DetailPane fills remaining space, Terminal at bottom with fixed height */}
           <div className="flex flex-col h-full overflow-hidden">
             <main className="flex-1 flex flex-col overflow-hidden min-h-0">
-              <DetailPane />
+              <DetailPane onRefresh={handleRefreshProject} isRefreshing={isRefreshing} />
             </main>
             <TerminalPanel />
           </div>

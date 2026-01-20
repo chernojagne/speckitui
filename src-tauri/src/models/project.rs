@@ -17,6 +17,9 @@ pub struct Project {
     /// Whether specs/ directory exists
     pub has_specs_dir: bool,
     
+    /// Whether .git/ directory exists
+    pub has_git_dir: bool,
+    
     /// Git remote URL if available
     pub git_remote: Option<String>,
     
@@ -40,6 +43,7 @@ impl Project {
             name,
             has_specify_dir: false,
             has_specs_dir: false,
+            has_git_dir: false,
             git_remote: None,
             git_branch: None,
             spec_instances: Vec::new(),

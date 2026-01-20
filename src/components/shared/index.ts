@@ -23,3 +23,4 @@ export { ProgressIndicator, ProgressBadge } from './ProgressIndicator';
 export { RichComposer } from './RichComposer';
 export { SourceViewer } from './SourceViewer';
 export { TabContainer } from './TabContainer';
+export { UninitializedProjectView } from './UninitializedProjectView';

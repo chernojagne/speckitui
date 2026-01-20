@@ -34,7 +34,7 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
   const [success, setSuccess] = useState(false);
 
   const handleCreate = useCallback(async () => {
-    if (!project || !name.trim()) return;
+    if (!project || !description.trim()) return;
 
     setIsCreating(true);
     setError(null);
@@ -42,17 +42,27 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
 
     try {
       // Execute the create-new-feature.sh script
-      // The script expects: feature-name "Feature description"
+      // The script expects: [--short-name <short-name>] <feature description>
       const scriptPath = '.specify/scripts/bash/create-new-feature.sh';
-      const args = [name.trim()];
-      if (description.trim()) {
-        args.push(description.trim());
+      const args: string[] = [];
+      
+      // Add optional short-name if provided
+      if (name.trim()) {
+        args.push('--short-name', name.trim());
       }
+      
+      // Add required description
+      args.push(description.trim());
 
       const result = await executeShellScript(scriptPath, args, project.path);
 
       if (result.exitCode !== 0) {
-        throw new Error(result.stderr || result.stdout || 'Script execution failed');
+        // Check for common errors and provide helpful messages
+        const errorOutput = result.stderr || result.stdout || '';
+        if (errorOutput.includes('No such file or directory') && errorOutput.includes('create-new-feature')) {
+          throw new Error('The create-new-feature.sh script is missing. Please run "npx specify init ." in your project folder to set up the speckit environment.');
+        }
+        throw new Error(errorOutput || 'Script execution failed');
       }
 
       setSuccess(true);
@@ -61,12 +71,11 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
       const updatedProject = await openProject(project.path);
       setProject(updatedProject);
 
-      // Try to find and select the new spec
-      const newSpecName = name.trim().toLowerCase().replace(/\s+/g, '-');
-      const newSpec = updatedProject.specInstances.find(
-        (spec) => spec.shortName.toLowerCase().includes(newSpecName)
-      );
-      if (newSpec) {
+      // Try to find and select the new spec (select the newest one - highest number)
+      if (updatedProject.specInstances.length > 0) {
+        // The new spec should be the one with the highest number
+        const sortedSpecs = [...updatedProject.specInstances].sort((a, b) => b.number - a.number);
+        const newSpec = sortedSpecs[0];
         setActiveSpec(newSpec);
       }
 
@@ -76,7 +85,14 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
         resetForm();
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      // Check for script not found error and provide helpful message
+      if (errorMessage.includes('SCRIPT_NOT_FOUND') || 
+          (errorMessage.includes('No such file or directory') && errorMessage.includes('create-new-feature'))) {
+        setError('The create-new-feature.sh script is missing. Please run "npx specify init ." in your project folder to set up the speckit environment.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setIsCreating(false);
     }
@@ -96,7 +112,7 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
     }
   };
 
-  const isValid = name.trim().length > 0;
+  const isValid = description.trim().length > 0;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -104,31 +120,30 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
-            Create New Feature Spec
+            Create New Spec-Kit Feature Spec
           </DialogTitle>
           <DialogDescription>
-            Create a new feature specification with its own branch and directory structure.
+            Create a new skeleton feature specification using Spec-Kit scripts.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label htmlFor="spec-name" className="text-sm font-medium">Feature Name</label>
+            <label htmlFor="spec-name" className="text-sm font-medium">Short Name (Optional)</label>
             <Input
               id="spec-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., user-authentication"
               disabled={isCreating}
-              autoFocus
             />
             <p className="text-xs text-muted-foreground">
-              Use lowercase with hyphens. This will be used for the directory and branch name.
+              Max 3 words, lowercase with hyphens. If omitted, it will be generated from the description.
             </p>
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="spec-description" className="text-sm font-medium">Description (Optional)</label>
+            <label htmlFor="spec-description" className="text-sm font-medium">Feature Description</label>
             <Textarea
               id="spec-description"
               value={description}
@@ -136,10 +151,8 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
               placeholder="Describe what this feature will do..."
               rows={3}
               disabled={isCreating}
+              autoFocus
             />
-            <p className="text-xs text-muted-foreground">
-              This will be added to the description.md file.
-            </p>
           </div>
 
           {error && (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FolderOpen, FolderPlus } from 'lucide-react';
+import { FolderOpen, FolderPlus, RefreshCw, Loader2, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -13,9 +13,11 @@ import { NewProjectDialog } from '../shared/NewProjectDialog';
 interface ProjectHeaderProps {
   projectName: string;
   onOpenProject: () => void;
+  onRefresh: () => void;
+  isRefreshing?: boolean;
 }
 
-export function ProjectHeader({ projectName, onOpenProject }: ProjectHeaderProps) {
+export function ProjectHeader({ projectName, onOpenProject, onRefresh, isRefreshing = false }: ProjectHeaderProps) {
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
 
   return (
@@ -23,35 +25,61 @@ export function ProjectHeader({ projectName, onOpenProject }: ProjectHeaderProps
       <span className="font-semibold text-foreground text-sm uppercase truncate flex-1">
         {projectName}
       </span>
-      <DropdownMenu>
+      <div className="flex items-center gap-1">
+        {/* Refresh button */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 shrink-0"
-                aria-label="Project options"
-              >
-                <FolderOpen className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 shrink-0"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              aria-label="Refresh project"
+            >
+              {isRefreshing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+            </Button>
           </TooltipTrigger>
-          <TooltipContent side="right">
-            <p>Project options</p>
+          <TooltipContent side="bottom">
+            <p>{isRefreshing ? 'Refreshing...' : 'Refresh project'}</p>
           </TooltipContent>
         </Tooltip>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onOpenProject}>
-            <FolderOpen className="h-4 w-4 mr-2" />
-            Open Project Folder
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsNewProjectDialogOpen(true)}>
-            <FolderPlus className="h-4 w-4 mr-2" />
-            New Project
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+
+        {/* Project menu */}
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0"
+                  aria-label="Project options"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>Project options</p>
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onOpenProject}>
+              <FolderOpen className="h-4 w-4 mr-2" />
+              Open Project...
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIsNewProjectDialogOpen(true)}>
+              <FolderPlus className="h-4 w-4 mr-2" />
+              New Project...
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <NewProjectDialog
         open={isNewProjectDialogOpen}

@@ -14,6 +14,8 @@ export interface Project {
   hasSpecifyDir: boolean;
   /** Whether specs/ directory exists */
   hasSpecsDir: boolean;
+  /** Whether .git/ directory exists */
+  hasGitDir: boolean;
   /** Git remote URL if available */
   gitRemote?: string;
   /** Current git branch */

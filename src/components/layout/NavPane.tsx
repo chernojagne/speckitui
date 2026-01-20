@@ -19,9 +19,11 @@ interface NavPaneProps {
   onSettings: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  onRefresh: () => void;
+  isRefreshing?: boolean;
 }
 
-export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onToggleCollapse }: NavPaneProps) {
+export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onToggleCollapse, onRefresh, isRefreshing = false }: NavPaneProps) {
   const { selectedStep, setSelectedStep, stepContentStatus, stepUncommittedStatus } = useWorkflowStore();
   const { project, activeSpec } = useProjectStore();
   
@@ -56,8 +58,8 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
           </Tooltip>
         </div>
 
-        {/* Constitution nav item */}
-        {project && (
+        {/* Constitution nav item - only show if project is initialized */}
+        {project && project.hasSpecifyDir && (
           <>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -79,7 +81,8 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
           </>
         )}
 
-        {/* Workflow step icons */}
+        {/* Workflow step icons - only show if project is initialized */}
+        {project?.hasSpecifyDir && (
         <div className="flex-1 flex flex-col items-center gap-1 overflow-auto">
           {workflowSteps.map((step) => {
             const isSelected = selectedStep === step.id;
@@ -111,9 +114,10 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
                 </TooltipTrigger>
                 <TooltipContent side="right">{step.label}</TooltipContent>
               </Tooltip>
-            );
-          })}
+            );          })
+        }
         </div>
+        )}
 
         {/* Avatar at bottom */}
         <AvatarMenu
@@ -130,7 +134,12 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
       <div className="flex items-center border-b border-border">
         {project ? (
           <div className="flex-1">
-            <ProjectHeader projectName={project.name} onOpenProject={onOpenProject} />
+            <ProjectHeader 
+              projectName={project.name} 
+              onOpenProject={onOpenProject}
+              onRefresh={onRefresh}
+              isRefreshing={isRefreshing}
+            />
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center px-3 py-2">
@@ -161,16 +170,9 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
         )}
       </div>
 
-      {/* Spec Selector */}
-      {project && project.specInstances.length > 0 && (
-        <div className="px-3 py-2 border-b border-border">
-          <SpecSelector />
-        </div>
-      )}
-
-      {/* Constitution nav item */}
-      {project && (
-        <div className={cn("px-2", compactMode ? "py-0.5" : "py-1")}>
+      {/* Constitution nav item - above spec selector since it applies to all features */}
+      {project && project.hasSpecifyDir && (
+        <div className={cn("px-2 border-b border-border", compactMode ? "py-1" : "py-2")}>
           <Button
             variant={selectedStep === 'constitution' ? "secondary" : "ghost"}
             className={cn(
@@ -183,10 +185,18 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
             {showIcons && <ScrollText className={cn("shrink-0", compactMode ? "h-3.5 w-3.5" : "h-4 w-4")} />}
             <span className={cn("flex-1 text-left", compactMode ? "text-xs" : "text-sm")}>Constitution</span>
           </Button>
-          <Separator className="mt-1" />
+        </div>
+      )}
+
+      {/* Spec Selector - only show if project is initialized */}
+      {project && project.hasSpecifyDir && (
+        <div className="px-3 py-2 border-b border-border">
+          <SpecSelector />
         </div>
       )}
       
+      {/* Workflow steps - only show if project is initialized */}
+      {project?.hasSpecifyDir && (
       <ScrollArea className="rounded-md flex-1 w-full">
         <div className={cn("px-2", compactMode ? "py-0.5" : "py-1")}>
             {workflowSteps.map((step) => {
@@ -235,6 +245,7 @@ export function NavPane({ onOpenProject, onSettings, isCollapsed = false, onTogg
         })}
         </div>
       </ScrollArea>
+      )}
 
       {/* Avatar Menu */}
       <AvatarMenu
