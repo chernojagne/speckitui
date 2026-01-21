@@ -6,6 +6,7 @@
 import { useCallback, useEffect } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useProjectStore } from '@/stores/projectStore';
+import { useFeatureEnvStore } from '@/stores/featureEnvStore';
 import type { TerminalSession } from '@/types';
 import {
   createTerminal,
@@ -35,6 +36,7 @@ interface UseTerminalReturn {
 
 export function useTerminal(): UseTerminalReturn {
   const project = useProjectStore((state) => state.project);
+  const getEnvRecord = useFeatureEnvStore((state) => state.getEnvRecord);
   const {
     sessions,
     activeSessionId,
@@ -90,7 +92,10 @@ export function useTerminal(): UseTerminalReturn {
     try {
       const cwd = getCwd();
       const shellPath = getShellPath(shell);
-      const result = await createTerminal(cwd, shellPath);
+      
+      // Get feature environment variables to inject into the terminal
+      const featureEnv = getEnvRecord();
+      const result = await createTerminal(cwd, shellPath, featureEnv);
       
       const shellLabel = getShellLabel(shell);
       const newSession: TerminalSession = {
@@ -111,7 +116,7 @@ export function useTerminal(): UseTerminalReturn {
       console.error('Failed to create terminal session:', err, shell);
       return null;
     }
-  }, [getCwd, getShellPath, getShellLabel, sessions.length, addSession, storeSetActiveSession]);
+  }, [getCwd, getShellPath, getShellLabel, getEnvRecord, sessions.length, addSession, storeSetActiveSession]);
 
   // Close a terminal session
   // If skipBackend is true, only remove from store (used when terminal already exited)

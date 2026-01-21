@@ -75,6 +75,70 @@ pub async fn load_description(spec_path: String) -> Result<String, String> {
         })
 }
 
+/// Save feature description text to a specific file path.
+/// Creates parent directories if they don't exist.
+/// 
+/// # Arguments
+/// * `file_path` - Absolute path to the description file
+/// * `content` - Description text to save
+/// 
+/// # Returns
+/// * `Ok(())` on successful save
+/// * `Err(message)` on file system error
+#[tauri::command]
+pub async fn save_description_file(file_path: String, content: String) -> Result<(), String> {
+    let path = Path::new(&file_path);
+    
+    // Create parent directories if they don't exist
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to create directories: {}", e))?;
+        }
+    }
+    
+    fs::write(&path, &content)
+        .map_err(|e| {
+            if e.kind() == std::io::ErrorKind::PermissionDenied {
+                format!("Permission denied: {}", file_path)
+            } else {
+                format!("IO error: {}", e)
+            }
+        })?;
+    
+    log::info!("Saved description to: {}", file_path);
+    Ok(())
+}
+
+/// Load feature description text from a specific file path.
+/// 
+/// # Arguments
+/// * `file_path` - Absolute path to the description file
+/// 
+/// # Returns
+/// * `Ok(content)` - description text (empty string if file doesn't exist)
+/// * `Err(message)` on file system error
+#[tauri::command]
+pub async fn load_description_file(file_path: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+    
+    // If file doesn't exist, return empty string (not an error)
+    if !path.exists() {
+        return Ok(String::new());
+    }
+    
+    fs::read_to_string(&path)
+        .map_err(|e| {
+            if e.kind() == std::io::ErrorKind::PermissionDenied {
+                format!("Permission denied: {}", file_path)
+            } else if e.kind() == std::io::ErrorKind::InvalidData {
+                "Encoding error: file is not valid UTF-8".to_string()
+            } else {
+                format!("IO error: {}", e)
+            }
+        })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

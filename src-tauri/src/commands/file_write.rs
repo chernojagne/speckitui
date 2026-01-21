@@ -221,6 +221,80 @@ pub async fn update_agent_context(
     })
 }
 
+// ============ Attachment Saving ============
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SaveAttachmentResponse {
+    pub success: bool,
+    pub file_path: String,
+    pub relative_path: String,
+    pub file_name: String,
+    pub size: usize,
+}
+
+/// Save an attachment file (base64 encoded) to the feature description directory
+/// Returns the relative path for referencing in markdown
+#[tauri::command]
+pub async fn save_attachment(
+    base_dir: String,
+    file_name: String,
+    content_base64: String,
+) -> Result<SaveAttachmentResponse, String> {
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    
+    let base_path = Path::new(&base_dir);
+    
+    // Create attachments subdirectory
+    let attachments_dir = base_path.join("attachments");
+    if !attachments_dir.exists() {
+        fs::create_dir_all(&attachments_dir)
+            .map_err(|e| format!("PERMISSION_DENIED: Failed to create attachments directory: {}", e))?;
+    }
+    
+    // Generate unique filename to avoid collisions
+    let timestamp = chrono::Utc::now().format("%Y%m%d_%H%M%S").to_string();
+    let sanitized_name = sanitize_filename(&file_name);
+    let unique_name = format!("{}_{}", timestamp, sanitized_name);
+    
+    let file_path = attachments_dir.join(&unique_name);
+    let file_path_str = file_path.to_string_lossy().to_string();
+    
+    // Decode base64 content
+    let content = STANDARD.decode(&content_base64)
+        .map_err(|e| format!("INVALID_CONTENT: Failed to decode base64: {}", e))?;
+    
+    let size = content.len();
+    
+    // Write the file
+    fs::write(&file_path, &content)
+        .map_err(|e| format!("IO_ERROR: Failed to write attachment: {}", e))?;
+    
+    // Calculate relative path from base_dir
+    let relative_path = format!("attachments/{}", unique_name);
+    
+    log::info!("Saved attachment: {} ({} bytes)", file_path_str, size);
+    
+    Ok(SaveAttachmentResponse {
+        success: true,
+        file_path: file_path_str,
+        relative_path,
+        file_name: unique_name,
+        size,
+    })
+}
+
+/// Sanitize a filename to remove problematic characters
+fn sanitize_filename(name: &str) -> String {
+    name.chars()
+        .map(|c| match c {
+            '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+            c if c.is_ascii_control() => '_',
+            c => c,
+        })
+        .collect()
+}
+
 // ============ Tests ============
 
 #[cfg(test)]

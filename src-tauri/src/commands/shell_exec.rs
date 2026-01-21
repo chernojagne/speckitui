@@ -36,6 +36,7 @@ const ALLOWED_SCRIPT_PREFIX: &str = ".specify/scripts/";
 /// Convert a Windows path to Unix-style path for Git Bash
 /// C:\repos\project -> /c/repos/project
 #[cfg(target_os = "windows")]
+#[allow(dead_code)]
 fn convert_windows_path_to_unix(windows_path: &str) -> String {
     let path = windows_path.replace('\\', "/");
     

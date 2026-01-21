@@ -1,41 +1,37 @@
 import { useState } from 'react';
-import { RichComposer } from '@/components/shared/RichComposer';
-import { AgentSelector } from '@/components/shared/AgentSelector';
-import { useDescription } from '@/hooks/useDescription';
+import { DescriptionRichEditor } from '@/components/shared/DescriptionRichEditor';
+import { useFeatureDescription } from '@/hooks/useFeatureDescription';
 import { useProjectStore } from '@/stores/projectStore';
-import { useTerminalStore } from '@/stores/terminalStore';
-import { writeTerminal } from '@/services/tauriCommands';
-import { Loader2, Send, CheckCircle2, AlertCircle, Bot } from 'lucide-react';
+import { Loader2, Save, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export function DescribeStep() {
   const { project, activeSpec } = useProjectStore();
-  const { activeSessionId } = useTerminalStore();
-  const [sendStatus, setSendStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [showAgentSelector, setShowAgentSelector] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  
   const {
     content,
+    attachments,
     isDirty,
     isLoading,
     isSaving,
     error,
+    descriptionFilePath,
     updateContent,
-  } = useDescription();
+    updateAttachments,
+    saveAttachment,
+    save,
+  } = useFeatureDescription();
 
-  const handleSendToTerminal = async () => {
-    if (!activeSessionId || !content.trim()) return;
-
-    try {
-      // Send the description text to the terminal
-      await writeTerminal(activeSessionId, content);
-      setSendStatus('success');
-      // Reset status after 2 seconds
-      setTimeout(() => setSendStatus('idle'), 2000);
-    } catch (err) {
-      console.error('Failed to send to terminal:', err);
-      setSendStatus('error');
-      setTimeout(() => setSendStatus('idle'), 3000);
+  const handleSave = async () => {
+    const success = await save();
+    if (success) {
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } else {
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
 
@@ -75,43 +71,43 @@ export function DescribeStep() {
       <div className="flex items-center gap-4 p-4 bg-card border-b border-border">
         <h3 className="text-sm font-semibold m-0">Describe</h3>
         
+        {descriptionFilePath && (
+          <span className="text-xs text-muted-foreground truncate max-w-[300px]" title={descriptionFilePath}>
+            {descriptionFilePath.split('/').slice(-2).join('/')}
+          </span>
+        )}
+        
         <div className="flex items-center gap-2 ml-auto">
           <Button
-            variant="outline"
+            variant={isDirty ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setShowAgentSelector(true)}
-            disabled={isLoading || !content.trim()}
-            className="gap-1.5"
-          >
-            <Bot className="h-3.5 w-3.5" />
-            Add to Agent
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSendToTerminal}
-            disabled={!activeSessionId || isLoading || !content.trim()}
+            onClick={handleSave}
+            disabled={isLoading || isSaving || (!isDirty && saveStatus === 'idle')}
             className={cn(
               "gap-1.5",
-              sendStatus === 'success' && "border-success text-success",
-              sendStatus === 'error' && "border-destructive text-destructive"
+              saveStatus === 'success' && "border-success text-success bg-success/10",
+              saveStatus === 'error' && "border-destructive text-destructive bg-destructive/10"
             )}
           >
-            {sendStatus === 'success' ? (
+            {isSaving ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Saving...
+              </>
+            ) : saveStatus === 'success' ? (
               <>
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Sent!
+                Saved!
               </>
-            ) : sendStatus === 'error' ? (
+            ) : saveStatus === 'error' ? (
               <>
                 <AlertCircle className="h-3.5 w-3.5" />
                 Failed
               </>
             ) : (
               <>
-                <Send className="h-3.5 w-3.5" />
-                Send to Terminal
+                <Save className="h-3.5 w-3.5" />
+                Save
               </>
             )}
           </Button>
@@ -119,23 +115,19 @@ export function DescribeStep() {
       </div>
 
       <div className="flex-1 min-h-0">
-        <RichComposer
+        <DescriptionRichEditor
           content={content}
           onChange={updateContent}
+          attachments={attachments}
+          onAttachmentsChange={updateAttachments}
+          onSaveAttachment={saveAttachment}
           isSaving={isSaving}
           isDirty={isDirty}
           isLoading={isLoading}
-          placeholder="Describe the feature you want to build. This description will be used to generate the specification..."
+          placeholder="Describe the feature you want to build. Add text, links, images, and documents. Attachments will be saved alongside the description file..."
           heightClass="h-full"
         />
       </div>
-      
-      {/* Agent Selector Dialog */}
-      <AgentSelector
-        open={showAgentSelector}
-        onOpenChange={setShowAgentSelector}
-        content={content}
-      />
     </div>
   );
 }
