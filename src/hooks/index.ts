@@ -5,7 +5,7 @@
 export { useArtifacts } from './useArtifacts';
 export { useDescription } from './useDescription';
 export { useFeatureDescription } from './useFeatureDescription';
-export { useFileWatcher, useArtifactWatcher, type FileChangeEvent } from './useFileWatcher';
+export { useFileWatcher, useArtifactWatcher, useArtifactCreationWatcher, type FileChangeEvent } from './useFileWatcher';
 export { useGitBranch } from './useGitBranch';
 export { useGitHub } from './useGitHub';
 export { useGitStatus } from './useGitStatus';

@@ -58,7 +58,7 @@ export function EditableMarkdownView({
   }, [initialContent]);
 
   // File watcher for external changes
-  const handleExternalChange = useCallback((changedPath: string) => {
+  const handleExternalChange = useCallback((changedPath: string, _kind: 'create' | 'modify' | 'delete' | 'rename') => {
     if (changedPath.includes(filePath.split('/').pop() || '') && !editor.isEditing) {
       editor.reloadContent();
     }

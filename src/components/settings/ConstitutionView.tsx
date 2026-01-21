@@ -104,7 +104,7 @@ export function ConstitutionView() {
   });
 
   // File watcher for external changes  
-  const handleExternalChange = useCallback((path: string) => {
+  const handleExternalChange = useCallback((path: string, _kind: 'create' | 'modify' | 'delete' | 'rename') => {
     if (constitutionPath && path.includes('constitution.md') && fileExists && !editor.isEditing) {
       editor.reloadContent();
     }

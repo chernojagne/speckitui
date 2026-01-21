@@ -400,26 +400,26 @@ export async function getGitFileStatus(
 
 export interface WatchArtifactResponse {
   success: boolean;
-  watchedPaths: string[];
+  watchId: string;
 }
 
 /**
- * Start watching artifact files for changes.
- * @param paths - Array of absolute file paths to watch
+ * Start watching a spec directory for file changes.
+ * @param specDir - Absolute path to the spec directory to watch
+ * @param files - Optional array of specific files to watch (for future filtering)
  */
-export async function watchArtifactFiles(paths: string[]): Promise<WatchArtifactResponse> {
-  return invoke('watch_artifact_files', { paths });
+export async function watchArtifactFiles(specDir: string, files: string[] = []): Promise<string> {
+  return invoke('watch_artifact_files', { specDir, files });
 }
 
 export interface UnwatchArtifactResponse {
   success: boolean;
-  unwatchedPaths: string[];
 }
 
 /**
  * Stop watching artifact files.
- * @param paths - Array of absolute file paths to stop watching
+ * @param watchId - The watch ID returned from watchArtifactFiles
  */
-export async function unwatchArtifactFiles(paths: string[]): Promise<UnwatchArtifactResponse> {
-  return invoke('unwatch_artifact_files', { paths });
+export async function unwatchArtifactFiles(watchId: string): Promise<void> {
+  return invoke('unwatch_artifact_files', { watchId });
 }
