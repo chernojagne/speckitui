@@ -20,19 +20,24 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-1. **Obtain environment variables**: Collect the following environment variables that will be used in the feature specification:
-   - FEATURE_DIR: The directory where the feature specification and related files are stored.
-   - SPEC_FILE: The path to the feature specification file.
-   - FEATURE_DESC_FILE: The path to the feature description file.
+1. **Setup**: Read the feature context from `.speckitui/context.json`. This file contains:
+   - `FEATURE_DIR`: Directory containing feature artifacts (e.g., `./specs/my-feature`)
+   - `SPEC_FILE`: Path to the specification file to write
+   - `FEATURE_DESC_FILE`: Path to the feature description file to read
+   - `BRANCH_NAME`: The git branch name for this feature
+   - `FEATURE_NUM`: The feature number
+   
+   If the file doesn't exist or is empty, ask the user to select a feature in SpeckitUI first.
+   
+   Remember these values and use them wherever the variable names are mentioned throughout this session.
 
-2. **Get the feature description**: Read the contents of the file FEATURE_DESC_FILE, along with the user input. Do not prompt the user for a feature description if at least one of these sources is available and not empty. These sources should be combined to form the complete **feature description**.
+2. **Load feature description** Read FEATURE_DESC_FILE. This **is** the feature description.
 
 3. Load `.specify/templates/spec-template.md` to understand required sections.
 
 4. Follow this execution flow:
 
-    1. Parse the feature description
-       If empty: ERROR "No feature description provided"
+    1. If the feature description is empty: ERROR "No feature description provided"
     2. Extract key concepts from description
        Identify: actors, actions, data, constraints
     3. For unclear aspects:

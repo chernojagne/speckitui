@@ -221,6 +221,61 @@ pub async fn update_agent_context(
     })
 }
 
+// ============ Feature Context ============
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WriteFeatureContextResponse {
+    pub success: bool,
+    pub file_path: String,
+}
+
+/// Write the current feature context to .speckitui/context.json
+/// This allows AI agents to read feature context without shell access
+#[tauri::command]
+pub async fn write_feature_context(
+    repo_path: String,
+    feature_dir: String,
+    spec_file: String,
+    feature_desc_file: String,
+    branch_name: String,
+    feature_num: String,
+) -> Result<WriteFeatureContextResponse, String> {
+    let base_path = Path::new(&repo_path);
+    let context_dir = base_path.join(".speckitui");
+    let context_file = context_dir.join("context.json");
+    
+    // Create .speckitui directory if needed
+    if !context_dir.exists() {
+        fs::create_dir_all(&context_dir)
+            .map_err(|e| format!("PERMISSION_DENIED: Failed to create .speckitui directory: {}", e))?;
+    }
+    
+    // Build the context JSON
+    let context = serde_json::json!({
+        "FEATURE_DIR": feature_dir,
+        "SPEC_FILE": spec_file,
+        "FEATURE_DESC_FILE": feature_desc_file,
+        "BRANCH_NAME": branch_name,
+        "FEATURE_NUM": feature_num,
+        "updated_at": chrono::Utc::now().to_rfc3339()
+    });
+    
+    let context_str = serde_json::to_string_pretty(&context)
+        .map_err(|e| format!("SERIALIZATION_ERROR: Failed to serialize context: {}", e))?;
+    
+    fs::write(&context_file, &context_str)
+        .map_err(|e| format!("IO_ERROR: Failed to write context file: {}", e))?;
+    
+    let file_path_str = context_file.to_string_lossy().to_string();
+    log::info!("Wrote feature context to: {}", file_path_str);
+    
+    Ok(WriteFeatureContextResponse {
+        success: true,
+        file_path: file_path_str,
+    })
+}
+
 // ============ Attachment Saving ============
 
 #[derive(Debug, Serialize)]

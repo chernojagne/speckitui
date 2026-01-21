@@ -112,6 +112,7 @@ pub fn run() {
             file_write::create_directory,
             file_write::update_agent_context,
             file_write::save_attachment,
+            file_write::write_feature_context,
             // Shell execution commands (005-ui-enhancements)
             shell_exec::execute_shell_script,
         ])

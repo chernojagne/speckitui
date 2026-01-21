@@ -5,6 +5,7 @@
  */
 
 import { create } from 'zustand';
+import { writeFeatureContext } from '@/services/tauriCommands';
 
 export interface FeatureEnvVariables {
   BRANCH_NAME?: string;
@@ -25,8 +26,8 @@ interface FeatureEnvState {
     BRANCH_NAME: string;
     SPEC_FILE: string;
     FEATURE_NUM: string | number;
-  }) => void;
-  clearVariables: () => void;
+  }, repoPath?: string) => void;
+  clearVariables: (repoPath?: string) => void;
   getEnvRecord: () => Record<string, string>;
 }
 
@@ -36,7 +37,7 @@ export const useFeatureEnvStore = create<FeatureEnvState>((set, get) => ({
   isSet: false,
 
   // Set variables from the create-new-feature.sh --json output
-  setFromScriptOutput: (output) => {
+  setFromScriptOutput: (output, repoPath) => {
     const branchName = output.BRANCH_NAME;
     const featureNum = String(output.FEATURE_NUM);
     
@@ -58,15 +59,38 @@ export const useFeatureEnvStore = create<FeatureEnvState>((set, get) => ({
       (window as unknown as Record<string, unknown>).__SPECKITUI_FEATURE_ENV__ = variables;
     }
 
+    // Write context file for AI agents if repoPath is provided
+    if (repoPath && variables.FEATURE_DIR && variables.SPEC_FILE && variables.FEATURE_DESC_FILE) {
+      writeFeatureContext(
+        repoPath,
+        variables.FEATURE_DIR,
+        variables.SPEC_FILE,
+        variables.FEATURE_DESC_FILE,
+        branchName,
+        featureNum
+      ).then(() => {
+        console.log('[FeatureEnvStore] Wrote context file for AI agents');
+      }).catch((err) => {
+        console.warn('[FeatureEnvStore] Failed to write context file:', err);
+      });
+    }
+
     console.log('[FeatureEnvStore] Set feature environment variables:', variables);
   },
 
   // Clear all variables
-  clearVariables: () => {
+  clearVariables: (repoPath) => {
     set({ variables: {}, isSet: false });
     
     if (typeof window !== 'undefined') {
       delete (window as unknown as Record<string, unknown>).__SPECKITUI_FEATURE_ENV__;
+    }
+
+    // Clear the context file by writing empty values
+    if (repoPath) {
+      writeFeatureContext(repoPath, '', '', '', '', '').catch(() => {
+        // Ignore errors when clearing
+      });
     }
 
     console.log('[FeatureEnvStore] Cleared feature environment variables');

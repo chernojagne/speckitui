@@ -286,6 +286,33 @@ export async function saveAttachment(
   return invoke('save_attachment', { baseDir, fileName, contentBase64 });
 }
 
+export interface WriteFeatureContextResponse {
+  success: boolean;
+  filePath: string;
+}
+
+/**
+ * Write the current feature context to .speckitui/context.json
+ * This allows AI agents to read feature context without shell access
+ */
+export async function writeFeatureContext(
+  repoPath: string,
+  featureDir: string,
+  specFile: string,
+  featureDescFile: string,
+  branchName: string,
+  featureNum: string
+): Promise<WriteFeatureContextResponse> {
+  return invoke('write_feature_context', {
+    repoPath,
+    featureDir,
+    specFile,
+    featureDescFile,
+    branchName,
+    featureNum,
+  });
+}
+
 export interface CreateDirectoryResponse {
   success: boolean;
   path: string;

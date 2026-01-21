@@ -59,7 +59,13 @@ impl TerminalManager {
         let mut cmd = CommandBuilder::new(&shell);
         cmd.cwd(&cwd);
         
-        // Set environment variables
+        // IMPORTANT: Inherit the parent process's environment variables
+        // This ensures PATH and other important vars are available
+        for (key, value) in std::env::vars() {
+            cmd.env(key, value);
+        }
+        
+        // Set/override terminal-specific environment variables
         #[cfg(windows)]
         {
             cmd.env("TERM", "xterm-256color");

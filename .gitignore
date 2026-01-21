@@ -38,3 +38,6 @@ coverage/
 
 # Local config overrides
 *.local
+
+# SpeckitUI local state (contains per-machine context)
+.speckitui/

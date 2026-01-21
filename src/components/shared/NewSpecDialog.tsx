@@ -77,8 +77,8 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
       try {
         const jsonOutput: CreateFeatureJsonOutput = JSON.parse(result.stdout.trim());
         
-        // Set feature environment variables in the store
-        setFromScriptOutput(jsonOutput);
+        // Set feature environment variables in the store (pass repoPath for context file)
+        setFromScriptOutput(jsonOutput, project.path);
         
         console.log('[NewSpecDialog] Feature created with JSON output:', jsonOutput);
       } catch (parseError) {
