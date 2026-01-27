@@ -245,11 +245,7 @@ export const useSettingsStore = create<SettingsState>()(
         const state = persistedState as Record<string, unknown>;
         return { ...state, navPaneCollapsed: false };
       },
-      onRehydrateStorage: () => (state, error) => {
-        if (error) {
-          console.error('Error rehydrating settings store:', error);
-          return;
-        }
+      onRehydrateStorage: () => (state) => {
         if (!state) return;
 
         // Validate and fix invalid theme preferences (006-more-themes T055)
