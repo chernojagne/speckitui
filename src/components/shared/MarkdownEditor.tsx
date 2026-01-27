@@ -4,10 +4,11 @@
  * Part of 005-ui-enhancements feature
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Editor from 'react-simple-code-editor';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { MarkdownRenderer } from '@/components/shared/MarkdownRenderer';
+import { MarkdownRenderer, getHighlighter } from '@/components/shared/MarkdownRenderer';
+import { useMarkdownTheme } from '@/hooks/useTheme';
 import { 
   Dialog,
   DialogContent,
@@ -65,14 +66,46 @@ export function MarkdownEditor({
   const [showPreview, setShowPreview] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<'cancel' | 'navigate' | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [themeStyle, setThemeStyle] = useState<React.CSSProperties>({});
+  const [highlighter, setHighlighter] = useState<any>(null); // Using any to avoid importing Highlighter type
+  const { shikiTheme } = useMarkdownTheme();
 
-  // Focus textarea when entering edit mode
+  // Load editor theme colors and highlighter
   useEffect(() => {
-    if (isEditing && textareaRef.current && !showPreview) {
-      textareaRef.current.focus();
+    let mounted = true;
+    getHighlighter().then((h) => {
+      if (!mounted) return;
+      setHighlighter(h);
+      try {
+        const theme = h.getTheme(shikiTheme);
+        setThemeStyle({
+          backgroundColor: theme.bg,
+          color: theme.fg,
+        });
+      } catch (e) {
+        console.warn('Failed to load theme colors for editor', e);
+      }
+    });
+    return () => { mounted = false; };
+  }, [shikiTheme]);
+
+  const highlightCode = useCallback((code: string) => {
+    if (!highlighter) return code;
+    try {
+      const html = highlighter.codeToHtml(code, {
+        lang: 'markdown',
+        theme: shikiTheme
+      });
+      // Strip the pre/code tags to let Editor handle wrapping
+      // shiki returns: <pre ...><code>...</code></pre>
+      // we want just the inner HTML of the code tag
+      return html
+        .replace(/^<pre[^>]*><code[^>]*>/, '')
+        .replace(/<\/code><\/pre>$/, '');
+    } catch (e) {
+      return code;
     }
-  }, [isEditing, showPreview]);
+  }, [highlighter, shikiTheme]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -207,15 +240,25 @@ export function MarkdownEditor({
       )}
 
       {/* Content area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {isEditing && !showPreview ? (
-          <Textarea
-            ref={textareaRef}
-            value={content}
-            onChange={(e) => onContentChange(e.target.value)}
-            placeholder={placeholder}
-            className="h-full w-full resize-none border-0 rounded-none focus-visible:ring-0 font-mono text-sm p-4"
-          />
+          <div className="h-full w-full overflow-auto" style={themeStyle}>
+            <Editor
+              value={content}
+              onValueChange={onContentChange}
+              highlight={highlightCode}
+              padding={16}
+              textareaId="markdown-editor-textarea"
+              placeholder={placeholder}
+              className="font-mono text-sm min-h-full"
+              style={{
+                fontFamily: '"Geist Mono", monospace',
+                fontSize: 14,
+                ...themeStyle,
+              }}
+              textareaClassName="focus:outline-none"
+            />
+          </div>
         ) : (
           <div className="h-full overflow-y-auto p-4">
             {content ? (

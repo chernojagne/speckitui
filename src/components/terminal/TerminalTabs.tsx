@@ -1,12 +1,14 @@
 /**
  * TerminalTabs Component
  * Tab bar for managing multiple terminal sessions with drag-to-reorder
+ * 
+ * @feature 006-more-themes - Updated to use useTerminalTheme hook
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { getTerminalTheme, getAutoTerminalTheme, type TerminalThemeId } from '@/config/terminalThemes';
+import { useTerminalTheme } from '@/hooks/useTheme';
 import type { ShellType } from '@/hooks/useTerminal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,16 +80,9 @@ export function TerminalTabs({
   const sessionsRef = useRef(sessions);
   sessionsRef.current = sessions;
   
-  // Get terminal theme to match selected tab background with terminal
-  const terminalThemeSetting = useSettingsStore((s) => s.terminalTheme);
-  const appTheme = useSettingsStore((s) => s.theme);
-  
-  const terminalBackground = useMemo(() => {
-    const resolvedThemeId: TerminalThemeId = terminalThemeSetting === 'auto' 
-      ? getAutoTerminalTheme(appTheme) 
-      : terminalThemeSetting as TerminalThemeId;
-    return getTerminalTheme(resolvedThemeId).background;
-  }, [terminalThemeSetting, appTheme]);
+  // Get terminal theme to match selected tab background with terminal (006-more-themes)
+  const { theme: terminalThemeConfig } = useTerminalTheme();
+  const terminalBackground = terminalThemeConfig.background;
 
   // Focus input when entering edit mode
   useEffect(() => {

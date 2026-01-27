@@ -1,11 +1,14 @@
 /**
  * SourceViewer Component
  * Read-only source code viewer with syntax highlighting
+ * 
+ * @feature 006-more-themes - Uses user's editor theme setting
  */
 
 import { useState, useEffect, useMemo } from 'react';
 import { createHighlighter, type Highlighter, type BundledLanguage, type BundledTheme } from 'shiki';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useEditorTheme } from '@/hooks/useTheme';
 
 interface SourceViewerProps {
   code: string;
@@ -20,9 +23,8 @@ interface SourceViewerProps {
   wordWrap?: boolean;
 }
 
-// Reuse the highlighter from MarkdownRenderer
-let highlighterPromise: Promise<Highlighter> | null = null;
-let highlighterInstance: Highlighter | null = null;
+// Cache highlighters by theme to avoid recreating them
+const highlighterCache = new Map<string, Promise<Highlighter>>();
 
 const COMMON_LANGUAGES: BundledLanguage[] = [
   'javascript',
@@ -41,23 +43,22 @@ const COMMON_LANGUAGES: BundledLanguage[] = [
   'toml',
 ];
 
-const LIGHT_THEME: BundledTheme = 'github-light';
-const DARK_THEME: BundledTheme = 'github-dark';
-
-async function getHighlighter(): Promise<Highlighter> {
-  if (highlighterInstance) {
-    return highlighterInstance;
-  }
-
-  if (!highlighterPromise) {
-    highlighterPromise = createHighlighter({
-      themes: [LIGHT_THEME, DARK_THEME],
+/**
+ * Get or create a highlighter for the specified theme
+ * @feature 006-more-themes - Dynamic theme support
+ */
+async function getHighlighter(theme: BundledTheme): Promise<Highlighter> {
+  const cacheKey = theme;
+  
+  if (!highlighterCache.has(cacheKey)) {
+    const promise = createHighlighter({
+      themes: [theme],
       langs: COMMON_LANGUAGES,
     });
+    highlighterCache.set(cacheKey, promise);
   }
 
-  highlighterInstance = await highlighterPromise;
-  return highlighterInstance;
+  return highlighterCache.get(cacheKey)!;
 }
 
 const LANGUAGE_MAP: Record<string, BundledLanguage> = {
@@ -102,6 +103,10 @@ export function SourceViewer({
   const settingsFontSize = useSettingsStore((state) => state.editorFontSize);
   const settingsWordWrap = useSettingsStore((state) => state.editorWordWrap);
 
+  // Get editor theme from settings (006-more-themes)
+  const { shikiTheme } = useEditorTheme();
+  const currentTheme = shikiTheme as BundledTheme;
+
   const resolvedShowLineNumbers = showLineNumbers ?? settingsLineNumbers;
   const resolvedFontSize = fontSize ?? settingsFontSize;
   const resolvedWordWrap = wordWrap ?? settingsWordWrap;
@@ -117,34 +122,35 @@ export function SourceViewer({
     return getLanguageFromFileName(fileName);
   }, [language, fileName]);
 
-  // Initialize highlighter
+  // Initialize or update highlighter when theme changes
   useEffect(() => {
-    getHighlighter()
+    getHighlighter(currentTheme)
       .then(setHighlighter)
       .catch((err) => console.error('Failed to load highlighter:', err));
-  }, []);
+  }, [currentTheme]);
 
-  // Highlight code
+  // Highlight code using the theme loaded in the highlighter
   useEffect(() => {
     if (!highlighter || !code) {
       setHighlightedHtml(null);
       return;
     }
 
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    const theme = prefersDark ? DARK_THEME : LIGHT_THEME;
-
     try {
+      // Use the theme that was loaded with this highlighter
+      const loadedThemes = highlighter.getLoadedThemes();
+      const themeToUse = loadedThemes[0] || currentTheme;
+
       const html = highlighter.codeToHtml(code, {
         lang: resolvedLanguage,
-        theme,
+        theme: themeToUse,
       });
       setHighlightedHtml(html);
     } catch {
       // Language not supported, fallback
       setHighlightedHtml(null);
     }
-  }, [highlighter, code, resolvedLanguage]);
+  }, [highlighter, code, resolvedLanguage, currentTheme]);
 
   const lines = code.split('\n');
   const highlightSet = useMemo(() => new Set(highlightLines), [highlightLines]);

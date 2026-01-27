@@ -15,3 +15,12 @@ export { useProjectMonitor } from './useProjectMonitor';
 export { useSpecInstance } from './useSpecInstance';
 export { useTerminal } from './useTerminal';
 export { useTerminalHotkeys } from './useTerminalHotkeys';
+export {
+  useTheme,
+  useThemeMode,
+  useAppTheme,
+  useTerminalTheme,
+  useEditorTheme,
+  useMarkdownTheme,
+  useThemePreset,
+} from './useTheme';
