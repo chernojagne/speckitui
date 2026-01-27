@@ -38,6 +38,7 @@ impl TerminalManager {
         app_handle: AppHandle,
         cwd: String,
         shell: String,
+        env: Option<HashMap<String, String>>,
     ) -> Result<String, String> {
         let id = uuid::Uuid::new_v4().to_string();
         
@@ -58,7 +59,13 @@ impl TerminalManager {
         let mut cmd = CommandBuilder::new(&shell);
         cmd.cwd(&cwd);
         
-        // Set environment variables
+        // IMPORTANT: Inherit the parent process's environment variables
+        // This ensures PATH and other important vars are available
+        for (key, value) in std::env::vars() {
+            cmd.env(key, value);
+        }
+        
+        // Set/override terminal-specific environment variables
         #[cfg(windows)]
         {
             cmd.env("TERM", "xterm-256color");
@@ -67,6 +74,14 @@ impl TerminalManager {
         {
             cmd.env("TERM", "xterm-256color");
             cmd.env("COLORTERM", "truecolor");
+        }
+
+        // Apply custom environment variables (feature env from the store)
+        if let Some(env_vars) = env {
+            for (key, value) in env_vars {
+                log::info!("Setting terminal env var: {}={}", key, value);
+                cmd.env(key, value);
+            }
         }
 
         // Spawn the child process

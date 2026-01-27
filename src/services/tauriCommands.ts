@@ -119,6 +119,25 @@ export async function loadDescription(specPath: string): Promise<string> {
   return invoke('load_description', { specPath });
 }
 
+/**
+ * Save feature description text to a specific file path.
+ * Creates parent directories if they don't exist.
+ * @param filePath - Absolute path to the description file
+ * @param content - Description text to save
+ */
+export async function saveDescriptionFile(filePath: string, content: string): Promise<void> {
+  return invoke('save_description_file', { filePath, content });
+}
+
+/**
+ * Load feature description text from a specific file path.
+ * @param filePath - Absolute path to the description file
+ * @returns Description text (empty string if file doesn't exist)
+ */
+export async function loadDescriptionFile(filePath: string): Promise<string> {
+  return invoke('load_description_file', { filePath });
+}
+
 // ============ Terminal Commands ============
 
 export interface TerminalCreatedResponse {
@@ -129,9 +148,10 @@ export interface TerminalCreatedResponse {
 
 export async function createTerminal(
   cwd?: string,
-  shell?: string
+  shell?: string,
+  env?: Record<string, string>
 ): Promise<TerminalCreatedResponse> {
-  return invoke('create_terminal', { cwd, shell });
+  return invoke('create_terminal', { cwd, shell, env });
 }
 
 export async function writeTerminal(sessionId: string, data: string): Promise<void> {
@@ -244,6 +264,55 @@ export async function writeFile(path: string, content: string): Promise<WriteFil
   return invoke('write_file', { path, content });
 }
 
+export interface SaveAttachmentResponse {
+  success: boolean;
+  filePath: string;
+  relativePath: string;
+  fileName: string;
+  size: number;
+}
+
+/**
+ * Save an attachment file (base64 encoded) to the feature description directory.
+ * @param baseDir - Directory where the description file lives
+ * @param fileName - Original filename
+ * @param contentBase64 - Base64 encoded file content
+ */
+export async function saveAttachment(
+  baseDir: string,
+  fileName: string,
+  contentBase64: string
+): Promise<SaveAttachmentResponse> {
+  return invoke('save_attachment', { baseDir, fileName, contentBase64 });
+}
+
+export interface WriteFeatureContextResponse {
+  success: boolean;
+  filePath: string;
+}
+
+/**
+ * Write the current feature context to .speckitui/context.json
+ * This allows AI agents to read feature context without shell access
+ */
+export async function writeFeatureContext(
+  repoPath: string,
+  featureDir: string,
+  specFile: string,
+  featureDescFile: string,
+  branchName: string,
+  featureNum: string
+): Promise<WriteFeatureContextResponse> {
+  return invoke('write_feature_context', {
+    repoPath,
+    featureDir,
+    specFile,
+    featureDescFile,
+    branchName,
+    featureNum,
+  });
+}
+
 export interface CreateDirectoryResponse {
   success: boolean;
   path: string;
@@ -331,26 +400,26 @@ export async function getGitFileStatus(
 
 export interface WatchArtifactResponse {
   success: boolean;
-  watchedPaths: string[];
+  watchId: string;
 }
 
 /**
- * Start watching artifact files for changes.
- * @param paths - Array of absolute file paths to watch
+ * Start watching a spec directory for file changes.
+ * @param specDir - Absolute path to the spec directory to watch
+ * @param files - Optional array of specific files to watch (for future filtering)
  */
-export async function watchArtifactFiles(paths: string[]): Promise<WatchArtifactResponse> {
-  return invoke('watch_artifact_files', { paths });
+export async function watchArtifactFiles(specDir: string, files: string[] = []): Promise<string> {
+  return invoke('watch_artifact_files', { specDir, files });
 }
 
 export interface UnwatchArtifactResponse {
   success: boolean;
-  unwatchedPaths: string[];
 }
 
 /**
  * Stop watching artifact files.
- * @param paths - Array of absolute file paths to stop watching
+ * @param watchId - The watch ID returned from watchArtifactFiles
  */
-export async function unwatchArtifactFiles(paths: string[]): Promise<UnwatchArtifactResponse> {
-  return invoke('unwatch_artifact_files', { paths });
+export async function unwatchArtifactFiles(watchId: string): Promise<void> {
+  return invoke('unwatch_artifact_files', { watchId });
 }

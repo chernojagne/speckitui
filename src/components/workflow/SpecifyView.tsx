@@ -42,7 +42,7 @@ export function SpecifyView() {
   });
 
   // File watcher for external changes
-  const handleExternalChange = useCallback((changedPath: string) => {
+  const handleExternalChange = useCallback((changedPath: string, _kind: 'create' | 'modify' | 'delete' | 'rename') => {
     if (!editor.isEditing && activeSpec) {
       if (changedPath.includes('spec.md') || changedPath.includes('checklists/')) {
         loadArtifacts();

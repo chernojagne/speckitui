@@ -71,6 +71,8 @@ pub fn run() {
             // Description commands
             description::save_description,
             description::load_description,
+            description::save_description_file,
+            description::load_description_file,
             // Terminal commands
             terminal::create_terminal,
             terminal::write_terminal,
@@ -109,6 +111,8 @@ pub fn run() {
             file_write::write_file,
             file_write::create_directory,
             file_write::update_agent_context,
+            file_write::save_attachment,
+            file_write::write_feature_context,
             // Shell execution commands (005-ui-enhancements)
             shell_exec::execute_shell_script,
         ])

@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { createHighlighter, type Highlighter, type BundledLanguage, type BundledTheme } from 'shiki';
 import { updateCheckbox as updateCheckboxIpc } from '@/services/tauriCommands';
+import { useMarkdownTheme } from '@/hooks/useTheme';
+import { editorThemes } from '@/config/editorThemes';
 
 interface MarkdownRendererProps {
   content: string;
@@ -14,7 +16,7 @@ interface CheckboxState {
   [line: number]: boolean;
 }
 
-// Singleton highlighter instance
+// Single highlighter instance loaded with all markdown themes
 let highlighterPromise: Promise<Highlighter> | null = null;
 let highlighterInstance: Highlighter | null = null;
 
@@ -36,18 +38,19 @@ const COMMON_LANGUAGES: BundledLanguage[] = [
   'toml',
 ];
 
-// Themes
-const LIGHT_THEME: BundledTheme = 'github-light';
-const DARK_THEME: BundledTheme = 'github-dark';
-
-async function getHighlighter(): Promise<Highlighter> {
+/**
+ * Get or create a highlighter loaded with all supported themes
+ * @feature 006-more-themes - Dynamic theme support
+ */
+export async function getHighlighter(): Promise<Highlighter> {
   if (highlighterInstance) {
     return highlighterInstance;
   }
 
   if (!highlighterPromise) {
+    const themes = editorThemes.map((theme) => theme.shikiName) as BundledTheme[];
     highlighterPromise = createHighlighter({
-      themes: [LIGHT_THEME, DARK_THEME],
+      themes,
       langs: COMMON_LANGUAGES,
     });
   }
@@ -58,6 +61,9 @@ async function getHighlighter(): Promise<Highlighter> {
 
 // Language alias mapping
 const LANGUAGE_ALIASES: Record<string, BundledLanguage> = {
+  text: 'markdown',
+  plaintext: 'markdown',
+  txt: 'markdown',
   js: 'javascript',
   ts: 'typescript',
   sh: 'bash',
@@ -69,7 +75,7 @@ const LANGUAGE_ALIASES: Record<string, BundledLanguage> = {
 };
 
 function normalizeLanguage(lang: string | undefined): BundledLanguage {
-  if (!lang) return 'text' as BundledLanguage;
+  if (!lang) return 'markdown' as BundledLanguage;
   const normalized = lang.toLowerCase();
   return (LANGUAGE_ALIASES[normalized] || normalized) as BundledLanguage;
 }
@@ -79,11 +85,19 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
   const [checkboxStates, setCheckboxStates] = useState<CheckboxState>({});
   const [highlighter, setHighlighter] = useState<Highlighter | null>(null);
 
-  // Initialize highlighter
+  // Get the current markdown theme from settings (006-more-themes)
+  const { shikiTheme } = useMarkdownTheme();
+  const currentTheme = shikiTheme as BundledTheme;
+
+  // Initialize highlighter once (supports all themes)
   useEffect(() => {
     getHighlighter()
-      .then(setHighlighter)
-      .catch((err) => console.error('Failed to load highlighter:', err));
+      .then((h) => {
+        setHighlighter(h);
+      })
+      .catch((err) => {
+        console.error('Failed to load highlighter:', err);
+      });
   }, []);
 
   useEffect(() => {
@@ -122,11 +136,6 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
     }
   };
 
-  // Detect if user prefers dark mode
-  const prefersDarkMode = useRef(
-    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  );
-
   // Code block component with Shiki syntax highlighting
   const CodeBlock = useCallback(
     ({ className, children, ...props }: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) => {
@@ -141,12 +150,11 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
       useEffect(() => {
         if (!highlighter) return;
 
-        const theme = prefersDarkMode.current ? DARK_THEME : LIGHT_THEME;
-
+        // Use the current theme from settings (006-more-themes)
         try {
           const html = highlighter.codeToHtml(codeString, {
             lang,
-            theme,
+            theme: currentTheme,
           });
           setHighlightedHtml(html);
         } catch (err) {
@@ -154,7 +162,7 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
           console.warn(`Language ${lang} not loaded, falling back to plain text`);
           setHighlightedHtml(null);
         }
-      }, [codeString, lang]);
+      }, [codeString, lang, highlighter, currentTheme]);
 
       // If we have highlighted HTML, render it
       if (highlightedHtml) {
@@ -173,11 +181,12 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
         </pre>
       );
     },
-    [highlighter]
+    [highlighter, currentTheme]
   );
 
   // Custom components for ReactMarkdown
-  const components = {
+  // useMemo to ensure ReactMarkdown re-renders when CodeBlock changes (theme updates)
+  const components = useMemo(() => ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     img: (props: any) => {
       const { src, alt, node, ...rest } = props;
@@ -225,6 +234,13 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
       return <input {...props} />;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    pre: ({ children, ...props }: any) => {
+      // Use a wrapper div instead of pre to avoid nesting pre inside pre,
+      // which causes styling issues and invalid HTML. The inner CodeBlock 
+      // component will handle rendering the actual pre tag.
+      return <div className="code-wrapper" {...props}>{children}</div>;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     code: (props: any) => {
       const { className, children, node, ...rest } = props;
       // Check if this is a code block (inside pre) or inline code
@@ -238,10 +254,10 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
       // Inline code
       return <code className={className} {...rest}>{children}</code>;
     },
-  };
+  }), [CodeBlock, checkboxStates, filePath, handleCheckboxChange]);
 
   return (
-    <div className="prose prose-sm max-w-none text-foreground leading-relaxed
+    <div className="prose prose-sm max-w-none text-foreground leading-relaxed font-extralight
       [&_h1]:text-3xl [&_h1]:font-semibold [&_h1]:mt-6 [&_h1]:mb-4 [&_h1]:pb-2 [&_h1]:border-b [&_h1]:border-border
       [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-5 [&_h2]:mb-3
       [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2
@@ -251,8 +267,8 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
       [&_ul]:my-2 [&_ul]:pl-8 [&_ol]:my-2 [&_ol]:pl-8
       [&_li]:my-1
       [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm
-      [&_pre]:bg-muted [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:overflow-x-auto [&_pre]:my-4
-      [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-sm [&_pre_code]:leading-relaxed
+      [&_pre:not(.shiki)]:bg-muted [&_pre:not(.shiki)]:p-4 [&_pre:not(.shiki)]:rounded-md [&_pre:not(.shiki)]:overflow-x-auto [&_pre:not(.shiki)]:my-4
+      [&_pre:not(.shiki)_code]:bg-transparent [&_pre:not(.shiki)_code]:p-0 [&_pre:not(.shiki)_code]:text-sm [&_pre:not(.shiki)_code]:leading-relaxed
       [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:my-4 [&_blockquote]:py-2 [&_blockquote]:px-4 [&_blockquote]:bg-muted [&_blockquote]:rounded-r-md
       [&_blockquote_p]:m-0
       [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
@@ -261,7 +277,7 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
       [&_tr:nth-child(even)]:bg-muted
       [&_hr]:border-none [&_hr]:border-t [&_hr]:border-border [&_hr]:my-8
       [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md
-      [&_strong]:font-semibold
+      [&_strong]:font-bold [&_strong]:text-foreground
       [&_em]:italic
       [&_.shiki-wrapper]:my-4
       [&_.shiki-wrapper_pre]:p-4 [&_.shiki-wrapper_pre]:rounded-md [&_.shiki-wrapper_pre]:overflow-x-auto [&_.shiki-wrapper_pre]:m-0

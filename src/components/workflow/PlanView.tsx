@@ -38,7 +38,7 @@ export function PlanView() {
   });
 
   // File watcher for external changes
-  const handleExternalChange = useCallback((changedPath: string) => {
+  const handleExternalChange = useCallback((changedPath: string, _kind: 'create' | 'modify' | 'delete' | 'rename') => {
     if (!editor.isEditing && activeSpec) {
       // Check if any of our artifacts changed
       const watchedFiles = ['plan.md', 'research.md', 'data-model.md', 'quickstart.md', 'contracts/'];

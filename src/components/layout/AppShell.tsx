@@ -1,11 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { NavPane } from './NavPane';
 import { DetailPane } from './DetailPane';
 import { StatusBar } from './StatusBar';
 import { TerminalPanel } from './TerminalPanel';
 import { TitleBar } from './TitleBar';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
-import { useProjectMonitor } from '@/hooks/useProjectMonitor';
+import { useProjectMonitor, useArtifactCreationWatcher } from '@/hooks';
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -14,7 +14,7 @@ import {
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { open } from '@tauri-apps/plugin-dialog';
-import { openProject } from '@/services/tauriCommands';
+import { openProject, watchArtifactFiles, unwatchArtifactFiles } from '@/services/tauriCommands';
 import { useWorkflowStore } from '@/stores/workflowStore';
 import { Button } from '@/components/ui/button';
 import { X, AlertTriangle } from 'lucide-react';
@@ -22,6 +22,7 @@ import { X, AlertTriangle } from 'lucide-react';
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const watchIdRef = useRef<string | null>(null);
   const { error, project, setProject, setLoading, setError, setActiveSpec } =
     useProjectStore();
   
@@ -35,6 +36,37 @@ export function AppShell() {
     setNavPaneWidth,
     toggleNavPaneCollapsed 
   } = useSettingsStore();
+
+  // Start watching specs directory when project is opened
+  useEffect(() => {
+    const setupWatcher = async () => {
+      if (project?.path && project.hasSpecsDir) {
+        try {
+          // Stop any existing watcher
+          if (watchIdRef.current) {
+            await unwatchArtifactFiles(watchIdRef.current).catch(() => {});
+          }
+          // Start watching the specs directory
+          const specsDir = `${project.path}/specs`;
+          const watchId = await watchArtifactFiles(specsDir);
+          watchIdRef.current = watchId;
+          console.log('[AppShell] Started watching specs directory:', specsDir);
+        } catch (err) {
+          console.warn('[AppShell] Failed to start file watcher:', err);
+        }
+      }
+    };
+    
+    setupWatcher();
+    
+    return () => {
+      // Cleanup watcher on unmount or project change
+      if (watchIdRef.current) {
+        unwatchArtifactFiles(watchIdRef.current).catch(() => {});
+        watchIdRef.current = null;
+      }
+    };
+  }, [project?.path, project?.hasSpecsDir]);
 
   // Use pixel-based sizes for predictable layout
   const navDefaultSize = "220px";
@@ -92,13 +124,28 @@ export function AppShell() {
   const handleRefreshProject = useCallback(async () => {
     if (!project?.path || isRefreshing) return;
     
+    // Remember current spec ID to preserve selection
+    const currentSpecId = useProjectStore.getState().activeSpec?.id;
+    
     setIsRefreshing(true);
     try {
       const proj = await openProject(project.path);
       setProject(proj);
       
-      // Re-select active spec if available
-      if (proj.specInstances.length > 0) {
+      // Try to re-select the same spec that was active before refresh
+      if (currentSpecId && proj.specInstances.length > 0) {
+        const matchingSpec = proj.specInstances.find(s => s.id === currentSpecId);
+        if (matchingSpec) {
+          setActiveSpec(matchingSpec);
+          updateContentStatus(matchingSpec.artifacts);
+        } else {
+          // Spec was removed, fall back to first available
+          const spec = proj.specInstances[0];
+          setActiveSpec(spec);
+          updateContentStatus(spec.artifacts);
+        }
+      } else if (proj.specInstances.length > 0) {
+        // No previous spec, select first one
         const spec = proj.specInstances[0];
         setActiveSpec(spec);
         updateContentStatus(spec.artifacts);
@@ -109,6 +156,9 @@ export function AppShell() {
       setIsRefreshing(false);
     }
   }, [project?.path, isRefreshing, setProject, setActiveSpec, updateContentStatus, setError]);
+
+  // Watch for new artifact file creation and auto-refresh
+  useArtifactCreationWatcher(handleRefreshProject);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">

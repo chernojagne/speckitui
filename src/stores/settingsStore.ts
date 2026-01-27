@@ -1,11 +1,52 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { AppSettings } from '@/types';
+import type { AppSettings, AppPaletteId, TerminalThemeId, ShikiThemeId } from '@/types';
+import { applyAppPalette } from '@/config/appThemes';
+import { getPresetValues } from '@/config/themePresets';
 
-export type TerminalThemeSetting = 'auto' | 'dark' | 'light' | 'caffeine-dark' | 'caffeine-light' | 'monokai' | 'dracula';
+// Valid theme IDs for fallback validation (006-more-themes T055)
+const VALID_APP_PALETTES: AppPaletteId[] = [
+  'caffeine', 'catppuccin', 'nord', 'gruvbox', 'amber', 'blue', 'emerald', 'fuchsia'
+];
 
-// Helper to apply theme to document
-const applyTheme = (theme: 'light' | 'dark' | 'system') => {
+const VALID_TERMINAL_THEMES: (TerminalThemeId | 'auto')[] = [
+  'auto', 'dark', 'light', 'caffeine-dark', 'caffeine-light', 'monokai', 'dracula',
+  'catppuccin-mocha', 'catppuccin-latte', 'nord', 'gruvbox-dark', 'gruvbox-light',
+  'solarized-dark', 'solarized-light', 'one-dark', 'tokyo-night'
+];
+
+const VALID_SHIKI_THEMES: ShikiThemeId[] = [
+  'github-dark', 'github-light', 'catppuccin-mocha', 'catppuccin-latte', 'nord',
+  'dracula', 'monokai', 'one-dark-pro', 'solarized-dark', 'solarized-light',
+  'tokyo-night', 'min-light'
+];
+
+// Default theme values
+const DEFAULT_APP_PALETTE: AppPaletteId = 'caffeine';
+const DEFAULT_TERMINAL_THEME: TerminalThemeId | 'auto' = 'auto';
+const DEFAULT_EDITOR_THEME: ShikiThemeId = 'github-dark';
+const DEFAULT_MARKDOWN_THEME: ShikiThemeId = 'github-dark';
+
+// Validation helpers
+const isValidAppPalette = (value: unknown): value is AppPaletteId =>
+  VALID_APP_PALETTES.includes(value as AppPaletteId);
+
+const isValidTerminalTheme = (value: unknown): value is TerminalThemeId | 'auto' =>
+  VALID_TERMINAL_THEMES.includes(value as TerminalThemeId | 'auto');
+
+const isValidShikiTheme = (value: unknown): value is ShikiThemeId =>
+  VALID_SHIKI_THEMES.includes(value as ShikiThemeId);
+
+// Helper to get current theme mode
+const getThemeMode = (theme: 'light' | 'dark' | 'system'): 'light' | 'dark' => {
+  if (theme === 'system') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return theme;
+};
+
+// Helper to apply theme mode to document
+const applyThemeMode = (theme: 'light' | 'dark' | 'system') => {
   const root = document.documentElement;
   
   if (theme === 'system') {
@@ -23,16 +64,28 @@ const applyTheme = (theme: 'light' | 'dark' | 'system') => {
   }
 };
 
+// Combined helper to apply theme mode and palette
+const applyTheme = (
+  theme: 'light' | 'dark' | 'system',
+  appPalette: AppPaletteId
+) => {
+  applyThemeMode(theme);
+  const mode = getThemeMode(theme);
+  applyAppPalette(appPalette, mode);
+};
+
 // Listen for system theme changes
 if (typeof window !== 'undefined') {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    const currentTheme = useSettingsStore.getState().theme;
-    if (currentTheme === 'system') {
+    const state = useSettingsStore.getState();
+    if (state.theme === 'system') {
       if (e.matches) {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
       }
+      // Re-apply palette with new mode
+      applyAppPalette(state.appPalette, e.matches ? 'dark' : 'light');
     }
   });
 }
@@ -40,6 +93,7 @@ if (typeof window !== 'undefined') {
 interface SettingsState extends AppSettings {
   // Actions
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  setAppPalette: (palette: AppPaletteId) => void;
   setTerminalPanelHeight: (height: number) => void;
   setTerminalPanelCollapsed: (collapsed: boolean) => void;
   addRecentProject: (path: string) => void;
@@ -48,19 +102,24 @@ interface SettingsState extends AppSettings {
   setEditorFontSize: (size: number) => void;
   setEditorLineNumbers: (show: boolean) => void;
   setEditorWordWrap: (wrap: boolean) => void;
+  setEditorTheme: (theme: ShikiThemeId) => void;
+  // Markdown settings actions
+  setMarkdownTheme: (theme: ShikiThemeId) => void;
   // Sidebar settings actions
   setSidebarShowIcons: (show: boolean) => void;
   setSidebarCompactMode: (compact: boolean) => void;
   // Terminal settings actions
   setTerminalFontSize: (size: number) => void;
   setTerminalFontFamily: (family: string) => void;
-  setTerminalTheme: (theme: TerminalThemeSetting) => void;
+  setTerminalTheme: (theme: TerminalThemeId | 'auto') => void;
   setTerminalCursorBlink: (blink: boolean) => void;
   setDefaultTerminal: (shell: 'cmd' | 'powershell' | 'bash') => void;
   // Navigation pane settings actions
   setNavPaneWidth: (width: number) => void;
   setNavPaneCollapsed: (collapsed: boolean) => void;
   toggleNavPaneCollapsed: () => void;
+  // Theme preset action
+  applyThemePreset: (presetId: string) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -73,10 +132,15 @@ export const useSettingsStore = create<SettingsState>()(
       terminalPanelHeight: 200,
       terminalPanelCollapsed: true,
       theme: 'system',
+      // App palette (006-more-themes)
+      appPalette: 'caffeine',
       // Editor settings
       editorFontSize: 14,
       editorLineNumbers: true,
       editorWordWrap: false,
+      editorTheme: 'github-dark',
+      // Markdown theme (006-more-themes)
+      markdownTheme: 'github-dark',
       // Sidebar settings
       sidebarShowIcons: true,
       sidebarCompactMode: false,
@@ -92,8 +156,16 @@ export const useSettingsStore = create<SettingsState>()(
 
       // Actions
       setTheme: (theme) => {
-        applyTheme(theme);
+        const { appPalette } = get();
+        applyTheme(theme, appPalette);
         set({ theme });
+      },
+
+      setAppPalette: (palette) => {
+        const { theme } = get();
+        const mode = getThemeMode(theme);
+        applyAppPalette(palette, mode);
+        set({ appPalette: palette });
       },
 
       setTerminalPanelHeight: (height) =>
@@ -118,6 +190,10 @@ export const useSettingsStore = create<SettingsState>()(
       setEditorFontSize: (size) => set({ editorFontSize: size }),
       setEditorLineNumbers: (show) => set({ editorLineNumbers: show }),
       setEditorWordWrap: (wrap) => set({ editorWordWrap: wrap }),
+      setEditorTheme: (theme) => set({ editorTheme: theme }),
+      
+      // Markdown settings actions
+      setMarkdownTheme: (theme) => set({ markdownTheme: theme }),
       
       // Sidebar settings actions
       setSidebarShowIcons: (show) => set({ sidebarShowIcons: show }),
@@ -136,6 +212,24 @@ export const useSettingsStore = create<SettingsState>()(
       setNavPaneCollapsed: (collapsed) => set({ navPaneCollapsed: collapsed }),
       toggleNavPaneCollapsed: () =>
         set((state) => ({ navPaneCollapsed: !state.navPaneCollapsed })),
+
+      // Theme preset action
+      applyThemePreset: (presetId) => {
+        const values = getPresetValues(presetId);
+        if (!values) {
+          console.warn(`Theme preset "${presetId}" not found`);
+          return;
+        }
+        const { theme } = get();
+        const mode = getThemeMode(theme);
+        applyAppPalette(values.appPalette, mode);
+        set({
+          appPalette: values.appPalette,
+          terminalTheme: values.terminalTheme,
+          editorTheme: values.editorTheme,
+          markdownTheme: values.markdownTheme,
+        });
+      },
     }),
     {
       name: 'speckitui-settings',
@@ -151,10 +245,50 @@ export const useSettingsStore = create<SettingsState>()(
         const state = persistedState as Record<string, unknown>;
         return { ...state, navPaneCollapsed: false };
       },
-      onRehydrateStorage: () => (state) => {
-        // Apply theme when store is rehydrated from localStorage
-        if (state?.theme) {
-          applyTheme(state.theme);
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('Error rehydrating settings store:', error);
+          return;
+        }
+        if (!state) return;
+
+        // Validate and fix invalid theme preferences (006-more-themes T055)
+        let needsUpdate = false;
+        const fixes: Partial<SettingsState> = {};
+
+        if (!isValidAppPalette(state.appPalette)) {
+          console.warn(`Invalid appPalette "${state.appPalette}", falling back to "${DEFAULT_APP_PALETTE}"`);
+          fixes.appPalette = DEFAULT_APP_PALETTE;
+          needsUpdate = true;
+        }
+
+        if (!isValidTerminalTheme(state.terminalTheme)) {
+          console.warn(`Invalid terminalTheme "${state.terminalTheme}", falling back to "${DEFAULT_TERMINAL_THEME}"`);
+          fixes.terminalTheme = DEFAULT_TERMINAL_THEME;
+          needsUpdate = true;
+        }
+
+        if (!isValidShikiTheme(state.editorTheme)) {
+          console.warn(`Invalid editorTheme "${state.editorTheme}", falling back to "${DEFAULT_EDITOR_THEME}"`);
+          fixes.editorTheme = DEFAULT_EDITOR_THEME;
+          needsUpdate = true;
+        }
+
+        if (!isValidShikiTheme(state.markdownTheme)) {
+          console.warn(`Invalid markdownTheme "${state.markdownTheme}", falling back to "${DEFAULT_MARKDOWN_THEME}"`);
+          fixes.markdownTheme = DEFAULT_MARKDOWN_THEME;
+          needsUpdate = true;
+        }
+
+        // Apply fixes if any invalid values found
+        if (needsUpdate) {
+          useSettingsStore.setState(fixes);
+        }
+
+        // Apply theme mode and palette when store is rehydrated from localStorage
+        const effectivePalette = (fixes.appPalette ?? state.appPalette) as AppPaletteId;
+        if (state.theme) {
+          applyTheme(state.theme, effectivePalette);
         }
       },
     }

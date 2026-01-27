@@ -39,7 +39,7 @@ export function TasksView() {
   }, [content, editor.content]);
 
   // File watcher for external changes
-  const handleExternalChange = useCallback((changedPath: string) => {
+  const handleExternalChange = useCallback((changedPath: string, _kind: 'create' | 'modify' | 'delete' | 'rename') => {
     if (filePath && changedPath.includes('tasks.md') && !editor.isEditing) {
       loadTasks();
     }

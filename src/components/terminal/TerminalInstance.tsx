@@ -1,15 +1,17 @@
 /**
  * TerminalInstance Component
  * Renders a single terminal instance using xterm.js
+ * 
+ * @feature 006-more-themes - Updated to use useTerminalTheme hook
  */
 
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { writeTerminal, resizeTerminal } from '@/services/tauriCommands';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { getTerminalTheme, getAutoTerminalTheme, type TerminalThemeId } from '@/config/terminalThemes';
+import { useTerminalTheme } from '@/hooks/useTheme';
 import '@xterm/xterm/css/xterm.css';
 import './TerminalInstance.css';
 
@@ -52,19 +54,10 @@ export function TerminalInstance({
   // Get terminal settings from store
   const terminalFontSize = useSettingsStore((s) => s.terminalFontSize);
   const terminalFontFamily = useSettingsStore((s) => s.terminalFontFamily);
-  const terminalThemeSetting = useSettingsStore((s) => s.terminalTheme);
   const terminalCursorBlink = useSettingsStore((s) => s.terminalCursorBlink);
-  const appTheme = useSettingsStore((s) => s.theme);
   
-  // Compute the actual theme based on settings
-  const resolvedThemeId = useMemo((): TerminalThemeId => {
-    if (terminalThemeSetting === 'auto') {
-      return getAutoTerminalTheme(appTheme);
-    }
-    return terminalThemeSetting as TerminalThemeId;
-  }, [terminalThemeSetting, appTheme]);
-  
-  const terminalTheme = useMemo(() => getTerminalTheme(resolvedThemeId), [resolvedThemeId]);
+  // Use the new theme hook for resolved theme (006-more-themes)
+  const { theme: terminalTheme } = useTerminalTheme();
   
   // Store callbacks in refs to avoid re-initializing terminal when they change
   const onReadyRef = useRef(onReady);

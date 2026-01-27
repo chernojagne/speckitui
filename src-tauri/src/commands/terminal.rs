@@ -1,5 +1,6 @@
 use crate::services::TerminalManager;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::sync::Arc;
 use tauri::State;
 
@@ -22,6 +23,7 @@ pub async fn create_terminal(
     state: State<'_, TerminalState>,
     cwd: Option<String>,
     shell: Option<String>,
+    env: Option<HashMap<String, String>>,
 ) -> Result<TerminalSession, String> {
     let cwd = cwd.unwrap_or_else(|| {
         std::env::current_dir()
@@ -41,8 +43,8 @@ pub async fn create_terminal(
         }
     });
 
-    // Create the PTY session
-    let session_id = state.0.create_session(app, cwd.clone(), shell.clone())?;
+    // Create the PTY session with optional environment variables
+    let session_id = state.0.create_session(app, cwd.clone(), shell.clone(), env)?;
 
     Ok(TerminalSession {
         session_id,

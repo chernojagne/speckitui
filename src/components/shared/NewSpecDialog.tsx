@@ -17,8 +17,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useProjectStore } from '@/stores/projectStore';
+import { useFeatureEnvStore } from '@/stores/featureEnvStore';
 import { executeShellScript, openProject } from '@/services/tauriCommands';
 import { Loader2, Plus, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+interface CreateFeatureJsonOutput {
+  BRANCH_NAME: string;
+  SPEC_FILE: string;
+  FEATURE_NUM: string | number;
+}
 
 interface NewSpecDialogProps {
   open: boolean;
@@ -27,6 +34,7 @@ interface NewSpecDialogProps {
 
 export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
   const { project, setProject, setActiveSpec } = useProjectStore();
+  const { setFromScriptOutput } = useFeatureEnvStore();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -41,10 +49,10 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
     setSuccess(false);
 
     try {
-      // Execute the create-new-feature.sh script
-      // The script expects: [--short-name <short-name>] <feature description>
+      // Execute the create-new-feature.sh script with --json option
+      // The script expects: --json [--short-name <short-name>] <feature description>
       const scriptPath = '.specify/scripts/bash/create-new-feature.sh';
-      const args: string[] = [];
+      const args: string[] = ['--json'];
       
       // Add optional short-name if provided
       if (name.trim()) {
@@ -63,6 +71,19 @@ export function NewSpecDialog({ open, onOpenChange }: NewSpecDialogProps) {
           throw new Error('The create-new-feature.sh script is missing. Please run "npx specify init ." in your project folder to set up the speckit environment.');
         }
         throw new Error(errorOutput || 'Script execution failed');
+      }
+
+      // Parse JSON output from the script
+      try {
+        const jsonOutput: CreateFeatureJsonOutput = JSON.parse(result.stdout.trim());
+        
+        // Set feature environment variables in the store (pass repoPath for context file)
+        setFromScriptOutput(jsonOutput, project.path);
+        
+        console.log('[NewSpecDialog] Feature created with JSON output:', jsonOutput);
+      } catch (parseError) {
+        console.warn('[NewSpecDialog] Could not parse JSON output, script may not support --json:', parseError);
+        // Continue even if JSON parsing fails - the feature was still created
       }
 
       setSuccess(true);

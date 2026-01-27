@@ -13,6 +13,27 @@ export interface FileChangeEvent {
   timestamp: string;
 }
 
+// Raw event from Rust backend (different field names)
+interface RawFileChangeEvent {
+  path: string;
+  change_type: string; // "created" | "modified" | "deleted" | "changed"
+}
+
+// Convert Rust event format to our internal format
+function normalizeEvent(raw: RawFileChangeEvent): FileChangeEvent {
+  const kindMap: Record<string, FileChangeEvent['kind']> = {
+    'created': 'create',
+    'modified': 'modify',
+    'deleted': 'delete',
+    'changed': 'modify',
+  };
+  return {
+    path: raw.path,
+    kind: kindMap[raw.change_type] || 'modify',
+    timestamp: new Date().toISOString(),
+  };
+}
+
 interface UseFileWatcherOptions {
   /** Only watch paths matching these patterns */
   patterns?: string[];
@@ -29,7 +50,7 @@ interface UseFileWatcherReturn {
   isWatching: boolean;
 }
 
-const FILE_CHANGE_EVENT = 'file-change';
+const FILE_CHANGE_EVENT = 'file-changed'; // Must match Rust event name
 
 export function useFileWatcher({
   patterns,
@@ -106,8 +127,9 @@ export function useFileWatcher({
 
     const setupListener = async () => {
       try {
-        unlisten = await listen<FileChangeEvent>(FILE_CHANGE_EVENT, (event) => {
-          handleFileChange(event.payload);
+        unlisten = await listen<RawFileChangeEvent>(FILE_CHANGE_EVENT, (event) => {
+          const normalizedEvent = normalizeEvent(event.payload);
+          handleFileChange(normalizedEvent);
         });
       } catch (err) {
         console.error('Failed to setup file watcher:', err);
@@ -134,13 +156,14 @@ export function useFileWatcher({
 /**
  * Hook to watch for changes to artifact files and invalidate cache
  */
-export function useArtifactWatcher(onArtifactChange: (path: string) => void) {
+export function useArtifactWatcher(onArtifactChange: (path: string, kind: FileChangeEvent['kind']) => void) {
   const activeSpec = useProjectStore((state) => state.activeSpec);
 
   const handleFileChange = useCallback(
     (event: FileChangeEvent) => {
-      if (event.kind === 'modify' || event.kind === 'delete') {
-        onArtifactChange(event.path);
+      // Handle modify, delete, AND create events
+      if (event.kind === 'modify' || event.kind === 'delete' || event.kind === 'create') {
+        onArtifactChange(event.path, event.kind);
       }
     },
     [onArtifactChange]
@@ -150,5 +173,46 @@ export function useArtifactWatcher(onArtifactChange: (path: string) => void) {
     patterns: activeSpec ? [`${activeSpec.path}/**`] : undefined,
     onFileChange: handleFileChange,
     enabled: !!activeSpec,
+  });
+}
+
+/**
+ * Hook to watch for new artifact file creation and trigger project refresh
+ * This updates the artifact manifest when files are created by external tools (like AI agents)
+ */
+export function useArtifactCreationWatcher(onRefreshNeeded: () => void) {
+  const project = useProjectStore((state) => state.project);
+  const activeSpec = useProjectStore((state) => state.activeSpec);
+  const lastRefreshRef = useRef<number>(0);
+  const refreshCallbackRef = useRef(onRefreshNeeded);
+
+  // Keep callback ref up to date
+  useEffect(() => {
+    refreshCallbackRef.current = onRefreshNeeded;
+  }, [onRefreshNeeded]);
+
+  const handleFileChange = useCallback(
+    (event: FileChangeEvent) => {
+      // Only care about file creation events
+      if (event.kind !== 'create') return;
+
+      // Debounce rapid creation events (e.g., when agent creates multiple files)
+      const now = Date.now();
+      if (now - lastRefreshRef.current < 1000) return;
+
+      // Check if the created file is in the active spec directory
+      if (activeSpec && event.path.includes(activeSpec.path)) {
+        console.log('[ArtifactCreationWatcher] New artifact detected:', event.path);
+        lastRefreshRef.current = now;
+        refreshCallbackRef.current();
+      }
+    },
+    [activeSpec]
+  );
+
+  useFileWatcher({
+    patterns: project ? [`${project.path}/specs/**`] : undefined,
+    onFileChange: handleFileChange,
+    enabled: !!project,
   });
 }

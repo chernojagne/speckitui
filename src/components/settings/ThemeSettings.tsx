@@ -1,12 +1,20 @@
 /**
  * ThemeSettings Component
  * Theme selection and customization options
+ * 
+ * @feature 006-more-themes - Expanded with palette, editor, and markdown theme selectors
  */
 
-import { useSettingsStore, type TerminalThemeSetting } from '@/stores/settingsStore';
-import { terminalThemes } from '@/config/terminalThemes';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/lib/utils';
 import { Sun, Moon, Monitor, Check, type LucideIcon, Terminal } from 'lucide-react';
+
+// Theme selector components
+import { ThemePresetSelector } from './ThemePresetSelector';
+import { AppPaletteSelector } from './AppPaletteSelector';
+import { TerminalThemeSelector } from './TerminalThemeSelector';
+import { EditorThemeSelector } from './EditorThemeSelector';
+import { MarkdownThemeSelector } from './MarkdownThemeSelector';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -24,11 +32,6 @@ const terminalFontFamilies = [
   { value: '"Fira Code", Consolas, monospace', label: 'Fira Code' },
   { value: '"JetBrains Mono", Consolas, monospace', label: 'JetBrains Mono' },
   { value: 'monospace', label: 'System Monospace' },
-];
-
-const terminalThemeOptions: { value: TerminalThemeSetting; label: string }[] = [
-  { value: 'auto', label: 'Auto (follow app theme)' },
-  ...terminalThemes.map((t) => ({ value: t.id as TerminalThemeSetting, label: t.name })),
 ];
 
 export function ThemeSettings() {
@@ -49,13 +52,11 @@ export function ThemeSettings() {
   const sidebarCompactMode = useSettingsStore((state) => state.sidebarCompactMode);
   const setSidebarCompactMode = useSettingsStore((state) => state.setSidebarCompactMode);
 
-  // Terminal settings
+  // Terminal settings (non-theme)
   const terminalFontSize = useSettingsStore((state) => state.terminalFontSize);
   const setTerminalFontSize = useSettingsStore((state) => state.setTerminalFontSize);
   const terminalFontFamily = useSettingsStore((state) => state.terminalFontFamily);
   const setTerminalFontFamily = useSettingsStore((state) => state.setTerminalFontFamily);
-  const terminalTheme = useSettingsStore((state) => state.terminalTheme);
-  const setTerminalTheme = useSettingsStore((state) => state.setTerminalTheme);
   const terminalCursorBlink = useSettingsStore((state) => state.terminalCursorBlink);
   const setTerminalCursorBlink = useSettingsStore((state) => state.setTerminalCursorBlink);
   const terminalPanelHeight = useSettingsStore((state) => state.terminalPanelHeight);
@@ -65,10 +66,14 @@ export function ThemeSettings() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Theme Presets - Quick Apply */}
+      <ThemePresetSelector />
+
+      {/* Light/Dark/System Mode */}
       <div className="pb-6 border-b border-border last:border-b-0 last:pb-0">
-        <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground">Theme</h3>
+        <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground">Mode</h3>
         <p className="text-[13px] text-muted-foreground m-0 mb-4">
-          Choose how SpeckitUI looks to you. Select a theme preference.
+          Choose light, dark, or follow your system preference.
         </p>
 
         <div className="flex gap-3">
@@ -92,10 +97,16 @@ export function ThemeSettings() {
         </div>
       </div>
 
+      {/* App Palette Selection */}
+      <AppPaletteSelector />
+
       <div className="pb-6 border-b border-border last:border-b-0 last:pb-0">
         <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground">Editor</h3>
         
-        <div className="flex items-center justify-between gap-4 py-3 first:pt-0">
+        {/* Editor Theme Selector */}
+        <EditorThemeSelector />
+
+        <div className="flex items-center justify-between gap-4 py-3">
           <div className="flex flex-col gap-0.5">
             <label className="text-sm font-medium text-foreground">Font Size</label>
             <span className="text-xs text-muted-foreground">
@@ -112,6 +123,9 @@ export function ThemeSettings() {
             ))}
           </select>
         </div>
+
+        {/* Markdown Theme Selector */}
+        <MarkdownThemeSelector />
 
         <div className="flex items-center justify-between gap-4 py-3">
           <div className="flex flex-col gap-0.5">
@@ -184,23 +198,8 @@ export function ThemeSettings() {
           Terminal
         </h3>
         
-        <div className="flex items-center justify-between gap-4 py-3 first:pt-0">
-          <div className="flex flex-col gap-0.5">
-            <label className="text-sm font-medium text-foreground">Color Theme</label>
-            <span className="text-xs text-muted-foreground">
-              Choose the terminal color scheme
-            </span>
-          </div>
-          <select 
-            className="px-3 py-1.5 text-[13px] border border-border rounded bg-card text-foreground cursor-pointer hover:border-border focus:outline-none focus:border-primary min-w-[180px]"
-            value={terminalTheme}
-            onChange={(e) => setTerminalTheme(e.target.value as TerminalThemeSetting)}
-          >
-            {terminalThemeOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </div>
+        {/* Terminal Theme Selector (uses the new component) */}
+        <TerminalThemeSelector />
 
         <div className="flex items-center justify-between gap-4 py-3">
           <div className="flex flex-col gap-0.5">

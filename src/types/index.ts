@@ -210,6 +210,57 @@ export interface GitHubIssue {
 
 // ============ Settings Types ============
 
+// Theme-related types (006-more-themes)
+export type AppPaletteId = 
+  | 'caffeine' 
+  | 'catppuccin' 
+  | 'nord' 
+  | 'gruvbox' 
+  | 'amber' 
+  | 'blue' 
+  | 'emerald' 
+  | 'fuchsia';
+
+export type TerminalThemeId = 
+  | 'dark' 
+  | 'light' 
+  | 'caffeine-dark' 
+  | 'caffeine-light' 
+  | 'monokai' 
+  | 'dracula'
+  | 'catppuccin-mocha'
+  | 'catppuccin-latte'
+  | 'nord'
+  | 'gruvbox-dark'
+  | 'gruvbox-light'
+  | 'solarized-dark'
+  | 'solarized-light'
+  | 'one-dark'
+  | 'tokyo-night';
+
+export type ShikiThemeId = 
+  | 'github-dark'
+  | 'github-light'
+  | 'catppuccin-mocha'
+  | 'catppuccin-latte'
+  | 'nord'
+  | 'dracula'
+  | 'monokai'
+  | 'one-dark-pro'
+  | 'solarized-dark'
+  | 'solarized-light'
+  | 'tokyo-night'
+  | 'min-light';
+
+export interface ThemePreset {
+  id: string;
+  name: string;
+  appPalette: AppPaletteId;
+  terminalTheme: TerminalThemeId | 'auto';
+  editorTheme: ShikiThemeId;
+  markdownTheme: ShikiThemeId;
+}
+
 export interface AppSettings {
   recentProjects: string[];
   lastProjectPath?: string;
@@ -217,10 +268,15 @@ export interface AppSettings {
   terminalPanelHeight: number;
   terminalPanelCollapsed: boolean;
   theme: 'light' | 'dark' | 'system';
+  // App palette (006-more-themes)
+  appPalette: AppPaletteId;
   // Editor settings
   editorFontSize: number;
   editorLineNumbers: boolean;
   editorWordWrap: boolean;
+  editorTheme: ShikiThemeId;
+  // Markdown theme (006-more-themes)
+  markdownTheme: ShikiThemeId;
   // Sidebar settings
   sidebarShowIcons: boolean;
   sidebarCompactMode: boolean;
@@ -230,7 +286,7 @@ export interface AppSettings {
   // Terminal settings
   terminalFontSize: number;
   terminalFontFamily: string;
-  terminalTheme: 'auto' | 'dark' | 'light' | 'caffeine-dark' | 'caffeine-light' | 'monokai' | 'dracula';
+  terminalTheme: TerminalThemeId | 'auto';
   terminalCursorBlink: boolean;
   defaultTerminal: 'cmd' | 'powershell' | 'bash';
 }
