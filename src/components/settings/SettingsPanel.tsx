@@ -3,22 +3,35 @@
  * Modal or slide-out panel for application settings
  */
 
-import { useState } from 'react';
-import { ConstitutionView } from './ConstitutionView';
+import { useState, useEffect } from 'react';
 import { ThemeSettings } from './ThemeSettings';
-import { RecentProjects } from './RecentProjects';
 import { cn } from '@/lib/utils';
-import { Settings, Palette, FolderOpen, ScrollText } from 'lucide-react';
+import { Settings, Palette } from 'lucide-react';
 
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type SettingsTab = 'general' | 'appearance' | 'projects' | 'constitution';
+type SettingsTab = 'general' | 'appearance';
 
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) {
     return null;
@@ -72,31 +85,11 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             >
               <Palette className="h-4 w-4" /> Appearance
             </button>
-            <button
-              className={cn(
-                "flex items-center gap-2 py-2.5 px-3 bg-transparent border-none text-left text-sm text-foreground cursor-pointer rounded-md transition-colors hover:bg-muted",
-                activeTab === 'projects' && "bg-primary/15 text-primary font-medium"
-              )}
-              onClick={() => setActiveTab('projects')}
-            >
-              <FolderOpen className="h-4 w-4" /> Recent Projects
-            </button>
-            <button
-              className={cn(
-                "flex items-center gap-2 py-2.5 px-3 bg-transparent border-none text-left text-sm text-foreground cursor-pointer rounded-md transition-colors hover:bg-muted",
-                activeTab === 'constitution' && "bg-primary/15 text-primary font-medium"
-              )}
-              onClick={() => setActiveTab('constitution')}
-            >
-              <ScrollText className="h-4 w-4" /> Constitution
-            </button>
           </nav>
 
           <div className="flex-1 p-5 overflow-y-auto">
             {activeTab === 'general' && <GeneralSettings />}
             {activeTab === 'appearance' && <ThemeSettings />}
-            {activeTab === 'projects' && <RecentProjects />}
-            {activeTab === 'constitution' && <ConstitutionView />}
           </div>
         </div>
       </div>

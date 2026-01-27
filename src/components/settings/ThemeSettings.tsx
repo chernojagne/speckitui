@@ -5,12 +5,12 @@
  * @feature 006-more-themes - Expanded with palette, editor, and markdown theme selectors
  */
 
+import { useEffect, useRef, useState } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/lib/utils';
-import { Sun, Moon, Monitor, Check, type LucideIcon, Terminal } from 'lucide-react';
+import { Sun, Moon, Monitor, Check, type LucideIcon, Terminal, Code2, Square } from 'lucide-react';
 
 // Theme selector components
-import { ThemePresetSelector } from './ThemePresetSelector';
 import { AppPaletteSelector } from './AppPaletteSelector';
 import { TerminalThemeSelector } from './TerminalThemeSelector';
 import { EditorThemeSelector } from './EditorThemeSelector';
@@ -45,33 +45,47 @@ export function ThemeSettings() {
   const setEditorLineNumbers = useSettingsStore((state) => state.setEditorLineNumbers);
   const editorWordWrap = useSettingsStore((state) => state.editorWordWrap);
   const setEditorWordWrap = useSettingsStore((state) => state.setEditorWordWrap);
-  
-  // Sidebar settings
-  const sidebarShowIcons = useSettingsStore((state) => state.sidebarShowIcons);
-  const setSidebarShowIcons = useSettingsStore((state) => state.setSidebarShowIcons);
-  const sidebarCompactMode = useSettingsStore((state) => state.sidebarCompactMode);
-  const setSidebarCompactMode = useSettingsStore((state) => state.setSidebarCompactMode);
+
+  // UI settings
+  const squareCorners = useSettingsStore((state) => state.squareCorners);
+  const setSquareCorners = useSettingsStore((state) => state.setSquareCorners);
 
   // Terminal settings (non-theme)
   const terminalFontSize = useSettingsStore((state) => state.terminalFontSize);
   const setTerminalFontSize = useSettingsStore((state) => state.setTerminalFontSize);
   const terminalFontFamily = useSettingsStore((state) => state.terminalFontFamily);
   const setTerminalFontFamily = useSettingsStore((state) => state.setTerminalFontFamily);
-  const terminalCursorBlink = useSettingsStore((state) => state.terminalCursorBlink);
-  const setTerminalCursorBlink = useSettingsStore((state) => state.setTerminalCursorBlink);
   const terminalPanelHeight = useSettingsStore((state) => state.terminalPanelHeight);
   const setTerminalPanelHeight = useSettingsStore((state) => state.setTerminalPanelHeight);
-  const terminalPanelCollapsed = useSettingsStore((state) => state.terminalPanelCollapsed);
-  const setTerminalPanelCollapsed = useSettingsStore((state) => state.setTerminalPanelCollapsed);
+
+  const [terminalPanelHeightInput, setTerminalPanelHeightInput] = useState(
+    String(terminalPanelHeight)
+  );
+  const isEditingPanelHeightRef = useRef(false);
+
+  useEffect(() => {
+    if (!isEditingPanelHeightRef.current) {
+      setTerminalPanelHeightInput(String(terminalPanelHeight));
+    }
+  }, [terminalPanelHeight]);
+
+  const commitTerminalPanelHeight = (value: string) => {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      setTerminalPanelHeightInput(String(terminalPanelHeight));
+      return;
+    }
+    setTerminalPanelHeight(Math.round(parsed));
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Theme Presets - Quick Apply */}
-      <ThemePresetSelector />
-
       {/* Light/Dark/System Mode */}
       <div className="pb-6 border-b border-border last:border-b-0 last:pb-0">
-        <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground">Mode</h3>
+        <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground flex items-center gap-2">
+          <Monitor className="h-4 w-4" />
+          Mode
+        </h3>
         <p className="text-[13px] text-muted-foreground m-0 mb-4">
           Choose light, dark, or follow your system preference.
         </p>
@@ -100,8 +114,34 @@ export function ThemeSettings() {
       {/* App Palette Selection */}
       <AppPaletteSelector />
 
+      {/* UI options */}
       <div className="pb-6 border-b border-border last:border-b-0 last:pb-0">
-        <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground">Editor</h3>
+        <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground flex items-center gap-2">
+          <Square className="h-4 w-4" />
+          UI
+        </h3>
+
+        <div className="flex items-center justify-between gap-4 py-3 first:pt-0">
+          <div className="flex flex-col gap-0.5">
+            <label className="text-sm font-medium text-foreground">Square Corners</label>
+            <span className="text-xs text-muted-foreground">
+              Set UI corner radii to 0 for a squared theme
+            </span>
+          </div>
+          <input 
+            type="checkbox" 
+            className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
+            checked={squareCorners}
+            onChange={(e) => setSquareCorners(e.target.checked)}
+          />
+        </div>
+      </div>
+
+      <div className="pb-6 border-b border-border last:border-b-0 last:pb-0">
+        <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground flex items-center gap-2">
+          <Code2 className="h-4 w-4" />
+          Editor
+        </h3>
         
         {/* Editor Theme Selector */}
         <EditorThemeSelector />
@@ -159,40 +199,6 @@ export function ThemeSettings() {
       </div>
 
       <div className="pb-6 border-b border-border last:border-b-0 last:pb-0">
-        <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground">Sidebar</h3>
-        
-        <div className="flex items-center justify-between gap-4 py-3 first:pt-0">
-          <div className="flex flex-col gap-0.5">
-            <label className="text-sm font-medium text-foreground">Show Icons</label>
-            <span className="text-xs text-muted-foreground">
-              Display icons next to navigation items
-            </span>
-          </div>
-          <input 
-            type="checkbox" 
-            className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
-            checked={sidebarShowIcons}
-            onChange={(e) => setSidebarShowIcons(e.target.checked)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-4 py-3">
-          <div className="flex flex-col gap-0.5">
-            <label className="text-sm font-medium text-foreground">Compact Mode</label>
-            <span className="text-xs text-muted-foreground">
-              Reduce spacing in the navigation panel
-            </span>
-          </div>
-          <input 
-            type="checkbox" 
-            className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
-            checked={sidebarCompactMode}
-            onChange={(e) => setSidebarCompactMode(e.target.checked)}
-          />
-        </div>
-      </div>
-
-      <div className="pb-6 border-b border-border last:border-b-0 last:pb-0">
         <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground flex items-center gap-2">
           <Terminal className="h-4 w-4" />
           Terminal
@@ -239,48 +245,37 @@ export function ThemeSettings() {
 
         <div className="flex items-center justify-between gap-4 py-3">
           <div className="flex flex-col gap-0.5">
-            <label className="text-sm font-medium text-foreground">Cursor Blink</label>
-            <span className="text-xs text-muted-foreground">
-              Enable blinking cursor in terminal
-            </span>
-          </div>
-          <input 
-            type="checkbox" 
-            className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
-            checked={terminalCursorBlink}
-            onChange={(e) => setTerminalCursorBlink(e.target.checked)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-4 py-3">
-          <div className="flex flex-col gap-0.5">
             <label className="text-sm font-medium text-foreground">Panel Height</label>
             <span className="text-xs text-muted-foreground">
-              Default height of the terminal panel (100-600px)
+              Default height of the terminal panel (100-600px). Applies on blur or Enter.
             </span>
           </div>
           <input
             type="number"
-            value={terminalPanelHeight}
-            onChange={(e) => setTerminalPanelHeight(parseInt(e.target.value, 10))}
+            value={terminalPanelHeightInput}
+            onChange={(e) => {
+              isEditingPanelHeightRef.current = true;
+              setTerminalPanelHeightInput(e.target.value);
+            }}
+            onBlur={() => {
+              isEditingPanelHeightRef.current = false;
+              commitTerminalPanelHeight(terminalPanelHeightInput);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                (e.target as HTMLInputElement).blur();
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                isEditingPanelHeightRef.current = false;
+                setTerminalPanelHeightInput(String(terminalPanelHeight));
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
             min={100}
             max={600}
             className="w-20 px-2 py-1.5 text-[13px] border border-border rounded bg-card text-foreground focus:outline-none focus:border-primary"
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-4 py-3">
-          <div className="flex flex-col gap-0.5">
-            <label className="text-sm font-medium text-foreground">Collapsed by Default</label>
-            <span className="text-xs text-muted-foreground">
-              Start with terminal panel hidden
-            </span>
-          </div>
-          <input 
-            type="checkbox" 
-            className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
-            checked={terminalPanelCollapsed}
-            onChange={(e) => setTerminalPanelCollapsed(e.target.checked)}
           />
         </div>
       </div>

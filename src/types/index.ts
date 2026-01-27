@@ -280,6 +280,8 @@ export interface AppSettings {
   // Sidebar settings
   sidebarShowIcons: boolean;
   sidebarCompactMode: boolean;
+  // UI settings
+  squareCorners: boolean;
   // Navigation pane settings
   navPaneWidth: number;
   navPaneCollapsed: boolean;

@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTerminal, type ShellType } from '@/hooks/useTerminal';
@@ -30,12 +30,19 @@ const SHELL_CONFIG = {
 
 export function TerminalPanel() {
   const { sessions, activeSessionId, panelHeight, setPanelHeight } = useTerminalStore();
-  const { defaultTerminal } = useSettingsStore();
+  const { defaultTerminal, terminalPanelHeight, setTerminalPanelHeight } = useSettingsStore();
   const { createSession, closeSession } = useTerminal();
   const [isResizing, setIsResizing] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef(0);
   const dragStartHeight = useRef(0);
+
+  // Sync panel height with settings
+  useEffect(() => {
+    if (terminalPanelHeight !== panelHeight) {
+      setPanelHeight(terminalPanelHeight);
+    }
+  }, [terminalPanelHeight, panelHeight, setPanelHeight]);
 
   // Handle drag resize
   const handleDragStart = useCallback((e: React.MouseEvent) => {
@@ -48,6 +55,7 @@ export function TerminalPanel() {
       const deltaY = dragStartY.current - moveEvent.clientY;
       const newHeight = Math.max(MIN_PANEL_HEIGHT, dragStartHeight.current + deltaY);
       setPanelHeight(newHeight);
+      setTerminalPanelHeight(newHeight);
     };
 
     const handleDragEnd = () => {

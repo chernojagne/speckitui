@@ -5,7 +5,7 @@
  * @feature 006-more-themes
  */
 
-import { Check } from 'lucide-react';
+import { Check, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppTheme, useThemeMode } from '@/hooks/useTheme';
 import { appPalettes, type AppPaletteConfig } from '@/config/appThemes';
@@ -56,7 +56,10 @@ export function AppPaletteSelector() {
 
   return (
     <div className="pb-6 border-b border-border last:border-b-0 last:pb-0">
-      <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground">App Palette</h3>
+      <h3 className="text-[15px] font-semibold m-0 mb-2 text-foreground flex items-center gap-2">
+        <Palette className="h-4 w-4" />
+        App Palette
+      </h3>
       <p className="text-[13px] text-muted-foreground m-0 mb-4">
         Choose a color palette for the app interface. Affects buttons, cards, sidebar, and more.
       </p>

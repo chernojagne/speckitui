@@ -26,6 +26,7 @@ const DEFAULT_APP_PALETTE: AppPaletteId = 'caffeine';
 const DEFAULT_TERMINAL_THEME: TerminalThemeId | 'auto' = 'auto';
 const DEFAULT_EDITOR_THEME: ShikiThemeId = 'github-dark';
 const DEFAULT_MARKDOWN_THEME: ShikiThemeId = 'github-dark';
+const DEFAULT_RADIUS = '0.625rem';
 
 // Validation helpers
 const isValidAppPalette = (value: unknown): value is AppPaletteId =>
@@ -74,6 +75,12 @@ const applyTheme = (
   applyAppPalette(appPalette, mode);
 };
 
+// Apply corner radius override
+const applyCornerRadius = (squareCorners: boolean) => {
+  const root = document.documentElement;
+  root.style.setProperty('--radius', squareCorners ? '0rem' : DEFAULT_RADIUS);
+};
+
 // Listen for system theme changes
 if (typeof window !== 'undefined') {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
@@ -108,6 +115,8 @@ interface SettingsState extends AppSettings {
   // Sidebar settings actions
   setSidebarShowIcons: (show: boolean) => void;
   setSidebarCompactMode: (compact: boolean) => void;
+  // UI settings actions
+  setSquareCorners: (square: boolean) => void;
   // Terminal settings actions
   setTerminalFontSize: (size: number) => void;
   setTerminalFontFamily: (family: string) => void;
@@ -144,6 +153,8 @@ export const useSettingsStore = create<SettingsState>()(
       // Sidebar settings
       sidebarShowIcons: true,
       sidebarCompactMode: false,
+      // UI settings
+      squareCorners: false,
       // Terminal settings
       terminalFontSize: 14,
       terminalFontFamily: 'Consolas, "Courier New", monospace',
@@ -198,6 +209,12 @@ export const useSettingsStore = create<SettingsState>()(
       // Sidebar settings actions
       setSidebarShowIcons: (show) => set({ sidebarShowIcons: show }),
       setSidebarCompactMode: (compact) => set({ sidebarCompactMode: compact }),
+
+      // UI settings actions
+      setSquareCorners: (square) => {
+        applyCornerRadius(square);
+        set({ squareCorners: square });
+      },
 
       // Terminal settings actions
       setTerminalFontSize: (size) => set({ terminalFontSize: size }),
@@ -285,6 +302,10 @@ export const useSettingsStore = create<SettingsState>()(
         const effectivePalette = (fixes.appPalette ?? state.appPalette) as AppPaletteId;
         if (state.theme) {
           applyTheme(state.theme, effectivePalette);
+        }
+
+        if (typeof state.squareCorners === 'boolean') {
+          applyCornerRadius(state.squareCorners);
         }
       },
     }
