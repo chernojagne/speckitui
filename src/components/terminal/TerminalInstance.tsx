@@ -5,7 +5,7 @@
  * @feature 006-more-themes - Updated to use useTerminalTheme hook
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
@@ -64,6 +64,13 @@ export function TerminalInstance({
   const onDataRef = useRef(onData);
   const onErrorRef = useRef(onError);
   const onExitRef = useRef(onExit);
+  const isActiveRef = useRef(isActive);
+  const suspendOutputRef = useRef(false);
+  const bufferedOutputRef = useRef<string[]>([]);
+  const bufferedBytesRef = useRef(0);
+  const isFlushingRef = useRef(false);
+  const MAX_BUFFERED_BYTES = 1024 * 1024; // 1MB
+  const FLUSH_CHUNK_BYTES = 64 * 1024; // 64KB
   
   // Keep refs up to date
   useEffect(() => {
@@ -72,6 +79,11 @@ export function TerminalInstance({
     onErrorRef.current = onError;
     onExitRef.current = onExit;
   }, [onReady, onData, onError, onExit]);
+
+  // Track active state for output buffering
+  useEffect(() => {
+    isActiveRef.current = isActive;
+  }, [isActive]);
 
   // Initialize terminal - only depends on sessionId
   useEffect(() => {
@@ -178,6 +190,20 @@ export function TerminalInstance({
           `terminal-output-${sessionId}`,
           (event) => {
             if (terminalRef.current && event.payload) {
+              if (!isActiveRef.current || suspendOutputRef.current) {
+                const payloadSize = event.payload.length;
+                bufferedBytesRef.current += payloadSize;
+                bufferedOutputRef.current.push(event.payload);
+
+                // Cap buffer size by dropping oldest chunks
+                while (bufferedBytesRef.current > MAX_BUFFERED_BYTES && bufferedOutputRef.current.length > 0) {
+                  const dropped = bufferedOutputRef.current.shift();
+                  if (dropped) {
+                    bufferedBytesRef.current -= dropped.length;
+                  }
+                }
+                return;
+              }
               terminalRef.current.write(event.payload);
             }
           }
@@ -201,6 +227,48 @@ export function TerminalInstance({
       unlisten?.();
     };
   }, [sessionId]);
+
+  const flushBufferedOutput = useCallback(() => {
+    if (!terminalRef.current) return;
+    if (bufferedOutputRef.current.length === 0) return;
+    if (isFlushingRef.current) return;
+    isFlushingRef.current = true;
+
+    const flushNext = () => {
+      if (!terminalRef.current) {
+        isFlushingRef.current = false;
+        return;
+      }
+
+      if (bufferedOutputRef.current.length === 0) {
+        isFlushingRef.current = false;
+        return;
+      }
+
+      let chunk = '';
+      while (bufferedOutputRef.current.length > 0 && chunk.length < FLUSH_CHUNK_BYTES) {
+        const next = bufferedOutputRef.current[0];
+        if (!next) break;
+
+        if (chunk.length + next.length <= FLUSH_CHUNK_BYTES) {
+          chunk += next;
+          bufferedOutputRef.current.shift();
+          bufferedBytesRef.current -= next.length;
+        } else {
+          const remaining = FLUSH_CHUNK_BYTES - chunk.length;
+          chunk += next.slice(0, remaining);
+          bufferedOutputRef.current[0] = next.slice(remaining);
+          bufferedBytesRef.current -= remaining;
+        }
+      }
+
+      terminalRef.current.write(chunk, () => {
+        requestAnimationFrame(flushNext);
+      });
+    };
+
+    flushNext();
+  }, []);
 
   // Listen for terminal exit events (PTY process terminated unexpectedly)
   useEffect(() => {
@@ -245,6 +313,7 @@ export function TerminalInstance({
 
   // Handle resize
   const handleResize = useCallback(() => {
+    if (!isActiveRef.current) return;
     if (fitAddonRef.current && terminalRef.current) {
       fitAddonRef.current.fit();
       
@@ -313,6 +382,27 @@ export function TerminalInstance({
       });
     }
   }, [isActive]);
+
+  // Resize before first paint when switching to active to avoid reflow flicker
+  useLayoutEffect(() => {
+    if (!isActive || !terminalRef.current) return;
+
+    suspendOutputRef.current = true;
+    fitAddonRef.current?.fit();
+
+    const { rows, cols } = terminalRef.current;
+    void resizeTerminal(sessionId, cols, rows)
+      .catch((err) => {
+        console.error('Failed to resize terminal:', err);
+      })
+      .finally(() => {
+        requestAnimationFrame(() => {
+          flushBufferedOutput();
+          terminalRef.current?.focus();
+          suspendOutputRef.current = false;
+        });
+      });
+  }, [isActive, sessionId, flushBufferedOutput]);
 
   // Also focus on initial mount if active (for new terminals)
   const initialFocusRef = useRef(false);

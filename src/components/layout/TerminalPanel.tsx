@@ -105,7 +105,7 @@ export function TerminalPanel() {
         />
       </div>
 
-      {/* Terminal content - keep all instances mounted, use display:none for inactive */}
+      {/* Terminal content - keep all instances mounted, hide via visibility/opacity for inactive */}
       <div className="flex-1 overflow-hidden relative">
         {sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
@@ -129,7 +129,11 @@ export function TerminalPanel() {
               <div 
                 key={session.id}
                 className="absolute inset-0"
-                style={{ display: session.id === activeSessionId ? 'block' : 'none' }}
+                style={{
+                  opacity: session.id === activeSessionId ? 1 : 0,
+                  visibility: session.id === activeSessionId ? 'visible' : 'hidden',
+                  pointerEvents: session.id === activeSessionId ? 'auto' : 'none',
+                }}
               >
                 <TerminalInstance
                   sessionId={session.id}

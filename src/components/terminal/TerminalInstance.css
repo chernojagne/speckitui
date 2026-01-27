@@ -7,7 +7,9 @@
 }
 
 .terminal-instance:not(.active) {
-  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Override xterm.js styles for better integration */
