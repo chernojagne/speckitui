@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useProjectStore } from '@/stores/projectStore';
 import { readArtifact, updateCheckbox } from '@/services/tauriCommands';
 import { MarkdownRenderer } from '../shared/MarkdownRenderer';
@@ -9,13 +9,6 @@ import { useMarkdownEditor } from '@/hooks/useMarkdownEditor';
 import { useArtifactWatcher } from '@/hooks/useFileWatcher';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, CheckSquare, Pencil } from 'lucide-react';
-
-interface TaskStats {
-  total: number;
-  completed: number;
-  pending: number;
-  percentComplete: number;
-}
 
 export function TasksView() {
   const { activeSpec } = useProjectStore();
@@ -70,34 +63,6 @@ export function TasksView() {
   useEffect(() => {
     loadTasks();
   }, [activeSpec, filePath]);
-
-  // Calculate task statistics
-  const stats: TaskStats = useMemo(() => {
-    if (!content) {
-      return { total: 0, completed: 0, pending: 0, percentComplete: 0 };
-    }
-
-    const lines = content.split('\n');
-    let total = 0;
-    let completed = 0;
-
-    for (const line of lines) {
-      const match = line.match(/^(\s*)-\s*\[([ xX])\]/);
-      if (match) {
-        total++;
-        if (match[2].toLowerCase() === 'x') {
-          completed++;
-        }
-      }
-    }
-
-    return {
-      total,
-      completed,
-      pending: total - completed,
-      percentComplete: total > 0 ? Math.round((completed / total) * 100) : 0,
-    };
-  }, [content]);
 
   const handleCheckboxToggle = async (lineNumber: number, checked: boolean) => {
     if (!filePath || editor.isEditing) return;
@@ -170,28 +135,13 @@ export function TasksView() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Progress bar with edit button */}
-      <div className="flex items-center gap-4 p-4 bg-card border-b border-border flex-shrink-0">
-        <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>
-            <strong className="text-foreground">{stats.completed}</strong> / {stats.total} completed
-          </span>
-          <span className="text-warning">
-            {stats.pending} pending
-          </span>
-        </div>
-        <div className="flex-1 h-2 bg-muted rounded-lg overflow-hidden">
-          <div
-            className="h-full bg-success transition-[width]"
-            style={{ width: `${stats.percentComplete}%` }}
-          />
-        </div>
-        <span className="text-sm font-semibold text-success min-w-[40px] text-right">{stats.percentComplete}%</span>
+      {/* Header with edit button */}
+      <div className="flex items-center justify-end px-4 py-2 border-b border-border bg-card/50 flex-shrink-0">
         <Button
           variant="outline"
           size="sm"
           onClick={editor.startEditing}
-          className="h-7 px-2 ml-2"
+          className="h-7 px-2"
         >
           <Pencil className="h-3.5 w-3.5 mr-1" />
           Edit

@@ -62,6 +62,22 @@
 
   --radius: 0.625rem;
 
+  /* Markdown preview defaults */
+  --md-foreground: var(--foreground);
+  --md-muted: var(--muted-foreground);
+  --md-heading: var(--foreground);
+  --md-link: var(--primary);
+  --md-link-hover: var(--primary);
+  --md-code: var(--foreground);
+  --md-code-bg: var(--muted);
+  --md-inline-code-bg: var(--muted);
+  --md-border: var(--border);
+  --md-blockquote-border: var(--primary);
+  --md-blockquote-bg: var(--muted);
+  --md-table-header-bg: var(--card);
+  --md-table-row-alt: var(--muted);
+  --md-highlight-bg: var(--accent);
+
   --shadow-2xs: 0 1px 3px 0px oklch(0.00 0 0 / 0.05);
   --shadow-xs: 0 1px 3px 0px oklch(0.00 0 0 / 0.05);
   --shadow-sm: 0 1px 3px 0px oklch(0.00 0 0 / 0.10), 0 1px 2px -1px oklch(0.00 0 0 / 0.10);
@@ -112,6 +128,22 @@
   --warning: oklch(0.75 0.15 85);
   --warning-foreground: oklch(0.20 0 0);
   --destructive-foreground: oklch(1.00 0 0);
+
+  /* Markdown preview defaults */
+  --md-foreground: var(--foreground);
+  --md-muted: var(--muted-foreground);
+  --md-heading: var(--foreground);
+  --md-link: var(--primary);
+  --md-link-hover: var(--primary);
+  --md-code: var(--foreground);
+  --md-code-bg: var(--muted);
+  --md-inline-code-bg: var(--muted);
+  --md-border: var(--border);
+  --md-blockquote-border: var(--primary);
+  --md-blockquote-bg: var(--muted);
+  --md-table-header-bg: var(--card);
+  --md-table-row-alt: var(--muted);
+  --md-highlight-bg: var(--accent);
 
   --shadow-2xs: 0 1px 3px 0px oklch(0.00 0 0 / 0.05);
   --shadow-xs: 0 1px 3px 0px oklch(0.00 0 0 / 0.05);
@@ -240,4 +272,88 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Markdown preview theming */
+.markdown-preview {
+  color: var(--md-foreground);
+}
+
+.markdown-preview h1 {
+  color: var(--md-h1);
+  border-color: var(--md-border);
+}
+
+.markdown-preview h2 {
+  color: var(--md-h2);
+}
+
+.markdown-preview h3 {
+  color: var(--md-h3);
+}
+
+.markdown-preview h4,
+.markdown-preview h5,
+.markdown-preview h6 {
+  color: var(--md-muted);
+}
+
+.markdown-preview strong,
+.markdown-preview b {
+  color: var(--md-bold);
+  font-weight: 500;
+}
+
+.markdown-preview em,
+.markdown-preview i {
+  color: var(--md-italic);
+}
+
+.markdown-preview a {
+  color: var(--md-link);
+}
+
+.markdown-preview a:hover {
+  color: var(--md-link-hover);
+}
+
+.markdown-preview code {
+  color: var(--md-code);
+  background: var(--md-inline-code-bg);
+}
+
+.markdown-preview pre:not(.shiki) {
+  background: var(--md-code-bg);
+}
+
+/* Ensure code text inside shiki blocks has no extra background */
+.markdown-preview .shiki code,
+.markdown-preview .shiki-wrapper code {
+  background: transparent !important;
+}
+
+.markdown-preview blockquote {
+  border-color: var(--md-blockquote-border);
+  background: var(--md-blockquote-bg);
+}
+
+.markdown-preview table th,
+.markdown-preview table td {
+  border-color: var(--md-border);
+}
+
+.markdown-preview table th {
+  background: var(--md-table-header-bg);
+}
+
+.markdown-preview table tr:nth-child(even) {
+  background: var(--md-table-row-alt);
+}
+
+.markdown-preview hr {
+  border-color: var(--md-border);
+}
+
+.markdown-preview mark {
+  background: var(--md-highlight-bg);
 }

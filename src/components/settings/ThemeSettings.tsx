@@ -15,6 +15,7 @@ import { AppPaletteSelector } from './AppPaletteSelector';
 import { TerminalThemeSelector } from './TerminalThemeSelector';
 import { EditorThemeSelector } from './EditorThemeSelector';
 import { MarkdownThemeSelector } from './MarkdownThemeSelector';
+import { MarkdownPreviewThemeSelector } from './MarkdownPreviewThemeSelector';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -130,7 +131,7 @@ export function ThemeSettings() {
           </div>
           <input 
             type="checkbox" 
-            className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-10 h-5.5 appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-4.5 before:h-4.5 before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-4.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             checked={squareCorners}
             onChange={(e) => setSquareCorners(e.target.checked)}
           />
@@ -167,6 +168,9 @@ export function ThemeSettings() {
         {/* Markdown Theme Selector */}
         <MarkdownThemeSelector />
 
+        {/* Markdown Preview Theme Selector */}
+        <MarkdownPreviewThemeSelector />
+
         <div className="flex items-center justify-between gap-4 py-3">
           <div className="flex flex-col gap-0.5">
             <label className="text-sm font-medium text-foreground">Line Numbers</label>
@@ -176,7 +180,7 @@ export function ThemeSettings() {
           </div>
           <input 
             type="checkbox" 
-            className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-10 h-5.5 appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-4.5 before:h-4.5 before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-4.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             checked={editorLineNumbers}
             onChange={(e) => setEditorLineNumbers(e.target.checked)}
           />
@@ -191,7 +195,7 @@ export function ThemeSettings() {
           </div>
           <input 
             type="checkbox" 
-            className="w-10 h-[22px] appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-[18px] before:h-[18px] before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-[18px] focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-10 h-5.5 appearance-none bg-muted rounded-full cursor-pointer relative transition-colors checked:bg-primary before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-4.5 before:h-4.5 before:bg-white before:rounded-full before:transition-transform before:shadow checked:before:translate-x-4.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             checked={editorWordWrap}
             onChange={(e) => setEditorWordWrap(e.target.checked)}
           />
@@ -233,7 +237,7 @@ export function ThemeSettings() {
             </span>
           </div>
           <select 
-            className="px-3 py-1.5 text-[13px] border border-border rounded bg-card text-foreground cursor-pointer hover:border-border focus:outline-none focus:border-primary min-w-[180px]"
+            className="px-3 py-1.5 text-[13px] border border-border rounded bg-card text-foreground cursor-pointer hover:border-border focus:outline-none focus:border-primary min-w-45"
             value={terminalFontFamily}
             onChange={(e) => setTerminalFontFamily(e.target.value)}
           >

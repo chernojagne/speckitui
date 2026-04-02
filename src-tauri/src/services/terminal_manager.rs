@@ -58,6 +58,13 @@ impl TerminalManager {
         // Build the shell command
         let mut cmd = CommandBuilder::new(&shell);
         cmd.cwd(&cwd);
+
+        // Ensure bash sessions are interactive/login to load color aliases
+        let shell_lower = shell.to_lowercase();
+        if shell_lower.contains("bash") {
+            cmd.arg("--login");
+            cmd.arg("-i");
+        }
         
         // IMPORTANT: Inherit the parent process's environment variables
         // This ensures PATH and other important vars are available
@@ -69,6 +76,7 @@ impl TerminalManager {
         #[cfg(windows)]
         {
             cmd.env("TERM", "xterm-256color");
+            cmd.env("COLORTERM", "truecolor");
         }
         #[cfg(not(windows))]
         {

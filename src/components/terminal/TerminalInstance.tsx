@@ -416,12 +416,38 @@ export function TerminalInstance({
     }
   });
 
+  const handleContextMenu = useCallback(async (event: React.MouseEvent) => {
+    event.preventDefault();
+    if (!isActiveRef.current) return;
+
+    const selection = terminalRef.current?.getSelection() ?? '';
+    if (selection.length > 0) {
+      try {
+        await navigator.clipboard.writeText(selection);
+        terminalRef.current?.clearSelection();
+      } catch (err) {
+        console.error('Failed to copy terminal selection:', err);
+      }
+      return;
+    }
+
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        await writeTerminal(sessionId, text);
+      }
+    } catch (err) {
+      console.error('Failed to paste into terminal:', err);
+    }
+  }, [sessionId]);
+
   return (
     <div 
       ref={containerRef}
       className={`terminal-instance ${isActive ? 'active' : ''}`}
       role="application"
       aria-label={`Terminal session ${sessionId}`}
+      onContextMenu={handleContextMenu}
     />
   );
 }

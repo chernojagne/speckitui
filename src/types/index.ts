@@ -252,6 +252,14 @@ export type ShikiThemeId =
   | 'tokyo-night'
   | 'min-light';
 
+export type MarkdownPreviewThemeId =
+  | 'default'
+  | 'github'
+  | 'nord'
+  | 'solarized'
+  | 'dracula'
+  | 'gruvbox';
+
 export interface ThemePreset {
   id: string;
   name: string;
@@ -277,6 +285,8 @@ export interface AppSettings {
   editorTheme: ShikiThemeId;
   // Markdown theme (006-more-themes)
   markdownTheme: ShikiThemeId;
+  // Markdown preview theme
+  markdownPreviewTheme: MarkdownPreviewThemeId;
   // Sidebar settings
   sidebarShowIcons: boolean;
   sidebarCompactMode: boolean;

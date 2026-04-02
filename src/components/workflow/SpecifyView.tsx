@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useProjectStore } from '@/stores/projectStore';
 import { readArtifact, updateCheckbox } from '@/services/tauriCommands';
 import { TabContainer } from '../shared/TabContainer';
@@ -18,6 +18,7 @@ export function SpecifyView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTabId, setActiveTabId] = useState<string>('spec');
+  const [pendingEditTabId, setPendingEditTabId] = useState<string | null>(null);
 
   // Determine the active file path based on selected tab
   const getActiveFilePath = useCallback((): string => {
@@ -35,11 +36,34 @@ export function SpecifyView() {
 
   const activeFilePath = getActiveFilePath();
 
+  // Get the content for the active tab
+  const getActiveContent = useCallback((): string | undefined => {
+    if (activeTabId === 'spec') {
+      return specContent ?? undefined;
+    }
+    if (activeTabId.startsWith('checklist-')) {
+      const filename = activeTabId.replace('checklist-', '');
+      return checklistContents[filename] ?? undefined;
+    }
+    return undefined;
+  }, [activeTabId, specContent, checklistContents]);
+
   const editor = useMarkdownEditor({
     artifactId: activeTabId,
     filePath: activeFilePath,
-    initialContent: activeTabId === 'spec' ? specContent ?? undefined : checklistContents[activeTabId.replace('checklist-', '')] ?? undefined,
+    initialContent: getActiveContent(),
   });
+
+  // When pendingEditTabId matches activeTabId and we have content, start editing
+  useEffect(() => {
+    if (pendingEditTabId && pendingEditTabId === activeTabId && !editor.isEditing) {
+      const content = getActiveContent();
+      if (content !== undefined) {
+        editor.startEditing();
+        setPendingEditTabId(null);
+      }
+    }
+  }, [pendingEditTabId, activeTabId, editor.isEditing, getActiveContent]);
 
   // File watcher for external changes
   const handleExternalChange = useCallback((changedPath: string, _kind: 'create' | 'modify' | 'delete' | 'rename') => {
@@ -172,6 +196,18 @@ export function SpecifyView() {
   // Build tabs with edit button
   const tabs = [];
 
+  // Handler to start editing a specific tab
+  const startEditingTab = (tabId: string) => {
+    if (activeTabId === tabId) {
+      // Already on this tab, just start editing
+      editor.startEditing();
+    } else {
+      // Switch tab first, then pending edit will trigger in useEffect
+      setPendingEditTabId(tabId);
+      setActiveTabId(tabId);
+    }
+  };
+
   if (specContent) {
     tabs.push({
       id: 'spec',
@@ -182,7 +218,7 @@ export function SpecifyView() {
             <Button
               variant="outline"
               size="sm"
-              onClick={editor.startEditing}
+              onClick={() => startEditingTab('spec')}
               className="h-7 px-2"
             >
               <Pencil className="h-3.5 w-3.5 mr-1" />
@@ -203,8 +239,9 @@ export function SpecifyView() {
   // Add checklist tabs with edit button
   Object.entries(checklistContents).forEach(([filename, content]) => {
     const checklistPath = `${activeSpec?.path}/checklists/${filename}`;
+    const tabId = `checklist-${filename}`;
     tabs.push({
-      id: `checklist-${filename}`,
+      id: tabId,
       label: filename,
       content: (
         <div className="flex flex-col h-full">
@@ -212,7 +249,7 @@ export function SpecifyView() {
             <Button
               variant="outline"
               size="sm"
-              onClick={editor.startEditing}
+              onClick={() => startEditingTab(tabId)}
               className="h-7 px-2"
             >
               <Pencil className="h-3.5 w-3.5 mr-1" />

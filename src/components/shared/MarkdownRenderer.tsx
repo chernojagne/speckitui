@@ -257,27 +257,26 @@ export function MarkdownRenderer({ content, filePath, onCheckboxToggle }: Markdo
   }), [CodeBlock, checkboxStates, filePath, handleCheckboxChange]);
 
   return (
-    <div className="prose prose-sm max-w-none text-foreground leading-relaxed font-extralight
+    <div className="markdown-preview prose prose-sm max-w-none leading-relaxed font-extralight
       [&_h1]:text-3xl [&_h1]:font-semibold [&_h1]:mt-6 [&_h1]:mb-4 [&_h1]:pb-2 [&_h1]:border-b [&_h1]:border-border
       [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-5 [&_h2]:mb-3
       [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2
       [&_h4]:text-base [&_h4]:font-semibold [&_h4]:mt-3 [&_h4]:mb-2
       [&_p]:my-3
-      [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline
+      [&_a]:no-underline hover:[&_a]:underline
       [&_ul]:my-2 [&_ul]:pl-8 [&_ol]:my-2 [&_ol]:pl-8
       [&_li]:my-1
-      [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm
-      [&_pre:not(.shiki)]:bg-muted [&_pre:not(.shiki)]:p-4 [&_pre:not(.shiki)]:rounded-md [&_pre:not(.shiki)]:overflow-x-auto [&_pre:not(.shiki)]:my-4
+      [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm
+      [&_pre:not(.shiki)]:p-4 [&_pre:not(.shiki)]:rounded-md [&_pre:not(.shiki)]:overflow-x-auto [&_pre:not(.shiki)]:my-4
       [&_pre:not(.shiki)_code]:bg-transparent [&_pre:not(.shiki)_code]:p-0 [&_pre:not(.shiki)_code]:text-sm [&_pre:not(.shiki)_code]:leading-relaxed
-      [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:my-4 [&_blockquote]:py-2 [&_blockquote]:px-4 [&_blockquote]:bg-muted [&_blockquote]:rounded-r-md
+      [&_blockquote]:border-l-4 [&_blockquote]:my-4 [&_blockquote]:py-2 [&_blockquote]:px-4 [&_blockquote]:rounded-r-md
       [&_blockquote_p]:m-0
       [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
-      [&_th]:border [&_th]:border-border [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:bg-card [&_th]:font-semibold
-      [&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-2 [&_td]:text-left
-      [&_tr:nth-child(even)]:bg-muted
+      [&_th]:border [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold
+      [&_td]:border [&_td]:px-3 [&_td]:py-2 [&_td]:text-left
       [&_hr]:border-none [&_hr]:border-t [&_hr]:border-border [&_hr]:my-8
       [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md
-      [&_strong]:font-bold [&_strong]:text-foreground
+      [&_strong]:font-bold
       [&_em]:italic
       [&_.shiki-wrapper]:my-4
       [&_.shiki-wrapper_pre]:p-4 [&_.shiki-wrapper_pre]:rounded-md [&_.shiki-wrapper_pre]:overflow-x-auto [&_.shiki-wrapper_pre]:m-0

@@ -115,6 +115,9 @@ export function TerminalTabs({
   }, []);
 
   const handleRenameKeyDown = useCallback((e: React.KeyboardEvent, sessionId: string) => {
+    // Stop propagation for all keys to prevent parent handlers from interfering
+    e.stopPropagation();
+    
     if (e.key === 'Enter') {
       e.preventDefault();
       handleSaveRename(sessionId);

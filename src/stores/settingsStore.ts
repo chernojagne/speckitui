@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { AppSettings, AppPaletteId, TerminalThemeId, ShikiThemeId } from '@/types';
+import type { AppSettings, AppPaletteId, TerminalThemeId, ShikiThemeId, MarkdownPreviewThemeId } from '@/types';
 import { applyAppPalette } from '@/config/appThemes';
 import { getPresetValues } from '@/config/themePresets';
+import { applyMarkdownPreviewTheme, MARKDOWN_PREVIEW_THEME_IDS } from '@/config/markdownPreviewThemes';
 
 // Valid theme IDs for fallback validation (006-more-themes T055)
 const VALID_APP_PALETTES: AppPaletteId[] = [
@@ -21,11 +22,14 @@ const VALID_SHIKI_THEMES: ShikiThemeId[] = [
   'tokyo-night', 'min-light'
 ];
 
+const VALID_MARKDOWN_PREVIEW_THEMES: MarkdownPreviewThemeId[] = MARKDOWN_PREVIEW_THEME_IDS;
+
 // Default theme values
 const DEFAULT_APP_PALETTE: AppPaletteId = 'caffeine';
 const DEFAULT_TERMINAL_THEME: TerminalThemeId | 'auto' = 'auto';
 const DEFAULT_EDITOR_THEME: ShikiThemeId = 'github-dark';
 const DEFAULT_MARKDOWN_THEME: ShikiThemeId = 'github-dark';
+const DEFAULT_MARKDOWN_PREVIEW_THEME: MarkdownPreviewThemeId = 'default';
 const DEFAULT_RADIUS = '0.625rem';
 
 // Validation helpers
@@ -37,6 +41,9 @@ const isValidTerminalTheme = (value: unknown): value is TerminalThemeId | 'auto'
 
 const isValidShikiTheme = (value: unknown): value is ShikiThemeId =>
   VALID_SHIKI_THEMES.includes(value as ShikiThemeId);
+
+const isValidMarkdownPreviewTheme = (value: unknown): value is MarkdownPreviewThemeId =>
+  VALID_MARKDOWN_PREVIEW_THEMES.includes(value as MarkdownPreviewThemeId);
 
 // Helper to get current theme mode
 const getThemeMode = (theme: 'light' | 'dark' | 'system'): 'light' | 'dark' => {
@@ -93,6 +100,7 @@ if (typeof window !== 'undefined') {
       }
       // Re-apply palette with new mode
       applyAppPalette(state.appPalette, e.matches ? 'dark' : 'light');
+      applyMarkdownPreviewTheme(state.markdownPreviewTheme, e.matches ? 'dark' : 'light');
     }
   });
 }
@@ -112,6 +120,8 @@ interface SettingsState extends AppSettings {
   setEditorTheme: (theme: ShikiThemeId) => void;
   // Markdown settings actions
   setMarkdownTheme: (theme: ShikiThemeId) => void;
+  // Markdown preview settings actions
+  setMarkdownPreviewTheme: (theme: MarkdownPreviewThemeId) => void;
   // Sidebar settings actions
   setSidebarShowIcons: (show: boolean) => void;
   setSidebarCompactMode: (compact: boolean) => void;
@@ -150,6 +160,8 @@ export const useSettingsStore = create<SettingsState>()(
       editorTheme: 'github-dark',
       // Markdown theme (006-more-themes)
       markdownTheme: 'github-dark',
+      // Markdown preview theme
+      markdownPreviewTheme: 'default',
       // Sidebar settings
       sidebarShowIcons: true,
       sidebarCompactMode: false,
@@ -169,6 +181,7 @@ export const useSettingsStore = create<SettingsState>()(
       setTheme: (theme) => {
         const { appPalette } = get();
         applyTheme(theme, appPalette);
+        applyMarkdownPreviewTheme(get().markdownPreviewTheme, getThemeMode(theme));
         set({ theme });
       },
 
@@ -205,6 +218,12 @@ export const useSettingsStore = create<SettingsState>()(
       
       // Markdown settings actions
       setMarkdownTheme: (theme) => set({ markdownTheme: theme }),
+
+      // Markdown preview settings actions
+      setMarkdownPreviewTheme: (theme) => {
+        applyMarkdownPreviewTheme(theme, getThemeMode(get().theme));
+        set({ markdownPreviewTheme: theme });
+      },
       
       // Sidebar settings actions
       setSidebarShowIcons: (show) => set({ sidebarShowIcons: show }),
@@ -293,6 +312,12 @@ export const useSettingsStore = create<SettingsState>()(
           needsUpdate = true;
         }
 
+        if (!isValidMarkdownPreviewTheme(state.markdownPreviewTheme)) {
+          console.warn(`Invalid markdownPreviewTheme "${state.markdownPreviewTheme}", falling back to "${DEFAULT_MARKDOWN_PREVIEW_THEME}"`);
+          fixes.markdownPreviewTheme = DEFAULT_MARKDOWN_PREVIEW_THEME;
+          needsUpdate = true;
+        }
+
         // Apply fixes if any invalid values found
         if (needsUpdate) {
           useSettingsStore.setState(fixes);
@@ -302,6 +327,11 @@ export const useSettingsStore = create<SettingsState>()(
         const effectivePalette = (fixes.appPalette ?? state.appPalette) as AppPaletteId;
         if (state.theme) {
           applyTheme(state.theme, effectivePalette);
+        }
+
+        const effectiveMarkdownPreviewTheme = (fixes.markdownPreviewTheme ?? state.markdownPreviewTheme) as MarkdownPreviewThemeId;
+        if (state.theme) {
+          applyMarkdownPreviewTheme(effectiveMarkdownPreviewTheme, getThemeMode(state.theme));
         }
 
         if (typeof state.squareCorners === 'boolean') {

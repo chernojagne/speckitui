@@ -101,12 +101,28 @@ export function useMarkdownEditor({
     }
   }, [filePath, unsavedFromStore]);
 
-  // Load on mount
+  // Load on mount or when filePath changes
   useEffect(() => {
     if (!initialContent) {
       loadContent();
     }
-  }, [initialContent, loadContent]);
+  }, [loadContent]); // loadContent already depends on filePath
+
+  // Sync with initialContent when it changes (e.g., tab switch)
+  useEffect(() => {
+    if (initialContent !== undefined && !isEditing) {
+      setOriginalContent(initialContent);
+    }
+  }, [initialContent, isEditing]);
+
+  // Reset editing state when filePath changes
+  useEffect(() => {
+    if (isEditing) {
+      // Cancel editing when switching files
+      setIsEditing(false);
+      setEditedContent('');
+    }
+  }, [filePath]);
 
   // Start editing
   const startEditing = useCallback(() => {

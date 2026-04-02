@@ -1,122 +1,121 @@
-# Research: SpeckitUI Enhanced Editing and Project Management
+# Implementation Plan: SpeckitUI Enhanced Editing and Project Management
 
-**Feature**: 005-ui-enhancements  
-**Date**: 2026-01-19  
-**Status**: Complete
+**Branch**: `005-ui-enhancements` | **Date**: 2026-01-19 | **Spec**: [spec.md](spec.md)
+**Input**: Feature specification from `/specs/005-ui-enhancements/spec.md`
 
-## Research Tasks
+## Summary
 
-### 1. Rich Text Editor for Markdown
+Enhance SpeckitUI with editable markdown views across all workflow steps, add a Constitution navbar item with direct editing, implement a rich composer for the Describe view with AI agent context integration, enable new spec/project creation from the UI, and add real-time file watching with uncommitted changes tracking.
 
-**Decision**: Use CodeMirror 6 or a simple textarea with markdown preview toggle
+## Technical Context
 
-**Rationale**: 
-- CodeMirror 6 provides syntax highlighting, but adds complexity
-- For MVP, a simple textarea with live preview (using existing react-markdown) is simpler
-- shadcn/ui Textarea component with markdown preview toggle follows Simplicity First principle
+**Language/Version**: TypeScript 5.9 (frontend), Rust 1.77 (backend)
+**Primary Dependencies**: React 19, Tauri 2.9, shadcn/ui (Radix), Zustand, xterm.js, react-markdown, shiki
+**Storage**: Local file system (no database)
+**Testing**: Vitest (unit), Playwright (E2E), cargo test (Rust)
+**Target Platform**: Windows, macOS, Linux (Tauri desktop)
+**Project Type**: Desktop application with Tauri (Rust backend + React frontend)
+**Performance Goals**: Navigation <1s, file updates <1s, markdown render <500ms (per Constitution)
+**Constraints**: Single user, single project, offline-capable, read-heavy optimization
+**Scale/Scope**: Single user, ~50 specs max, ~20 files watched per spec
 
-**Alternatives Considered**:
-- TipTap/ProseMirror: Too heavy for markdown editing
-- Monaco Editor: Overkill for simple markdown, large bundle size
-- ContentEditable with markdown parsing: Complex to implement correctly
+## Constitution Check
 
-**Recommendation**: Start with shadcn/ui Textarea + react-markdown preview toggle. Can upgrade to CodeMirror 6 later if needed.
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### 2. Image Handling in Composer
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| I. Simplicity First | ✅ PASS | Extending existing patterns, no new abstractions |
+| II. Local-First | ✅ PASS | All operations on local files, no cloud dependencies |
+| III. Tauri Standard Patterns | ✅ PASS | Using existing command patterns, IPC for file ops |
+| IV. Test-First Development | ⚠️ REQUIRES | Must write tests before implementing Rust commands |
+| V. Spec-Kit Compatibility | ✅ PASS | Respects .specify/ and specs/ structure |
+| VI. shadcn/ui Components | ✅ PASS | Will use shadcn/ui Dialog, Textarea, Select, etc. |
+| VII. Performance Budgets | ✅ PASS | File watching is async, no blocking operations |
 
-**Decision**: Store images as base64 data URIs or reference paths in description.md
+**Quality Gates**:
+- Pre-Implementation: ✅ spec.md exists, plan.md (this file), tasks.md to be created
+- Test Gate: Must add tests for new Rust commands (file write, shell exec)
+- Contract Gate: IPC API contracts documented in contracts/
 
-**Rationale**:
-- Tauri's fs plugin can read/write files
-- For pasted images: convert to base64 and embed in markdown
-- For uploaded files: save to `specs/###-feature/assets/` and reference by path
-- Markdown image syntax: `![alt](data:image/png;base64,...)` or `![alt](./assets/image.png)`
+## Project Structure
 
-**Alternatives Considered**:
-- External image hosting: Violates Local-First principle
-- Binary blob storage: Complicates file management
+### Documentation (this feature)
 
-### 3. Agent Context File Updates
-
-**Decision**: Append content within clearly marked sections, similar to update-agent-context.sh
-
-**Rationale**:
-- Looking at `.specify/scripts/bash/update-agent-context.sh`, it uses marker comments
-- We should use similar markers: `<!-- SPECKITUI-DESCRIBE-START -->` and `<!-- SPECKITUI-DESCRIBE-END -->`
-- Content between markers can be replaced on subsequent updates
-- Content outside markers (including spec-kit's own sections) is preserved
-
-**Agent File Paths** (from update-agent-context.sh):
-- Claude: `CLAUDE.md` (repo root)
-- Gemini: `GEMINI.md` (repo root)
-- Copilot: `.github/agents/copilot-instructions.md`
-
-### 4. Shell Script Execution from Tauri
-
-**Decision**: Use tauri-plugin-shell with Command::new for shell script execution
-
-**Rationale**:
-- Tauri 2.x uses tauri-plugin-shell for running external commands
-- Already have the plugin installed (see Cargo.toml)
-- Can capture stdout/stderr for error reporting
-- Need to handle Windows (bash via Git Bash) vs Unix (native bash)
-
-**Implementation Pattern**:
-```rust
-use tauri_plugin_shell::ShellExt;
-app.shell().command("bash").args(["-c", script_path, ...]).spawn()
+```text
+specs/005-ui-enhancements/
+├── plan.md              # This file
+├── research.md          # Phase 0 output
+├── data-model.md        # Phase 1 output
+├── quickstart.md        # Phase 1 output
+├── contracts/           # Phase 1 output (IPC API docs)
+│   └── ipc-api.md
+└── tasks.md             # Phase 2 output
 ```
 
-### 5. Git Status Tracking
+### Source Code (repository root)
 
-**Decision**: Use `git status --porcelain` output parsing
+```text
+src/
+├── components/
+│   ├── layout/
+│   │   ├── NavPane.tsx          # MODIFY: Add Constitution nav item
+│   │   └── ProjectHeader.tsx    # MODIFY: Add New Project option
+│   ├── settings/
+│   │   └── ConstitutionView.tsx # MODIFY: Make editable
+│   ├── workflow/
+│   │   ├── DescribeView.tsx     # MODIFY: Add rich composer
+│   │   ├── SpecView.tsx         # MODIFY: Add edit mode
+│   │   ├── PlanView.tsx         # MODIFY: Add edit mode
+│   │   ├── TasksView.tsx        # MODIFY: Add edit mode
+│   │   └── ResearchView.tsx     # MODIFY: Add edit mode
+│   ├── shared/
+│   │   ├── MarkdownEditor.tsx   # NEW: Reusable markdown editor
+│   │   ├── RichComposer.tsx     # NEW: Rich content composer
+│   │   └── AgentSelector.tsx    # NEW: Agent selection dialog
+│   └── ui/                      # shadcn/ui components (existing)
+├── hooks/
+│   ├── useFileWatcher.ts        # MODIFY: Extend for artifact watching
+│   ├── useGitStatus.ts          # NEW: Track uncommitted changes
+│   └── useMarkdownEditor.ts     # NEW: Editor state management
+├── services/
+│   └── tauriCommands.ts         # MODIFY: Add write/exec commands
+├── stores/
+│   ├── editorStore.ts           # NEW: Unsaved changes tracking
+│   └── artifactStore.ts         # NEW: Artifact file states
+└── types/
+    └── index.ts                 # MODIFY: Add new types
 
-**Rationale**:
-- Already have git.rs commands in the backend
-- `git status --porcelain` provides machine-parseable output
-- Can check specific files: `git status --porcelain -- path/to/file`
-- Status codes: `M` = modified, `A` = added, `??` = untracked
+src-tauri/src/
+├── commands/
+│   ├── mod.rs                   # MODIFY: Register new commands
+│   ├── file_write.rs            # NEW: File write commands
+│   └── shell_exec.rs            # NEW: Shell script execution
+├── services/
+│   ├── file_watcher.rs          # MODIFY: Watch artifact files
+│   └── git_status.rs            # NEW: Git status checking
+└── lib.rs                       # MODIFY: Register commands
+```
 
-**Performance**: Run status check when file changes detected, debounce to avoid excessive calls
+**Structure Decision**: Extending existing Tauri desktop app structure. Frontend components in src/components/, Rust commands in src-tauri/src/commands/, following established patterns.
 
-### 6. File Watching for Artifacts
+## Complexity Tracking
 
-**Decision**: Extend existing file_watcher.rs to watch spec artifact files
+No constitution violations identified. All features use existing patterns and technologies.
 
-**Rationale**:
-- Already using `notify` crate for file watching
-- Need to watch: spec.md, plan.md, tasks.md, research.md, description.md, quickstart.md
-- Emit events per-file so UI can update specific tabs
-- Debounce rapid changes (editor autosave creates multiple writes)
+## Phase Summary
 
-### 7. New Project Creation
+| Phase | Deliverables | Status |
+|-------|--------------|--------|
+| Phase 0: Research | [research.md](research.md) | ✅ Complete |
+| Phase 1: Design | [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md) | ✅ Complete |
+| Phase 2: Tasks | [tasks.md](tasks.md) | ✅ Complete |
 
-**Decision**: Create folder via Tauri fs plugin, show init command guidance
+## Next Steps
 
-**Rationale**:
-- tauri-plugin-dialog for folder picker
-- tauri-plugin-fs for folder creation
-- After creation, display init instructions: `cd <path> && npx speckit init`
-- Don't run init automatically (requires npm/npx, may fail)
-
-### 8. Unsaved Changes Warning
-
-**Decision**: Use beforeunload event + custom navigation guard
-
-**Rationale**:
-- Browser's beforeunload handles app close
-- For in-app navigation, use Zustand store to track dirty state
-- Show shadcn/ui AlertDialog before navigation when dirty
-
-## Technology Decisions Summary
-
-| Component | Choice | Reason |
-|-----------|--------|--------|
-| Markdown Editor | Textarea + Preview | Simplicity, uses existing react-markdown |
-| Image Storage | Base64 or local assets/ | Local-first, no external dependencies |
-| Agent File Updates | Marker-based sections | Non-destructive, matches spec-kit pattern |
-| Shell Execution | tauri-plugin-shell | Already installed, Tauri standard |
-| Git Status | git status --porcelain | Simple, reliable, machine-parseable |
-| File Watching | Extend notify watcher | Already in use, proven approach |
-| Folder Creation | tauri-plugin-fs + dialog | Standard Tauri plugins |
-| Navigation Guard | Zustand + AlertDialog | React/shadcn patterns |
+1. Run `/speckit.tasks` to generate implementation tasks
+2. Implement Rust backend commands first (Test-First per Constitution)
+3. Add frontend stores and hooks
+4. Build UI components using shadcn/ui
+5. Wire up file watching and git status
+6. E2E test all user stories
