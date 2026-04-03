@@ -1,6 +1,6 @@
 [package]
 name = "speckitui"
-version = "0.1.1"
+version = "0.1.2"
 description = "SpeckitUI - A desktop UI for spec-kit spec-driven development"
 authors = ["SpeckitUI Team"]
 license = "MIT"
