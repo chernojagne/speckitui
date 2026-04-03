@@ -158,7 +158,7 @@ impl GitHubClient {
 
     fn get_headers(&self) -> Result<HeaderMap, String> {
         let mut headers = HeaderMap::new();
-        headers.insert(USER_AGENT, HeaderValue::from_static("SpeckitUI/0.1.0"));
+        headers.insert(USER_AGENT, HeaderValue::from_static("SpeckitUI/0.1.1"));
         headers.insert(ACCEPT, HeaderValue::from_static("application/vnd.github.v3+json"));
         
         if let Some(token) = self.token.lock().unwrap().as_ref() {
