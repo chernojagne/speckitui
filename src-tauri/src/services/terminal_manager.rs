@@ -126,6 +126,7 @@ impl TerminalManager {
         // Thread to read PTY output
         thread::spawn(move || {
             let mut buf = [0u8; 4096];
+            let mut pending_utf8: Vec<u8> = Vec::new();
             loop {
                 match reader.read(&mut buf) {
                     Ok(0) => {
@@ -135,8 +136,30 @@ impl TerminalManager {
                         break;
                     }
                     Ok(n) => {
-                        let data = String::from_utf8_lossy(&buf[..n]).to_string();
-                        let _ = app_handle.emit(&format!("terminal-output-{}", session_id_for_output), data);
+                        // PTY reads can split multi-byte UTF-8 code points across chunks.
+                        // Preserve incomplete trailing bytes to avoid replacement-char corruption
+                        // that can make full-screen TUI apps look jumbled.
+                        pending_utf8.extend_from_slice(&buf[..n]);
+
+                        let valid_up_to = match std::str::from_utf8(&pending_utf8) {
+                            Ok(_) => pending_utf8.len(),
+                            Err(err) => err.valid_up_to(),
+                        };
+
+                        if valid_up_to > 0 {
+                            let chunk = pending_utf8[..valid_up_to].to_vec();
+                            if let Ok(data) = String::from_utf8(chunk) {
+                                let _ = app_handle.emit(&format!("terminal-output-{}", session_id_for_output), data);
+                            }
+                            pending_utf8.drain(..valid_up_to);
+                        }
+
+                        // Guard against unbounded growth in case of persistent invalid bytes.
+                        if pending_utf8.len() > 16 {
+                            let data = String::from_utf8_lossy(&pending_utf8).to_string();
+                            let _ = app_handle.emit(&format!("terminal-output-{}", session_id_for_output), data);
+                            pending_utf8.clear();
+                        }
                     }
                     Err(e) => {
                         log::error!("Error reading from PTY: {}", e);
