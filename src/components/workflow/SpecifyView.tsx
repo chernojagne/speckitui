@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useProjectStore } from '@/stores/projectStore';
 import { readArtifact, updateCheckbox } from '@/services/tauriCommands';
 import { TabContainer } from '../shared/TabContainer';
